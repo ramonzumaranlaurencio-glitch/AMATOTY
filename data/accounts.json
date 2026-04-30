@@ -1,0 +1,37 @@
+[
+  {
+    "account_name": "kitchen_yt_1",
+    "platform": "YouTube Shorts",
+    "niche": "kitchen",
+    "daily_limit": 3,
+    "status": "active"
+  },
+  {
+    "account_name": "kitchen_tiktok_1",
+    "platform": "TikTok",
+    "niche": "kitchen",
+    "daily_limit": 3,
+    "status": "active"
+  },
+  {
+    "account_name": "car_tiktok_1",
+    "platform": "TikTok",
+    "niche": "car",
+    "daily_limit": 3,
+    "status": "active"
+  },
+  {
+    "account_name": "home_pinterest_1",
+    "platform": "Pinterest",
+    "niche": "home",
+    "daily_limit": 4,
+    "status": "active"
+  },
+  {
+    "account_name": "home_yt_1",
+    "platform": "YouTube Shorts",
+    "niche": "home",
+    "daily_limit": 3,
+    "status": "active"
+  }
+]

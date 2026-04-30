@@ -1,0 +1,13 @@
+{
+  "site_name": "Smart Finds Review",
+  "site_base_url": "https://tudominio.com",
+  "amazon_tag": "TU-TAG-20",
+  "author_name": "Edwin Sumaran",
+  "author_full_name": "Edwin Ramon Sumaran Ojeda",
+  "author_email": "edwinsumaran3@gmail.com",
+  "author_bio": "Product reviewer and content creator focused on practical solutions for everyday problems.",
+  "disclosure": "As an Amazon Associate, I earn from qualifying purchases.",
+  "daily_video_cap": 20,
+  "max_active_products": 5,
+  "tracking_endpoint": "http://localhost:5055/track"
+}

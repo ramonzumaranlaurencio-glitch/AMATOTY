@@ -1,0 +1,92 @@
+[
+  {
+    "active": true,
+    "product_name": "Portable Mini Blender",
+    "category": "Kitchen",
+    "niche": "kitchen",
+    "problem": "making healthy drinks is hard when you are busy",
+    "who_it_is_for": "busy people who want quick smoothies at home, work, or while traveling",
+    "primary_keyword": "portable mini blender review",
+    "secondary_keywords": [
+      "mini blender for smoothies",
+      "portable blender for travel"
+    ],
+    "amazon_keyword": "portable mini blender",
+    "amazon_asin": "",
+    "competitor_1": "Traditional countertop blender",
+    "competitor_2": "Manual shaker bottle",
+    "status": "active"
+  },
+  {
+    "active": true,
+    "product_name": "Car Seat Gap Organizer",
+    "category": "Automotive",
+    "niche": "car",
+    "problem": "small things fall between your car seats every day",
+    "who_it_is_for": "drivers who want a cleaner car and easier access to phone, keys, cards, and small items",
+    "primary_keyword": "car seat gap organizer review",
+    "secondary_keywords": [
+      "car organizer between seats",
+      "seat gap filler organizer"
+    ],
+    "amazon_keyword": "car seat gap organizer",
+    "amazon_asin": "",
+    "competitor_1": "Basic seat gap filler",
+    "competitor_2": "Console storage box",
+    "status": "active"
+  },
+  {
+    "active": true,
+    "product_name": "Kitchen Food Saver Gadget",
+    "category": "Kitchen",
+    "niche": "kitchen",
+    "problem": "people waste food because storage is messy",
+    "who_it_is_for": "families and home cooks who want to keep food organized and reduce waste",
+    "primary_keyword": "kitchen food saver gadget review",
+    "secondary_keywords": [
+      "food storage gadget",
+      "kitchen storage tool"
+    ],
+    "amazon_keyword": "kitchen food saver gadget",
+    "amazon_asin": "",
+    "competitor_1": "Standard food containers",
+    "competitor_2": "Reusable storage bags",
+    "status": "active"
+  },
+  {
+    "active": true,
+    "product_name": "Home Cable Organizer",
+    "category": "Home",
+    "niche": "home",
+    "problem": "cables make desks and rooms look messy",
+    "who_it_is_for": "people who want a cleaner workspace or gaming setup",
+    "primary_keyword": "home cable organizer review",
+    "secondary_keywords": [
+      "desk cable organizer",
+      "cable management box"
+    ],
+    "amazon_keyword": "home cable organizer",
+    "amazon_asin": "",
+    "competitor_1": "Cable ties",
+    "competitor_2": "Cable management box",
+    "status": "active"
+  },
+  {
+    "active": true,
+    "product_name": "Mini Vacuum Cleaner",
+    "category": "Home",
+    "niche": "home",
+    "problem": "small dust and crumbs are hard to clean quickly",
+    "who_it_is_for": "people who want a quick cleaning tool for desk, car or small spaces",
+    "primary_keyword": "mini vacuum cleaner review",
+    "secondary_keywords": [
+      "small vacuum for desk",
+      "portable vacuum cleaner"
+    ],
+    "amazon_keyword": "mini vacuum cleaner",
+    "amazon_asin": "",
+    "competitor_1": "Regular vacuum",
+    "competitor_2": "Cleaning cloth",
+    "status": "active"
+  }
+]
