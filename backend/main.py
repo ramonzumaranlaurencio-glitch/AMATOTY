@@ -1,36 +1,19 @@
-@app.get("/")
-def home():
-    return "AMATOTY backend activo", 200
-
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-CORS(app)
+
 
 @app.route("/")
 def home():
     return "AMATOTY backend activo", 200
 
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "AMATOTY backend activo", 200
 
 @app.route("/analisis", methods=["POST"])
 def analisis():
     if "imagen" not in request.files:
         return jsonify({"error": "No hay imagen"}), 400
-    imagen = request.files["imagen"]
-    return jsonify({
-        "ok": True,
-        "mensaje": "Imagen recibida"
-    })
-def google_trends(keyword: str):
-    # Placeholder: Integrar con pytrends o scraping real
-    return {"keyword": keyword, "trend": "alta"}
+    return jsonify({"ok": True})
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "date": str(datetime.date.today())}
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5050)
