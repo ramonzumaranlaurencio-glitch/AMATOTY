@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oye Bonita - Diagnóstico Facial</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        body { background: #f6f8fa; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        .header { background: linear-gradient(90deg, #0f2027, #2c5364); color: #fff; padding: 24px 0 12px 40px; font-size: 2rem; font-weight: bold; }
+        .nav { margin: 0 0 24px 40px; }
+        .nav a { color: #fff; margin-right: 24px; text-decoration: none; font-size: 1rem; }
+        .container { max-width: 1100px; margin: 32px auto; }
+        .title { text-align: center; font-size: 2rem; font-weight: 600; margin-bottom: 32px; }
+        .cards { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #0001; padding: 32px 24px; min-width: 320px; max-width: 350px; display: flex; flex-direction: column; align-items: center; border: 2px solid #fff; transition: border 0.2s; }
+        .card.bonita { border: 2px solid #ffb6c1; box-shadow: 0 0 16px #ffb6c155; }
+        .bonita-label { background: #e1006a; color: #fff; font-size: 0.9rem; border-radius: 12px; padding: 2px 14px; margin-bottom: 12px; }
+        .bonita-title { color: #e1006a; font-size: 1.3rem; font-weight: 600; margin-bottom: 18px; }
+        .bonita-btn { background: #e1006a; color: #fff; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 12px; padding: 16px 24px; margin-bottom: 12px; cursor: pointer; transition: background 0.2s; }
+        .bonita-btn:hover { background: #b80054; }
+        .bonita-desc { color: #444; font-size: 1rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">Smart Finds Review</div>
+    <div class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="category/index.html">Categorías</a>
+        <a href="blog/index.html">Blog</a>
+        <a href="about.html">Sobre</a>
+        <a href="contact.html">Contacto</a>
+        <a href="editorial-policy.html">Editorial</a>
+    </div>
+    <div class="container">
+        <div class="title">Oye Bonita - Diagnóstico Facial</div>
+        <div class="cards">
+            <div class="card bonita">
+                <div class="bonita-label">Diagnóstico Belleza</div>
+                <div class="bonita-title">Oye Bonita</div>
+                <button class="bonita-btn" onclick="startFacialDiagnosis()">Tomarse una foto para diagnóstico facial</button>
+                <div class="bonita-desc">¡Descubre tu tipo de piel y recibe productos recomendados!</div>
+            </div>
+            <!-- Aquí puedes agregar más tarjetas de productos/categorías si lo deseas -->
+        </div>
+    </div>
+    <script>
+    function startFacialDiagnosis() {
+        // Crear input para seleccionar imagen
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Llama a tu backend en Render
+            try {
+                const response = await fetch('https://amatoty.onrender.com/api/diagnostico', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('Diagnóstico: ' + JSON.stringify(data));
+                } else {
+                    alert('Error al procesar la imagen');
+                }
+            } catch (err) {
+                alert('Error de conexión: ' + err);
+            }
+        };
+        input.click();
+    }
+    </script>
+</body>
+</html>

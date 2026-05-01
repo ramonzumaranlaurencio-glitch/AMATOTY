@@ -9,13 +9,11 @@
 </head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="../index.html">Inicio</a><a href="index.html">Categorías</a><a href="../blog/index.html">Blog</a><a href="../about.html">Sobre</a><a href="../affiliate-disclosure.html">Divulgación</a><a href="../contact.html">Contacto</a><a href="../editorial-policy.html">Editorial</a></nav></header><main>
 <h1 style="margin-bottom:28px;">Explora nuestras categorías</h1>
 <div class="grid">
-  <div class="card" style="border:2px solid #d81b60;box-shadow:0 4px 24px #fbbf24;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:320px;">
-    <span class="badge" style="background:#d81b60;color:#fff;">IA Belleza</span>
-    <h2 style="color:#d81b60;margin-bottom:18px;">Oye Bonita</h2>
-    <a class="btn" href="../oye-bonita.html" style="background:#d81b60;color:#fff;font-size:1.2em;padding:18px 32px;border-radius:14px;box-shadow:0 2px 12px #fbbf24;display:inline-block;">
-      Tomarse una foto para diagnóstico facial
-    </a>
-    <div style="font-size:1em;color:#d81b60;margin-top:12px;">¡Descubre tu tipo de piel y recibe productos recomendados con IA!</div>
+  <div class="card" style="border:3px solid #d81b60;box-shadow:0 6px 32px #fbbf24;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:340px;background:linear-gradient(90deg,#fff0f6 0%,#fbbf24 100%);margin-bottom:24px;">
+    <span class="badge" style="background:#d81b60;color:#fff;font-size:1.1em;padding:6px 18px;">Diagnóstico Belleza</span>
+    <h2 style="color:#d81b60;margin-bottom:18px;font-size:2em;">Oye Bonita</h2>
+    <a class="btn" href="../oye-bonita.html" style="background:#d81b60;color:#fff;font-size:1.3em;padding:20px 38px;border-radius:16px;box-shadow:0 2px 16px #fbbf24;display:inline-block;margin-bottom:10px;">Diagnóstico facial personalizado</a>
+    <div style="font-size:1.1em;color:#d81b60;margin-top:10px;max-width:340px;margin-left:auto;margin-right:auto;">Sube tu foto, conoce tu tipo de piel y recibe productos recomendados para ti. ¡Haz clic y vive la experiencia!</div>
   </div>
   <div class="card">
     <span class="badge">Más práctico</span>
@@ -70,17 +68,40 @@ fetch('../assets/trending_products.json')
         const card = document.createElement('div');
         card.className = 'card';
         card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
-        card.innerHTML = `
-          <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-          <h4 style='color:#0a6ed1;'>${prod.name}</h4>
-          <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
-          <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
-          <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
-          <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
-          <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
-          <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
-          <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
-        `;
+          card.innerHTML = `
+            <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;" onerror="this.onerror=null;this.src='../assets/placeholder.png';">
+            <h4 style='color:#0a6ed1;'>${prod.name}</h4>
+            <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
+            <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
+            <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
+            <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
+            <button onclick="explicarImagenIA('${prod.image}', this)" style="margin-top:8px;background:#d81b60;color:#fff;padding:6px 16px;border-radius:8px;border:none;font-weight:bold;cursor:pointer;">Explicación automática del producto</button>
+            <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
+            <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
+            <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
+          `;
+        <script>
+        function explicarImagenIA(imageUrl, btn) {
+          btn.disabled = true;
+          btn.innerText = 'Analizando...';
+          fetch('http://localhost:5050/api/explicar-imagen', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({image_url: imageUrl})
+          })
+          .then(r => r.json())
+          .then(data => {
+            alert('Descripción del producto: ' + (data.descripcion || 'Sin resultado'));
+            btn.innerText = '¿Qué ve la IA?';
+            btn.disabled = false;
+          })
+          .catch(() => {
+            alert('No se pudo analizar la imagen.');
+            btn.innerText = '¿Qué ve la IA?';
+            btn.disabled = false;
+          });
+        }
+        </script>
         grid.appendChild(card);
       });
       catBlock.appendChild(grid);

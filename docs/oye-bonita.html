@@ -161,27 +161,52 @@
         method: 'POST',
         body: formData
       })
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById('ob-diagnosis').style.display = 'block';
-        document.getElementById('ob-diagnosis').innerHTML =
-          `<b>Tipo de piel:</b> ${data.tipo_piel}<br>` +
-          `<b>Subtono:</b> ${data.subtono}<br>` +
-          `<b>Recomendación:</b> ${data.recomendacion}`;
-        document.getElementById('ob-products-section').style.display = 'block';
-        const prodCont = document.getElementById('ob-products');
-        prodCont.innerHTML = '';
-        (data.productos || []).forEach((p, idx) => {
-          const card = document.createElement('div');
-          card.className = 'ob-product-card';
-          card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><button class='ob-btn' onclick='addToCart(${idx})'>${data.textos && data.textos.btn_agregar || 'Agregar al carrito'}</button>`;
-          prodCont.appendChild(card);
-        });
-        // Guardar productos para agregar al carrito
-        window._obLastProducts = data.productos || [];
+      .then(async r => {
+        let data;
+        try {
+          data = await r.json();
+        } catch (e) {
+          throw new Error('Respuesta inválida del servidor');
+        }
+        if (r.ok && data && !data.error) {
+          document.getElementById('ob-diagnosis').style.display = 'block';
+          document.getElementById('ob-diagnosis').innerHTML =
+            `<b>Tipo de piel:</b> ${data.tipo_piel}<br>` +
+            `<b>Subtono:</b> ${data.subtono}<br>` +
+            `<b>Recomendación:</b> ${data.recomendacion}`;
+          document.getElementById('ob-products-section').style.display = 'block';
+          const prodCont = document.getElementById('ob-products');
+          prodCont.innerHTML = '';
+          (data.productos || []).forEach((p, idx) => {
+            const card = document.createElement('div');
+            card.className = 'ob-product-card';
+            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><button class='ob-btn' onclick='addToCart(${idx})'>${data.textos && data.textos.btn_agregar || 'Agregar al carrito'}</button>`;
+            prodCont.appendChild(card);
+          });
+          window._obLastProducts = data.productos || [];
+        } else {
+          let msg = 'Error en el análisis. Intenta de nuevo.';
+          // Mostrar siempre el mensaje técnico si existe
+          let errorDesc = '';
+          if (data && data.productos && data.productos[0] && data.productos[0].desc) {
+            errorDesc = data.productos[0].desc;
+          } else if (data && data.desc) {
+            errorDesc = data.desc;
+          } else if (data && data.error) {
+            errorDesc = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+          }
+          if (errorDesc) {
+            msg += `<br><span style='color:#b91c1c;'>${errorDesc}</span>`;
+          }
+          document.getElementById('ob-diagnosis').innerHTML = msg;
+          document.getElementById('ob-products-section').style.display = 'none';
+          document.getElementById('ob-products').innerHTML = '';
+        }
       })
       .catch(err => {
-        document.getElementById('ob-diagnosis').innerHTML = 'Error en el análisis. Intenta de nuevo.';
+        document.getElementById('ob-diagnosis').innerHTML = 'Error en el análisis. Intenta de nuevo.<br><span style="color:#b91c1c;">' + (err && err.message ? err.message : err) + '</span>';
+        document.getElementById('ob-products-section').style.display = 'none';
+        document.getElementById('ob-products').innerHTML = '';
       });
     };
     window.addToCart = function(idx) {

@@ -1,0 +1,38 @@
+[
+  {
+    "nombre": "Base Resiste Mate",
+    "marca": "VOGUE",
+    "categoria": "Base",
+    "tipo_piel_recomendado": "Mixta a grasa",
+    "beneficios": ["Unifica el tono", "Ayuda a controlar brillo", "Mejora textura visual"],
+    "ingredientes_clave": ["Pigmentos micronizados", "Polimeros fijadores"],
+    "modo_uso": "Aplicar capa delgada del centro al exterior del rostro y difuminar.",
+    "contraindicaciones": "No aplicar sobre piel irritada sin prueba previa.",
+    "precio": 29.7,
+    "stock": 12,
+    "imagenes": ["https://www.google.com/search?q=VOGUE+Base+Resiste+Mate&tbm=isch"],
+    "imagen_ref": "https://picsum.photos/seed/VOGUE-Base_Resiste_Mate/320/320",
+    "resultados_esperados": "Cobertura media-alta con acabado mas uniforme.",
+    "currency": "PEN",
+    "type": "own",
+    "cta": "comprar"
+  },
+  {
+    "nombre": "Polvo Compacto",
+    "marca": "VOGUE",
+    "categoria": "Sellado",
+    "tipo_piel_recomendado": "Mixta a grasa",
+    "beneficios": ["Controla sebo", "Reduce brillo en zona T", "Prolonga duracion del maquillaje"],
+    "ingredientes_clave": ["Minerales absorbentes", "Pigmentos de acabado mate"],
+    "modo_uso": "Aplicar con brocha en zona T y areas de mayor brillo.",
+    "contraindicaciones": "Evitar exceso en piel muy seca para no marcar textura.",
+    "precio": 24.3,
+    "stock": 12,
+    "imagenes": ["https://www.google.com/search?q=VOGUE+Polvo+Compacto&tbm=isch"],
+    "imagen_ref": "https://picsum.photos/seed/VOGUE-Polvo_Compacto/320/320",
+    "resultados_esperados": "Aspecto mate y mas estable durante el dia.",
+    "currency": "PEN",
+    "type": "own",
+    "cta": "comprar"
+  }
+]

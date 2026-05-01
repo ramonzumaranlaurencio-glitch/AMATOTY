@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-product="">
+<header>
+	<h1>Smart Finds Review</h1>
+	<nav>
+		<a href="/index.html">Home</a>
+		<a href="/blog/index.html">Blog</a>
+		<a href="/category/index.html">Categories</a>
+		<a href="/about.html">About</a>
+		<a href="/editorial-policy.html">Editorial</a>
+		<a href="/contact.html">Contact</a>
+		<a href="/affiliate-disclosure.html">Disclosure</a>
+	</nav>
+</header>
+<main>
+	<h1>Smart product reviews</h1>
+	<p>We review practical products that solve everyday problems. Our goal is to help you choose what actually works — not just what looks good online.</p>
+	<div class='grid'>
+		<div class="card bonita">
+			<div class="bonita-label" style="background:#e1006a;color:#fff;font-size:0.9rem;border-radius:12px;padding:2px 14px;margin-bottom:12px;">Diagnóstico Belleza</div>
+			<div class="bonita-title" style="color:#e1006a;font-size:1.3rem;font-weight:600;margin-bottom:18px;">Oye Bonita</div>
+			<button class="bonita-btn" style="background:#e1006a;color:#fff;font-size:1.1rem;font-weight:bold;border:none;border-radius:12px;padding:16px 24px;margin-bottom:12px;cursor:pointer;transition:background 0.2s;" onclick="startFacialDiagnosis()">Tomarse una foto para diagnóstico facial</button>
+			<div class="bonita-desc" style="color:#444;font-size:1rem;text-align:center;">¡Descubre tu tipo de piel y recibe productos recomendados!</div>
+		</div>
+		<div class="card"><h2>Portable Mini Blender</h2><p>making healthy drinks is hard when you are busy</p><a class="btn" href="/blog/portable-mini-blender-review.html">Read review</a></div>
+		<div class="card"><h2>Car Seat Gap Organizer</h2><p>small things fall between your car seats every day</p><a class="btn" href="/blog/car-seat-gap-organizer-review.html">Read review</a></div>
+		<div class="card"><h2>Kitchen Food Saver Gadget</h2><p>people waste food because storage is messy</p><a class="btn" href="/blog/kitchen-food-saver-gadget-review.html">Read review</a></div>
+		<div class="card"><h2>Home Cable Organizer</h2><p>cables make desks and rooms look messy</p><a class="btn" href="/blog/home-cable-organizer-review.html">Read review</a></div>
+		<div class="card"><h2>Mini Vacuum Cleaner</h2><p>small dust and crumbs are hard to clean quickly</p><a class="btn" href="/blog/mini-vacuum-cleaner-review.html">Read review</a></div>
+	</div>
+</main>
+<footer>
+	<p>As an Amazon Associate, I earn from qualifying purchases.</p>
+	<p>Author: Edwin Sumaran</p>
+</footer>
+<script src="/assets/lca_tracker.js"></script>
+<script>
+function startFacialDiagnosis() {
+	const input = document.createElement('input');
+	input.type = 'file';
+	input.accept = 'image/*';
+	input.onchange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+		const formData = new FormData();
+		formData.append('image', file);
+		try {
+			const response = await fetch('https://amatoty.onrender.com/api/diagnostico', {
+				method: 'POST',
+				body: formData
+			});
+			if (response.ok) {
+				const data = await response.json();
+				alert('Diagnóstico: ' + JSON.stringify(data));
+			} else {
+				alert('Error al procesar la imagen');
+			}
+		} catch (err) {
+			alert('Error de conexión: ' + err);
+		}
+	};
+	input.click();
+}
+</script>
+</body>
+</html>

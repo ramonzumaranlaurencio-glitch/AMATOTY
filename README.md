@@ -1,4 +1,8 @@
+
 # LCA PRO FINAL ÚNICA
+
+**Página principal del sistema:**  
+[Ir a la web generada (public_site/index.html)](public_site/index.html)
 
 Versión única PRO, sin depender de V13/V14 ni carpetas anteriores.
 

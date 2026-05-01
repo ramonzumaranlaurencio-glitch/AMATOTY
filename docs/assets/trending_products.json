@@ -2,6 +2,38 @@
   "date": "2026-04-30",
   "products": [
     {
+      "name": "Sérum Facial Hidratante",
+      "brand": "Oye Bonita",
+      "category": "belleza",
+      "problem": "Piel seca, falta de luminosidad",
+      "target": "Mujeres y hombres de 18-45 años",
+      "seo_title": "Sérum Facial Hidratante: Hidratación profunda y brillo natural | Review 2026",
+      "short_desc": "Hidrata tu piel en segundos. Fórmula ligera, rápida absorción y resultados visibles.",
+      "article": "¿Tu piel se siente tirante o apagada? El Sérum Facial Hidratante de Oye Bonita aporta hidratación intensa y un brillo saludable. Con ácido hialurónico y vitamina C. Ideal para todo tipo de piel.",
+      "hook": "¡Piel radiante en 7 días!",
+      "cta": "Ver en Amazon",
+      "reason": "Producto tendencia, excelente reseñas, recomendado por dermatólogos.",
+      "decision": "mantener",
+      "image": "https://m.media-amazon.com/images/I/71Qe0euJJZL._AC_SL1500_.jpg",
+      "specs": "Marca: Oye Bonita, Contenido: 30ml, Ingredientes: Ácido hialurónico, Vitamina C"
+    },
+    {
+      "name": "Protector Solar Facial SPF50",
+      "brand": "Neutrogena",
+      "category": "belleza",
+      "problem": "Protección solar diaria, manchas",
+      "target": "Todo tipo de piel",
+      "seo_title": "Protector Solar Facial SPF50: Protección y cuidado diario | Review 2026",
+      "short_desc": "Protege tu piel del sol y previene manchas. Textura ligera, no grasa.",
+      "article": "El Protector Solar Facial SPF50 de Neutrogena es ideal para uso diario. Previene el envejecimiento prematuro y las manchas solares. Resistente al agua y sin fragancia.",
+      "hook": "¡No salgas sin protección!",
+      "cta": "Ver en Amazon",
+      "reason": "Producto esencial, recomendado por expertos, alta demanda.",
+      "decision": "mantener",
+      "image": "https://m.media-amazon.com/images/I/81Qe0euJJZL._AC_SL1500_.jpg",
+      "specs": "Marca: Neutrogena, Contenido: 50ml, SPF: 50, Resistente al agua"
+    },
+    {
       "name": "Portable Mini Blender",
       "brand": "BlendJet",
       "category": "cocina",
