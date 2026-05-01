@@ -1,20 +1,39 @@
 import json
 import os
 import sys
+import urllib.parse
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from PIL import Image
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(__name__)
-CORS(app, origins=["https://systamato.github.io"])
+CORS(app)
+
+SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+
+
+def _send_site_file(filename):
+    from main import _send_site_file as send_site_file
+
+    return send_site_file(filename)
 
 
 @app.route("/")
 def home():
-    return "Backend AMATOTY activo. Usa /analisis con POST e imagen.", 200
+    return _send_site_file("index.html")
+
+
+@app.route("/healthz")
+def healthz():
+    return jsonify({"ok": True, "service": "amatoty-backend"}), 200
+
+
+@app.route("/oye_bonita.html")
+def oye_bonita_underscore():
+    return _send_site_file("oye-bonita.html")
 
 
 @app.route("/analisis", methods=["POST"])
@@ -145,6 +164,51 @@ def api_diagnostico():
             except ValueError:
                 pass
     return jsonify(resultado)
+
+
+def _leer_precio(precio):
+    import re
+
+    match = re.search(r"(\d+(?:[.,]\d+)?)", str(precio or ""))
+    return float(match.group(1).replace(",", ".")) if match else 0.0
+
+
+@app.route("/api/pedido", methods=["POST"])
+def pedido():
+    data = request.get_json(silent=True) or {}
+    nombre = data.get("nombre", "")
+    email = data.get("email", "")
+    direccion = data.get("direccion", "")
+    whatsapp = str(data.get("whatsapp", ""))
+    carrito = data.get("carrito") or []
+
+    total = sum(
+        _leer_precio(item.get("precio")) * int(item.get("cantidad", 1))
+        for item in carrito
+    )
+    wa_msg = f"Hola! Soy {nombre}.\nQuiero pedir:\n"
+    for item in carrito:
+        wa_msg += (
+            f"- {item.get('nombre', 'Producto')} x{item.get('cantidad', 1)} "
+            f"({item.get('precio', '')})\n"
+        )
+    wa_msg += f"Total: {total:.2f}\nDireccion: {direccion}\nEmail: {email}"
+
+    wa_number = whatsapp.lstrip("+").replace(" ", "")
+    wa_url = (
+        f"https://wa.me/{wa_number}?text={urllib.parse.quote(wa_msg)}"
+        if wa_number
+        else ""
+    )
+    return jsonify({"ok": True, "wa_url": wa_url})
+
+
+@app.route("/<path:filename>")
+def site_file(filename):
+    normalized = filename.strip("/")
+    if normalized.startswith("api/"):
+        return jsonify({"error": "Ruta API no encontrada."}), 404
+    return _send_site_file(normalized)
 
 
 if __name__ == "__main__":

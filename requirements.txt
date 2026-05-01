@@ -1,0 +1,6 @@
+flask
+flask-cors
+pillow
+mediapipe
+numpy
+gunicorn

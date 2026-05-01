@@ -1,9 +1,13 @@
 import json
 import os
 import re
+import sqlite3
 import urllib.parse
+import uuid
+from datetime import datetime
 
-from flask import Flask, jsonify, request
+from flask import jsonify, request, send_from_directory
+from flask import Flask
 from flask_cors import CORS
 from PIL import Image
 
@@ -29,7 +33,6 @@ UNIVERSAL_VISUAL_AGENT_PROMPT = (
     "visibles mediante OCR, industria/categoria dinamica, uso principal, "
     "publico objetivo y propuesta de valor. Responde exclusivamente JSON valido."
 )
-
 MONEDAS = {
     "PE": ("S/", 1.0),
     "MX": ("MXN", 1.0),
@@ -67,6 +70,139 @@ def _data_path(*parts):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", *parts))
 
 
+SITE_DIR = _data_path("docs")
+LOCAL_SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "docs"))
+TRACKING_DB_PATH = _data_path("data", "lca_pro_final.db")
+
+
+def _fallback_oye_bonita_html():
+    return """<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oye Bonita - Diagnostico Facial</title>
+  <style>
+    body{margin:0;background:#f8fafc;color:#1f2937;font-family:Arial,sans-serif}
+    .wrap{max-width:840px;margin:32px auto;padding:0 16px}
+    .card{background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:24px;box-shadow:0 8px 28px #0001}
+    h1{margin:0 0 16px;color:#d81b60;text-align:center}
+    label{font-weight:700} select,input{margin:8px 0 16px;padding:8px;width:100%;max-width:360px}
+    button{background:#d81b60;color:white;border:0;border-radius:8px;padding:11px 18px;font-weight:700;cursor:pointer}
+    button:disabled{background:#e5e7eb;color:#777}.msg{background:#f1f5f9;border-radius:10px;padding:12px;margin:16px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.prod{background:white;border-radius:12px;padding:12px;text-align:center;border:1px solid #e5e7eb}
+    .prod img{width:100px;height:100px;object-fit:cover;border-radius:8px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Oye Bonita: Diagnostico Facial</h1>
+      <label for="pais">Pais</label><br>
+      <select id="pais"><option value="PE">Peru</option><option value="MX">Mexico</option><option value="CO">Colombia</option><option value="US">Estados Unidos</option><option value="OTRO">Otro</option></select><br>
+      <label for="foto">Sube tu foto</label><br>
+      <input id="foto" type="file" accept="image/*"><br>
+      <button id="analizar" disabled>Analizar rostro y productos</button>
+      <div id="resultado" class="msg" style="display:none"></div>
+      <div id="productos" class="grid"></div>
+    </section>
+  </main>
+  <script>
+    const foto=document.getElementById('foto'), btn=document.getElementById('analizar'), res=document.getElementById('resultado'), productos=document.getElementById('productos');
+    foto.addEventListener('change',()=>btn.disabled=!foto.files[0]);
+    btn.addEventListener('click',async()=>{
+      if(!foto.files[0]) return;
+      const fd=new FormData(); fd.append('foto',foto.files[0]); fd.append('pais',document.getElementById('pais').value);
+      res.style.display='block'; res.textContent='Analizando...'; productos.innerHTML='';
+      try{
+        const r=await fetch('/api/diagnostico',{method:'POST',body:fd});
+        const data=await r.json();
+        if(!r.ok||data.error) throw new Error(data.error||'Error del servidor');
+        res.innerHTML='<b>Tipo de piel:</b> '+(data.tipo_piel||'')+'<br><b>Subtono:</b> '+(data.subtono||'')+'<br><b>Recomendacion:</b> '+(data.recomendacion||'');
+        productos.innerHTML=(data.productos||[]).map(p=>'<div class="prod"><img src="'+(p.imagen||'/assets/home.jpg')+'" alt=""><b>'+p.nombre+'</b><br><span>'+p.marca+'</span><p>'+p.desc+'</p><b>'+p.precio+'</b></div>').join('');
+      }catch(e){res.innerHTML='Error en el analisis.<br><span style="color:#b91c1c">'+e.message+'</span>'}
+    });
+  </script>
+</body>
+</html>"""
+
+
+def _fallback_index_html():
+    return """<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AMATOTY</title>
+<style>body{margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#111827}.hero{max-width:900px;margin:42px auto;padding:28px 18px;text-align:center}.btn{display:inline-block;background:#d81b60;color:white;padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700}</style></head>
+<body><main class="hero"><h1>AMATOTY - Oye Bonita</h1><p>Diagnostico facial y productos recomendados.</p><a class="btn" href="/oye-bonita.html">Abrir Oye Bonita</a></main></body></html>"""
+
+
+def _fallback_css():
+    return "body{font-family:Arial,sans-serif;background:#f8fafc;color:#1f2937}.btn{background:#d81b60;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none}.card{background:white;border-radius:12px;padding:16px}"
+
+
+def _send_site_file(filename):
+    normalized = filename.strip("/") or "index.html"
+    if normalized == "oye-bonita":
+        normalized = "oye-bonita.html"
+    for site_dir in [SITE_DIR, LOCAL_SITE_DIR]:
+        path = os.path.abspath(os.path.join(site_dir, normalized))
+        if path.startswith(os.path.abspath(site_dir)) and os.path.exists(path):
+            return send_from_directory(site_dir, normalized)
+    if normalized in ["index.html", ""]:
+        return _fallback_index_html()
+    if normalized in ["oye-bonita.html", "oye_bonita.html"]:
+        return _fallback_oye_bonita_html()
+    if normalized == "assets/style.css":
+        return _fallback_css(), 200, {"Content-Type": "text/css; charset=utf-8"}
+    return jsonify({"error": "Archivo no encontrado", "path": normalized}), 404
+
+
+def _init_tracking_db():
+    os.makedirs(os.path.dirname(TRACKING_DB_PATH), exist_ok=True)
+    with sqlite3.connect(TRACKING_DB_PATH) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tracking_events (
+                id TEXT PRIMARY KEY,
+                product_name TEXT,
+                source TEXT,
+                event_type TEXT,
+                page_url TEXT,
+                referrer TEXT,
+                user_agent TEXT,
+                created_at TEXT
+            )
+            """
+        )
+
+
+def _load_beauty_products():
+    candidates = [
+        os.environ.get("BEAUTY_PRODUCTS_PATH"),
+        _data_path("docs", "assets", "beauty_products.json"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "assets", "beauty_products.json")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "beauty_products.json")),
+    ]
+    for products_path in candidates:
+        if products_path and os.path.exists(products_path):
+            with open(products_path, encoding="utf-8") as f:
+                return json.load(f)
+    return [
+        {
+            "id": "rutina-basica",
+            "nombre": "Rutina basica de cuidado facial",
+            "marca": "Oye Bonita",
+            "categoria": "Belleza",
+            "beneficios": ["Limpieza", "Hidratacion", "Proteccion diaria"],
+            "resultados_esperados": "Rutina inicial para mantener la piel limpia e hidratada.",
+            "modo_uso": "Usar manana y noche segun necesidad.",
+            "tipo_piel_recomendado": "Todo tipo de piel",
+            "precio": 0,
+            "stock": 1,
+            "imagen_ref": "assets/placeholder.png",
+        }
+    ]
+
+
 def _detectar_rostro(img):
     try:
         import mediapipe as mp
@@ -85,9 +221,7 @@ def _detectar_rostro(img):
 
 
 def _productos_belleza(simbolo):
-    products_path = _data_path("docs", "assets", "beauty_products.json")
-    with open(products_path, encoding="utf-8") as f:
-        beauty_products = json.load(f)
+    beauty_products = _load_beauty_products()
 
     productos = []
     for idx, prod in enumerate(beauty_products, start=1):
@@ -121,7 +255,46 @@ def _leer_precio(precio):
 
 @app.route("/")
 def home():
-    return "AMATOTY backend activo", 200
+    return _send_site_file("index.html")
+
+
+@app.route("/oye_bonita.html")
+def oye_bonita_underscore():
+    return _send_site_file("oye-bonita.html")
+
+
+@app.route("/healthz")
+def healthz():
+    return jsonify({"ok": True, "service": "amatoty-backend"}), 200
+
+
+@app.route("/track", methods=["POST"])
+def track():
+    data = request.get_json(silent=True) or {}
+    try:
+        _init_tracking_db()
+        with sqlite3.connect(TRACKING_DB_PATH) as conn:
+            conn.execute(
+                """
+                INSERT INTO tracking_events (
+                    id, product_name, source, event_type, page_url,
+                    referrer, user_agent, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(uuid.uuid4()),
+                    data.get("product_name", ""),
+                    data.get("source", ""),
+                    data.get("event_type", ""),
+                    data.get("page_url", ""),
+                    data.get("referrer", ""),
+                    request.headers.get("User-Agent", ""),
+                    datetime.utcnow().isoformat(),
+                ),
+            )
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"No se pudo guardar tracking: {exc}"}), 500
+    return jsonify({"ok": True}), 200
 
 
 @app.route("/analisis", methods=["POST"])
@@ -321,6 +494,14 @@ def validar_imagen_producto():
             "validation_prompt": IMAGE_VALIDATION_PROMPT,
         }
     )
+
+
+@app.route("/<path:filename>")
+def site_file(filename):
+    normalized = filename.strip("/")
+    if normalized.startswith("api/"):
+        return jsonify({"error": "Ruta API no encontrada."}), 404
+    return _send_site_file(normalized)
 
 
 if __name__ == "__main__":
