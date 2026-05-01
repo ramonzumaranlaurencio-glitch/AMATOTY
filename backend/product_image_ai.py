@@ -23,5 +23,5 @@ def describe_image(img):
 
 # Ejemplo de uso:
 if __name__ == "__main__":
-    url = "https://m.media-amazon.com/images/I/61Qe0euJJZL._AC_SL1500_.jpg"
+    url = "https://example.com/product-image.jpg"
     print("Descripción IA:", describe_image_from_url(url))

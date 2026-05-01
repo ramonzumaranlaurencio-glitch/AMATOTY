@@ -13,6 +13,7 @@
 .comparador th{background:#f1f5f9;color:#0a6ed1;}
 .comparador .highlight{background:#fef9c3;font-weight:bold;}
 </style>
+<script src="assets/product_ai_guard.js"></script>
 </head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header><main>
 <div class="hero">
   <h1>Probamos productos reales para que compres mejor</h1>
@@ -46,59 +47,16 @@
 </section>
 <section class="card" style="background:#f1f5f9;margin-top:32px;">
   <h2 style="color:#0a6ed1;">Recomendación PRO: Solución real a un problema actual</h2>
-  <div class="producto-recomendado" style="background:#fff;padding:22px 18px;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;max-width:420px;margin:auto;">
-    <img src="https://m.media-amazon.com/images/I/61Qe0euJJZL._AC_SL1500_.jpg" alt="Licuadora portátil" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-    <h3>Licuadora portátil</h3>
-    <p>Solución para: Falta de tiempo para cocinar saludable.</p>
-    <ul>
-      <li>✔ Calidad comprobada</li>
-      <li>✔ Buenas reseñas</li>
-      <li>✔ Precio accesible</li>
-    </ul>
-    <div class="multi-afiliado" style="margin:12px 0;">
-      <span style="font-weight:bold;">Disponible en:</span>
-      <a href="https://www.amazon.com/s?k=portable+mini+blender" target="_blank" style="margin:0 8px;">Amazon</a>
-      <a href="https://www.mercadolibre.com.mx/ofertas/licuadora-portatil" target="_blank" style="margin:0 8px;">MercadoLibre</a>
-      <a href="https://www.aliexpress.com/wholesale?SearchText=portable+blender" target="_blank" style="margin:0 8px;">AliExpress</a>
-    </div>
-    <div class="cta-neutral" style="background:#e0f2fe;padding:10px 0;border-radius:8px;font-weight:bold;">Comparar opciones y ver mejor oferta disponible</div>
-    <div class="frases-proteccion" style="font-size:0.95em;color:#64748b;margin-top:8px;">
-      <p>Evaluamos múltiples opciones antes de recomendar.</p>
-      <p>No todas las opciones son adecuadas para todos los usuarios.</p>
-      <p>Mostramos diferentes tiendas según disponibilidad y precio.</p>
-    </div>
-  </div>
+  <div id="pro-recommendation" class="producto-recomendado" style="max-width:420px;margin:auto;"></div>
 </section>
 <script>
 fetch('assets/trending_products.json')
   .then(r => r.json())
   .then(data => {
-    const cont = document.getElementById('top-picks-list');
-    if (!data.products || !data.products.length) {
-      cont.innerHTML = '<p>No hay picks destacados este mes.</p>';
-      return;
-    }
-    data.products.forEach(prod => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
-      let badge = '';
-      if(prod.decision && prod.decision.toLowerCase().includes('mantener')) badge = '<span class="badge">Mejor opción</span>';
-      if(prod.reason && prod.reason.toLowerCase().includes('precio')) badge = '<span class="badge" style="background:#16a34a;">Mejor precio</span>';
-      if(prod.reason && prod.reason.toLowerCase().includes('práctico')) badge = '<span class="badge" style="background:#f59e42;">Más práctico</span>';
-      card.innerHTML = `
-        <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-        <h3 style='color:#0a6ed1;'>${prod.name} ${badge}</h3>
-        <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
-        <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
-        <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
-        <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
-        <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
-        <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
-        <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
-      `;
-      cont.appendChild(card);
-    });
+    const products = data.products || [];
+    ProductAIGuard.renderProductGrid('top-picks-list', products);
+    ProductAIGuard.renderProRecommendation('pro-recommendation', products[0]);
+    ProductAIGuard.renderProductGrid('product-gallery', products);
   });
 </script>
 <h2 class="section-title">Comparador rápido</h2>
@@ -114,30 +72,8 @@ fetch('assets/trending_products.json')
   <div class="card"><h2>Car Seat Gap Organizer <span class="badge" style="background:#f59e42;">Más vendido</span></h2><p>Evita perder objetos en el auto.</p><a class="btn" href="blog/car-seat-gap-organizer-review.html">Leer review</a></div>
   <div class="card"><h2>Kitchen Food Saver Gadget <span class="badge" style="background:#16a34a;">Ahorro</span></h2><p>Reduce el desperdicio de comida.</p><a class="btn" href="blog/kitchen-food-saver-gadget-review.html">Leer review</a></div>
 </div>
-<h2 class="section-title">Galería de productos en tiempo real</h2>
+<h2 class="section-title">Galería verificada de productos</h2>
 <div id="product-gallery" class="grid"></div>
-<script>
-// Galería dinámica de imágenes de Unsplash
-const products = [
-  { name: "Portable Mini Blender", query: "portable blender" },
-  { name: "Car Seat Gap Organizer", query: "car organizer" },
-  { name: "Kitchen Food Saver Gadget", query: "kitchen gadget" }
-];
-const gallery = document.getElementById('product-gallery');
-products.forEach(prod => {
-  const img = document.createElement('img');
-  img.alt = prod.name;
-  img.style = 'width:100%;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;margin-bottom:8px;';
-  img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(prod.query)}`;
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.appendChild(img);
-  const title = document.createElement('h3');
-  title.textContent = prod.name;
-  card.appendChild(title);
-  gallery.appendChild(card);
-});
-</script>
 <div class="testimonial">“Probamos el organizador de cables y realmente mi escritorio se ve más limpio. ¡Recomendado!”</div>
 <h2 class="section-title">¿Por qué confiar en nosotros?</h2>
 <ul>

@@ -1,0 +1,11 @@
+{
+  "version": "2026-05-01",
+  "rules": {
+    "publish_image_only_if": "image_verified is true and image_match_score is greater than or equal to 0.82",
+    "never_publish_sources": ["source.unsplash.com", "picsum.photos", "empty placeholder"],
+    "fallback_behavior": "Use a local category image and show that the image is referential until IA verification passes."
+  },
+  "trend_prompt": "Eres un investigador de productos para ecommerce afiliado. Devuelve SOLO JSON valido. Selecciona productos con problema real, intencion de compra clara, utilidad demostrable y busqueda probable en Amazon, MercadoLibre o AliExpress. No inventes URLs de imagen. No incluyas productos medicos de alto riesgo ni promesas exageradas. Para cada producto genera: name, brand, category, product_type, problem, target, short_desc, seo_title, hook, reason, specs, search_query, image_must_show, image_must_not_show. Si no puedes verificar imagen, deja image vacio e image_verified false.",
+  "image_validation_prompt": "Analiza la imagen y el producto esperado. Responde SOLO JSON con: match, score, caption, detected_objects, reason. Marca match false si la imagen parece decorativa, paisaje, placeholder, producto distinto, empaque ilegible o foto generica. Producto esperado: {name}. Tipo: {product_type}. Debe mostrar: {image_must_show}. No debe mostrar: {image_must_not_show}.",
+  "image_generation_prompt": "Fotografia realista de producto ecommerce sobre fondo blanco. Producto: {product_type}. Debe verse claramente: {image_must_show}. Sin texto, sin logos falsos, sin manos, sin personas, sin paisaje, sin decoracion. Estilo: foto de catalogo limpia, iluminacion suave, alta nitidez."
+}

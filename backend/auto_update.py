@@ -21,7 +21,9 @@ def fetch_trends():
             "cta": "Ver en Amazon",
             "reason": "Producto tendencia, búsquedas en aumento, excelente reseñas, utilidad real.",
             "decision": "mantener",
-            "image": "https://m.media-amazon.com/images/I/61Qe0euJJZL._AC_SL1500_.jpg",
+            "image": "",
+            "image_verified": False,
+            "image_match_score": 0,
             "specs": "Marca: BlendJet, Capacidad: 475ml, Batería: 4000mAh, Material: BPA Free"
         }
     ]
