@@ -59,12 +59,84 @@ def get_trending_products(niche):
                 }
             )
         ],
+        "hogar": [
+            product_template(
+                {
+                    "name": "Home Cable Organizer",
+                    "brand": "Generic",
+                    "category": "hogar",
+                    "product_type": "organizador de cables para escritorio",
+                    "problem": "Cables sueltos y desorden visual en casa u oficina",
+                    "target": "Personas que trabajan desde casa, estudiantes y usuarios con varios dispositivos",
+                    "seo_title": "Home Cable Organizer: orden para escritorio y hogar | Review 2026",
+                    "short_desc": "Organizador simple para mantener cables visibles, cargadores y escritorio bajo control.",
+                    "article": "Una solucion economica para reducir desorden y encontrar cables mas rapido.",
+                    "hook": "Un escritorio mas limpio en minutos.",
+                    "cta": "Ver opciones",
+                    "reason": "Problema cotidiano, bajo precio y alta utilidad visual.",
+                    "decision": "mantener",
+                    "search_query": "home cable organizer desk cable management",
+                    "image_alt": "Organizador de cables para escritorio",
+                    "image_must_show": ["organizador de cables", "cables ordenados", "escritorio o pared"],
+                    "image_must_not_show": ["licuadora", "paisaje", "maquillaje", "auto"],
+                    "specs": "Uso: cables y cargadores, Instalacion: adhesiva o de escritorio",
+                }
+            )
+        ],
+        "automocion": [
+            product_template(
+                {
+                    "name": "Car Seat Gap Organizer",
+                    "brand": "Generic",
+                    "category": "automocion",
+                    "product_type": "organizador para espacio entre asientos de auto",
+                    "problem": "Objetos que se caen entre los asientos del auto",
+                    "target": "Conductores, familias y personas que pasan tiempo en el auto",
+                    "seo_title": "Car Seat Gap Organizer: orden para el auto | Review 2026",
+                    "short_desc": "Accesorio para guardar celular, llaves y objetos pequenos al alcance del conductor.",
+                    "article": "Una mejora practica para evitar distracciones y mantener el auto mas ordenado.",
+                    "hook": "Nada se pierde entre los asientos.",
+                    "cta": "Ver opciones",
+                    "reason": "Soluciona una molestia frecuente con busqueda comercial clara.",
+                    "decision": "mantener",
+                    "search_query": "car seat gap organizer",
+                    "image_alt": "Organizador entre asientos de auto",
+                    "image_must_show": ["organizador de auto", "asiento de auto", "espacio entre asientos"],
+                    "image_must_not_show": ["licuadora", "paisaje", "maquillaje", "cocina"],
+                    "specs": "Uso: auto, Ubicacion: espacio entre asientos, Funcion: guardar objetos pequenos",
+                }
+            )
+        ],
+        "belleza": [
+            product_template(
+                {
+                    "name": "Protector Solar Facial SPF50",
+                    "brand": "Neutrogena",
+                    "category": "belleza",
+                    "product_type": "protector solar facial",
+                    "problem": "Proteccion solar diaria y prevencion de manchas",
+                    "target": "Personas que usan protector solar todos los dias",
+                    "seo_title": "Protector Solar Facial SPF50: proteccion diaria ligera | Review 2026",
+                    "short_desc": "Protector facial de uso diario para quienes buscan textura ligera y alta proteccion.",
+                    "article": "Un esencial de cuidado facial para rutinas de manana.",
+                    "hook": "El paso que no deberia faltar antes de salir.",
+                    "cta": "Ver opciones",
+                    "reason": "Demanda constante y necesidad clara durante todo el ano.",
+                    "decision": "mantener",
+                    "search_query": "protector solar facial spf 50 textura ligera",
+                    "image_alt": "Envase de protector solar facial SPF50",
+                    "image_must_show": ["envase de protector solar", "spf 50", "producto facial"],
+                    "image_must_not_show": ["paisaje", "licuadora", "auto", "mueble"],
+                    "specs": "SPF: 50, Uso: facial diario, Acabado: ligero",
+                }
+            )
+        ],
     }
     return trending.get(niche, [])
 
 
 def main():
-    niches = ["cocina", "hogar", "automocion", "organizacion", "gadgets practicos"]
+    niches = ["cocina", "hogar", "automocion", "belleza"]
     today = datetime.date.today().isoformat()
     report = {
         "date": today,

@@ -4,6 +4,7 @@
 .card h2{margin-bottom:6px;}
 .card p{margin-bottom:10px;}
 </style>
+<script src="../assets/product_ai_guard.js"></script>
 </head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="index.html">Categorías</a><a href="automotive.html">Automoción</a><a href="../index.html">Inicio</a><a href="../blog/index.html">Blog</a></nav></header><main>
 <h1>Productos de Automoción</h1>
 <div class='grid'>
@@ -54,31 +55,6 @@ Solo recomendamos productos probados, con opiniones reales y comparativas honest
   <h2 style="color:#0a6ed1;">Tendencias en Automoción</h2>
   <div id="trending-auto-list" class="grid"></div>
 </section>
-<section class="card" style="background:#f1f5f9;margin-top:32px;">
-  <h2 style="color:#0a6ed1;">Recomendación PRO: Solución real a un problema actual</h2>
-  <div class="producto-recomendado" style="background:#fff;padding:22px 18px;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;max-width:420px;margin:auto;">
-    <img src="../assets/car.jpg" alt="Producto automotriz recomendado" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-    <h3>Licuadora portátil</h3>
-    <p>Solución para: Falta de tiempo para cocinar saludable.</p>
-    <ul>
-      <li>✔ Calidad comprobada</li>
-      <li>✔ Buenas reseñas</li>
-      <li>✔ Precio accesible</li>
-    </ul>
-    <div class="multi-afiliado" style="margin:12px 0;">
-      <span style="font-weight:bold;">Disponible en:</span>
-      <a href="https://www.amazon.com/s?k=portable+mini+blender" target="_blank" style="margin:0 8px;">Amazon</a>
-      <a href="https://www.mercadolibre.com.mx/ofertas/licuadora-portatil" target="_blank" style="margin:0 8px;">MercadoLibre</a>
-      <a href="https://www.aliexpress.com/wholesale?SearchText=portable+blender" target="_blank" style="margin:0 8px;">AliExpress</a>
-    </div>
-    <div class="cta-neutral" style="background:#e0f2fe;padding:10px 0;border-radius:8px;font-weight:bold;">Comparar opciones y ver mejor oferta disponible</div>
-    <div class="frases-proteccion" style="font-size:0.95em;color:#64748b;margin-top:8px;">
-      <p>Evaluamos múltiples opciones antes de recomendar.</p>
-      <p>No todas las opciones son adecuadas para todos los usuarios.</p>
-      <p>Mostramos diferentes tiendas según disponibilidad y precio.</p>
-    </div>
-  </div>
-</section>
 <script>
 fetch('../assets/trending_products.json')
   .then(r => r.json())
@@ -87,23 +63,9 @@ fetch('../assets/trending_products.json')
     if (!data.products) return;
     let found = false;
     data.products.forEach(prod => {
-      if (prod.category && prod.category.toLowerCase().includes('automoción')) {
+      if (prod.category && prod.category.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes('automocion')) {
         found = true;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
-        card.innerHTML = `
-          <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-          <h3 style='color:#0a6ed1;'>${prod.name}</h3>
-          <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
-          <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
-          <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
-          <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
-          <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
-          <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
-          <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
-        `;
-        cont.appendChild(card);
+        cont.insertAdjacentHTML('beforeend', ProductAIGuard.productCard(prod, {prefix: '../'}));
       }
     });
     if (!found) cont.innerHTML = '<p>No hay productos tendencia en automoción hoy.</p>';

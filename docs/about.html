@@ -24,16 +24,16 @@
 <div id="about-gallery" class="grid"></div>
 <script>
 const aboutImages = [
-  { alt: "Equipo Smart Finds", query: "team work office" },
-  { alt: "Probando gadgets", query: "testing gadgets" },
-  { alt: "Productos destacados", query: "best gadgets" }
+  { alt: "Equipo Smart Finds", src: "assets/home.jpg" },
+  { alt: "Probando gadgets", src: "assets/kitchen.jpg" },
+  { alt: "Productos destacados", src: "assets/car.jpg" }
 ];
 const aboutGallery = document.getElementById('about-gallery');
 aboutImages.forEach(imgData => {
   const img = document.createElement('img');
   img.alt = imgData.alt;
   img.style = 'width:100%;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;margin-bottom:8px;';
-  img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(imgData.query)}`;
+  img.src = imgData.src;
   const card = document.createElement('div');
   card.className = 'card';
   card.appendChild(img);
