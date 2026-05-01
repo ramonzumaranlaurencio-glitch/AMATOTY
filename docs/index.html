@@ -19,6 +19,31 @@
   <div class="card"><h2>Car Seat Gap Organizer</h2><p>Evita perder objetos en el auto. <span class="badge">Más vendido</span></p><a class="btn" href="blog/car-seat-gap-organizer-review.html">Leer review</a></div>
   <div class="card"><h2>Kitchen Food Saver Gadget</h2><p>Reduce el desperdicio de comida. <span class="badge">Ahorro</span></p><a class="btn" href="blog/kitchen-food-saver-gadget-review.html">Leer review</a></div>
 </div>
+<h2 class="section-title">Galería de productos en tiempo real</h2>
+<div id="product-gallery" class="grid"></div>
+<script>
+// Galería dinámica de imágenes de Unsplash
+const products = [
+  { name: "Portable Mini Blender", query: "portable blender" },
+  { name: "Car Seat Gap Organizer", query: "car organizer" },
+  { name: "Kitchen Food Saver Gadget", query: "kitchen gadget" }
+];
+const gallery = document.getElementById('product-gallery');
+products.forEach(prod => {
+  const img = document.createElement('img');
+  img.alt = prod.name;
+  img.style = 'width:100%;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;margin-bottom:8px;';
+  // Unsplash fuente libre, sin API key para imágenes aleatorias
+  img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(prod.query)}`;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.appendChild(img);
+  const title = document.createElement('h3');
+  title.textContent = prod.name;
+  card.appendChild(title);
+  gallery.appendChild(card);
+});
+</script>
 <div class="testimonial">“Probé el organizador de cables y realmente mi escritorio se ve más limpio. ¡Recomendado!”</div>
 <h2 class="section-title">¿Por qué confiar en nosotros?</h2>
 <ul>
