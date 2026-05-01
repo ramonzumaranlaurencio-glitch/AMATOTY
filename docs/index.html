@@ -49,6 +49,38 @@
   <button onclick="alert('Simulación: La IA revisó tendencias y actualizó productos. (Automatización real requiere backend/API)')" style="background:#0a6ed1;color:#fff;padding:12px 32px;border:none;border-radius:8px;font-size:1.1em;cursor:pointer;box-shadow:0 2px 8px #bae6fd;">Actualizar productos tendencia</button>
   <p style="font-size:0.95em;color:#0369a1;margin-top:8px;">*Esta función requiere automatización backend para ser 100% real.</p>
 </section>
+<section id="trending-products" class="card" style="background:#f1f5f9;margin-top:32px;">
+  <h2 style="color:#0a6ed1;">Productos tendencia de hoy</h2>
+  <div id="trending-list" class="grid"></div>
+</section>
+<script>
+fetch('assets/trending_products.json')
+  .then(r => r.json())
+  .then(data => {
+    const cont = document.getElementById('trending-list');
+    if (!data.products || !data.products.length) {
+      cont.innerHTML = '<p>No hay productos tendencia hoy.</p>';
+      return;
+    }
+    data.products.forEach(prod => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
+      card.innerHTML = `
+        <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
+        <h3 style='color:#0a6ed1;'>${prod.name}</h3>
+        <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
+        <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
+        <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
+        <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
+        <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
+        <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
+        <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
+      `;
+      cont.appendChild(card);
+    });
+  });
+</script>
 <h2 class="section-title">Últimos análisis destacados</h2>
 <div class='grid'>
   <div class="card"><h2>Portable Mini Blender</h2><p>Ideal para quienes buscan salud y rapidez. <span class="badge">Recomendado</span></p><a class="btn" href="blog/portable-mini-blender-review.html">Leer review</a></div>
