@@ -52,6 +52,40 @@
     <em>Incluye guía digital de organización con tu compra.</em>
   </div>
 </section>
+<section id="trending-home" class="card" style="background:#f1f5f9;margin-top:32px;">
+  <h2 style="color:#0a6ed1;">Tendencias en Hogar</h2>
+  <div id="trending-home-list" class="grid"></div>
+</section>
+<script>
+fetch('../assets/trending_products.json')
+  .then(r => r.json())
+  .then(data => {
+    const cont = document.getElementById('trending-home-list');
+    if (!data.products) return;
+    let found = false;
+    data.products.forEach(prod => {
+      if (prod.category && prod.category.toLowerCase().includes('hogar')) {
+        found = true;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
+        card.innerHTML = `
+          <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
+          <h3 style='color:#0a6ed1;'>${prod.name}</h3>
+          <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
+          <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
+          <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
+          <a href="https://www.amazon.com/s?k=${encodeURIComponent(prod.name)}" target="_blank" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${prod.cta || 'Ver en Amazon'}</a>
+          <div style='font-size:0.93em;color:#0e7490;margin-top:8px;'>${prod.reason}</div>
+          <div style='font-size:0.93em;color:#f59e42;margin-top:4px;'>${prod.decision ? 'Decisión: ' + prod.decision : ''}</div>
+          <div style='font-size:0.93em;color:#0369a1;margin-top:4px;'>${prod.hook}</div>
+        `;
+        cont.appendChild(card);
+      }
+    });
+    if (!found) cont.innerHTML = '<p>No hay productos tendencia en hogar hoy.</p>';
+  });
+</script>
 <div class="testimonial" style="background:#e0e7ff;color:#3730a3;padding:18px 22px;border-radius:12px;margin:18px 0;font-style:italic;box-shadow:0 2px 12px rgba(10,110,209,.07);">
 “Mi casa está más ordenada y limpia desde que uso estos productos. ¡Vale la pena!”</div>
 <div class="cta-block" style="background:#fff7ed;border:1px solid #fed7aa;padding:18px 22px;border-radius:14px;margin:28px 0;text-align:center;">
