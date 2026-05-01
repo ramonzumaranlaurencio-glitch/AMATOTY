@@ -2,7 +2,7 @@
 (function(){
   function sendEvent(eventType, productName){
     try {
-      fetch("http://localhost:5055/track", {
+      fetch("https://amatoty.onrender.com/track", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({

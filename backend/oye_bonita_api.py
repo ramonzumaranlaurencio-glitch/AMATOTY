@@ -1,3 +1,15 @@
+
+
+# Ruta raíz para mensaje de estado
+@app.route('/')
+def home():
+    return 'Backend AMATOTY activo. Usa /analisis con POST e imagen.', 200
+
+# Ruta /analisis solo POST
+@app.route('/analisis', methods=['POST'])
+def analisis():
+    # Aquí puedes poner tu lógica real de análisis
+    return {'ok': True}
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
@@ -80,7 +92,9 @@ def diagnostico_real(img):
 def api_diagnostico():
     if request.method == 'GET':
         return jsonify({"error": "Este endpoint solo acepta POST con una imagen para análisis facial."}), 405
-    file = request.files['foto']
+    file = request.files.get('foto') or request.files.get('imagen')
+    if not file:
+        return jsonify({"error": "No llegó ninguna imagen. El campo debe llamarse foto o imagen"}), 400
     img = Image.open(file.stream)
     # Obtener país del formulario
     pais = request.form.get('pais', 'PE').upper()

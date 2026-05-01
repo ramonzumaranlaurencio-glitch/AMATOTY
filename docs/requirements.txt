@@ -1,0 +1,9 @@
+# Archivo de referencia SOLO para traducción.
+# No usar para instalar dependencias.
+# Traducción de requirements.txt (backend) al español:
+frasco
+frasco
+flask-cors
+almohada
+mediapipe
+gunicorn

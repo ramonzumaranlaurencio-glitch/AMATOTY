@@ -84,7 +84,7 @@ fetch('../assets/trending_products.json')
         function explicarImagenIA(imageUrl, btn) {
           btn.disabled = true;
           btn.innerText = 'Analizando...';
-          fetch('http://localhost:5050/api/explicar-imagen', {
+          fetch('https://amatoty.onrender.com/api/explicar-imagen', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({image_url: imageUrl})

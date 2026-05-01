@@ -1,3 +1,6 @@
+@app.get("/")
+def home():
+    return "AMATOTY backend activo", 200
 from fastapi import FastAPI
 from pydantic import BaseModel
 import json

@@ -126,7 +126,7 @@
       };
       const cartDiv = document.getElementById('ob-cart');
       cartDiv.innerHTML = `<div class='ob-checkout-success'>Procesando pedido...</div>`;
-      fetch('http://localhost:5050/api/pedido', {
+      fetch('https://amatoty.onrender.com/api/pedido', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(datos)
@@ -155,9 +155,16 @@
       const formData = new FormData();
       formData.append('foto', file);
       formData.append('pais', country);
+      // Depuración: mostrar datos antes de enviar
+      console.log('Enviando al backend:');
+      console.log('Archivo:', file);
+      console.log('País:', country);
+      for (let pair of formData.entries()) {
+        console.log(pair[0]+ ':', pair[1]);
+      }
       document.getElementById('ob-diagnosis').style.display = 'block';
       document.getElementById('ob-diagnosis').innerHTML = 'Analizando...';
-      fetch('http://localhost:5050/api/diagnostico', {
+      fetch('https://amatoty.onrender.com/api/diagnostico', {
         method: 'POST',
         body: formData
       })
@@ -168,6 +175,8 @@
         } catch (e) {
           throw new Error('Respuesta inválida del servidor');
         }
+        // Depuración: mostrar respuesta del backend
+        console.log('Respuesta backend:', data);
         if (r.ok && data && !data.error) {
           document.getElementById('ob-diagnosis').style.display = 'block';
           document.getElementById('ob-diagnosis').innerHTML =
