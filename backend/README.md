@@ -4,6 +4,8 @@
 
 - Expone una API Flask para validar que el backend esta activo.
 - Recibe imagenes por POST en `/analisis`.
+- Recibe diagnostico facial/producto por POST en `/api/diagnostico`.
+- Recibe pedidos por POST en `/api/pedido`.
 - El archivo que Render debe arrancar es `main.py`.
 
 ## Uso rapido
@@ -31,3 +33,12 @@ Si Render usa la raiz del repositorio como Root Directory, el Start Command debe
 ```bash
 gunicorn backend.main:app
 ```
+
+Despues de publicar, prueba que Render tenga la ruta activa:
+
+```bash
+curl https://amatoty.onrender.com/api/diagnostico
+```
+
+Debe responder JSON con estado 405. Si responde una pagina HTML 404, Render todavia
+esta usando un deploy viejo o un Start Command distinto.
