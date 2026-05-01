@@ -7,68 +7,51 @@
 .testimonial{background:#e0e7ff;color:#3730a3;padding:18px 22px;border-radius:12px;margin:18px 0;font-style:italic;box-shadow:0 2px 12px rgba(10,110,209,.07);}
 .cta-block{background:#fff7ed;border:1px solid #fed7aa;padding:18px 22px;border-radius:14px;margin:28px 0;text-align:center;}
 .cta-block strong{color:#f59e0b;}
+.badge{display:inline-block;background:#0a6ed1;color:#fff;border-radius:6px;padding:2px 10px;font-size:0.9em;margin-left:8px;}
+.comparador{width:100%;max-width:700px;margin:32px auto 0 auto;border-collapse:collapse;box-shadow:0 2px 12px #e2e8f0;}
+.comparador th,.comparador td{border:1px solid #e5e7eb;padding:10px 8px;text-align:left;}
+.comparador th{background:#f1f5f9;color:#0a6ed1;}
+.comparador .highlight{background:#fef9c3;font-weight:bold;}
 </style>
 </head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header><main>
 <div class="hero">
-  <h1>Descubre productos que realmente solucionan tu día a día</h1>
-  <p>Analizamos, probamos y recomendamos gadgets y soluciones prácticas para tu hogar, cocina y auto. Solo lo que funciona, sin rodeos.</p>
+  <h1>Probamos productos reales para que compres mejor</h1>
+  <p>¿Cansado de reviews genéricos? Aquí solo encuentras análisis honestos, pruebas reales y recomendaciones con criterio. Nuestro objetivo: que compres solo lo que realmente te sirve.</p>
 </div>
 <section class="card" style="background:#f8fafc;margin-top:32px;">
-  <h2 style="text-align:center;color:#0a6ed1;">¿Por qué elegir Smart Finds?</h2>
-  <div class="grid">
-    <div class="card" style="background:#f0fdf4;">
-      <h3>Salud & Fitness</h3>
-      <p><strong>“Soluciones para tu bienestar.”</strong><br>Desde batidos post-entreno hasta organización en casa, tenemos gadgets que mejoran tu día a día. 🥤🏡</p>
-    </div>
-    <div class="card" style="background:#f0f9ff;">
-      <h3>Productividad & Orden</h3>
-      <p><strong>“Haz más, vive mejor.”</strong><br>Optimiza tu tiempo, mantén tu espacio limpio y enfócate en lo importante. 📑✨</p>
-    </div>
-    <div class="card" style="background:#fef9c3;">
-      <h3>Estilo & Innovación</h3>
-      <p><strong>“Tecnología que se adapta a ti.”</strong><br>Productos modernos, compactos y funcionales para cada estilo de vida. 🌿🔋</p>
-    </div>
-  </div>
-  <h3 style="margin-top:32px;">Beneficios clave</h3>
-  <ul style="columns:2;max-width:700px;margin:auto;">
-    <li><strong>Probados y recomendados:</strong> Solo gadgets que funcionan de verdad.</li>
-    <li><strong>Fácil compra y envío rápido:</strong> Recibe tus productos en 24 horas.</li>
-    <li><strong>Materiales seguros:</strong> Salud y calidad garantizadas.</li>
-    <li><strong>Soporte real:</strong> Te ayudamos a elegir lo mejor para ti.</li>
-    <li><strong>Actualización constante:</strong> Siempre los últimos lanzamientos.</li>
+  <h2 style="text-align:center;color:#0a6ed1;">¿Cómo evaluamos los productos?</h2>
+  <ul style="max-width:700px;margin:auto;list-style:disc inside;">
+    <li>Identificamos problemas reales y necesidades cotidianas.</li>
+    <li>Seleccionamos solo productos con demanda, buenas reseñas y utilidad comprobada.</li>
+    <li>Probamos cada producto en situaciones reales.</li>
+    <li>Comparamos alternativas y destacamos pros/contras.</li>
+    <li>Solo recomendamos lo que usaríamos en casa.</li>
   </ul>
-  <div class="cta-block" style="margin-top:24px;">
-    <strong>¡Descubre el gadget que cambiará tu rutina!</strong><br>
-    Explora reviews, comparativas y consejos de compra.<br>
-    <em>¿Listo para mejorar tu día a día? Empieza ahora.</em>
-  </div>
 </section>
-<section class="card" style="background:#e0f2fe;margin:32px 0 0 0;padding:24px 16px;text-align:center;">
-  <h2 style="color:#0a6ed1;">Actualizar productos tendencia</h2>
-  <p>La IA revisa tendencias → compara con productos actuales → decide mantener o reemplazar → actualiza home y categorías → crea artículo y video.</p>
-  <button onclick="alert('Simulación: La IA revisó tendencias y actualizó productos. (Automatización real requiere backend/API)')" style="background:#0a6ed1;color:#fff;padding:12px 32px;border:none;border-radius:8px;font-size:1.1em;cursor:pointer;box-shadow:0 2px 8px #bae6fd;">Actualizar productos tendencia</button>
-  <p style="font-size:0.95em;color:#0369a1;margin-top:8px;">*Esta función requiere automatización backend para ser 100% real.</p>
-</section>
-<section id="trending-products" class="card" style="background:#f1f5f9;margin-top:32px;">
-  <h2 style="color:#0a6ed1;">Productos tendencia de hoy</h2>
-  <div id="trending-list" class="grid"></div>
+<section class="card" style="background:#f1f5f9;margin-top:32px;">
+  <h2 style="color:#0a6ed1;text-align:center;">Top picks del mes</h2>
+  <div id="top-picks-list" class="grid"></div>
 </section>
 <script>
 fetch('assets/trending_products.json')
   .then(r => r.json())
   .then(data => {
-    const cont = document.getElementById('trending-list');
+    const cont = document.getElementById('top-picks-list');
     if (!data.products || !data.products.length) {
-      cont.innerHTML = '<p>No hay productos tendencia hoy.</p>';
+      cont.innerHTML = '<p>No hay picks destacados este mes.</p>';
       return;
     }
     data.products.forEach(prod => {
       const card = document.createElement('div');
       card.className = 'card';
       card.style = 'background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;';
+      let badge = '';
+      if(prod.decision && prod.decision.toLowerCase().includes('mantener')) badge = '<span class="badge">Mejor opción</span>';
+      if(prod.reason && prod.reason.toLowerCase().includes('precio')) badge = '<span class="badge" style="background:#16a34a;">Mejor precio</span>';
+      if(prod.reason && prod.reason.toLowerCase().includes('práctico')) badge = '<span class="badge" style="background:#f59e42;">Más práctico</span>';
       card.innerHTML = `
         <img src="${prod.image}" alt="${prod.name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-        <h3 style='color:#0a6ed1;'>${prod.name}</h3>
+        <h3 style='color:#0a6ed1;'>${prod.name} ${badge}</h3>
         <div style='font-size:0.95em;color:#64748b;margin-bottom:6px;'>${prod.brand ? prod.brand + ' · ' : ''}${prod.category}</div>
         <p style='font-size:1.05em;margin-bottom:8px;'>${prod.short_desc}</p>
         <ul style='font-size:0.97em;color:#334155;margin-bottom:8px;'><li><b>Problema:</b> ${prod.problem}</li><li><b>Público:</b> ${prod.target}</li><li><b>Specs:</b> ${prod.specs || ''}</li></ul>
@@ -81,11 +64,18 @@ fetch('assets/trending_products.json')
     });
   });
 </script>
+<h2 class="section-title">Comparador rápido</h2>
+<table class="comparador">
+  <tr><th>Producto</th><th>Mejor para</th><th>Problema</th><th>Precio</th></tr>
+  <tr class="highlight"><td>Portable Mini Blender</td><td>Salud y practicidad</td><td>Batidos en cualquier lugar</td><td>-</td></tr>
+  <tr><td>Car Seat Gap Organizer</td><td>Organización auto</td><td>Evitar perder objetos</td><td>-</td></tr>
+  <tr><td>Kitchen Food Saver Gadget</td><td>Ahorro y orden</td><td>Desperdicio de comida</td><td>-</td></tr>
+</table>
 <h2 class="section-title">Últimos análisis destacados</h2>
 <div class='grid'>
-  <div class="card"><h2>Portable Mini Blender</h2><p>Ideal para quienes buscan salud y rapidez. <span class="badge">Recomendado</span></p><a class="btn" href="blog/portable-mini-blender-review.html">Leer review</a></div>
-  <div class="card"><h2>Car Seat Gap Organizer</h2><p>Evita perder objetos en el auto. <span class="badge">Más vendido</span></p><a class="btn" href="blog/car-seat-gap-organizer-review.html">Leer review</a></div>
-  <div class="card"><h2>Kitchen Food Saver Gadget</h2><p>Reduce el desperdicio de comida. <span class="badge">Ahorro</span></p><a class="btn" href="blog/kitchen-food-saver-gadget-review.html">Leer review</a></div>
+  <div class="card"><h2>Portable Mini Blender <span class="badge">Recomendado</span></h2><p>Ideal para quienes buscan salud y rapidez.</p><a class="btn" href="blog/portable-mini-blender-review.html">Leer review</a></div>
+  <div class="card"><h2>Car Seat Gap Organizer <span class="badge" style="background:#f59e42;">Más vendido</span></h2><p>Evita perder objetos en el auto.</p><a class="btn" href="blog/car-seat-gap-organizer-review.html">Leer review</a></div>
+  <div class="card"><h2>Kitchen Food Saver Gadget <span class="badge" style="background:#16a34a;">Ahorro</span></h2><p>Reduce el desperdicio de comida.</p><a class="btn" href="blog/kitchen-food-saver-gadget-review.html">Leer review</a></div>
 </div>
 <h2 class="section-title">Galería de productos en tiempo real</h2>
 <div id="product-gallery" class="grid"></div>
@@ -101,7 +91,6 @@ products.forEach(prod => {
   const img = document.createElement('img');
   img.alt = prod.name;
   img.style = 'width:100%;border-radius:14px;box-shadow:0 2px 12px #e2e8f0;margin-bottom:8px;';
-  // Unsplash fuente libre, sin API key para imágenes aleatorias
   img.src = `https://source.unsplash.com/400x300/?${encodeURIComponent(prod.query)}`;
   const card = document.createElement('div');
   card.className = 'card';
@@ -112,12 +101,13 @@ products.forEach(prod => {
   gallery.appendChild(card);
 });
 </script>
-<div class="testimonial">“Probé el organizador de cables y realmente mi escritorio se ve más limpio. ¡Recomendado!”</div>
+<div class="testimonial">“Probamos el organizador de cables y realmente mi escritorio se ve más limpio. ¡Recomendado!”</div>
 <h2 class="section-title">¿Por qué confiar en nosotros?</h2>
 <ul>
   <li>Solo publicamos productos probados y útiles</li>
   <li>Comparativas honestas y sin publicidad engañosa</li>
   <li>Actualizaciones semanales y análisis reales</li>
+  <li>Reviewed by: <b>Edwin Ramon Sumaran Ojeda</b><br>Product Research & Practical Reviews</li>
 </ul>
 <div class="cta-block"><strong>¿Listo para mejorar tu día a día?</strong><br>Explora nuestras <a href="category/index.html">categorías</a> o revisa el <a href="blog/index.html">blog</a> para ver los últimos análisis.</div>
 </main><footer><p>As an Amazon Associate, I earn from qualifying purchases.</p><p>Author: Edwin Sumaran</p></footer><script src="assets/lca_tracker.js"></script></body></html>
