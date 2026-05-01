@@ -34,4 +34,18 @@
     <a class="btn" href="home.html">Ver productos de hogar</a>
   </div>
 </div>
-</main><footer><p>As an Amazon Associate, I earn from qualifying purchases.</p><p>Author: Edwin Sumaran</p></footer><script src="../assets/lca_tracker.js"></script></body></html>
+</main><footer><p>As an Amazon Associate, I earn from qualifying purchases.</p><p>Author: Edwin Sumaran</p></footer><script src="../assets/lca_tracker.js"></script>
+<script>
+// Fallback automático a Unsplash si la imagen local no carga
+const fallbackImages = {
+  'kitchen.jpg': 'https://source.unsplash.com/400x300/?kitchen',
+  'car.jpg': 'https://source.unsplash.com/400x300/?car',
+  'home.jpg': 'https://source.unsplash.com/400x300/?home'
+};
+document.querySelectorAll('.card img').forEach(img => {
+  img.onerror = function() {
+    const name = img.src.split('/').pop();
+    if (fallbackImages[name]) img.src = fallbackImages[name];
+  };
+});
+</script></body></html>
