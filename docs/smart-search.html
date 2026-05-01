@@ -1,0 +1,305 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Busca inteligente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/product_ai_guard.js"></script>
+<style>
+:root{--sap-blue:#0a6ed1;--sap-ink:#1d2d3e;--sap-muted:#5b738b;--sap-line:#d9e4ee;--sap-bg:#f3f6f9;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c}
+body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
+header{background:#0b1f33;padding:14px 22px;border-bottom:1px solid #244761}
+header h1{font-size:20px;margin:0 0 8px 0;letter-spacing:0}
+nav a{font-size:14px;margin-right:16px}
+main{max-width:none;padding:0}
+.workbench{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;min-height:calc(100vh - 95px)}
+.side{background:#fff;border-right:1px solid var(--sap-line);padding:16px}
+.side h2,.panel h2{font-size:14px;text-transform:uppercase;color:#365b75;margin:0 0 12px 0}
+.side label,.field label{display:block;font-size:12px;font-weight:700;color:#496b84;margin-bottom:5px}
+.side input,.side select,.field input,.field select{width:100%;box-sizing:border-box;border:1px solid #b8c7d4;border-radius:4px;padding:9px 10px;background:#fff;color:#1d2d3e}
+.side .group{margin-bottom:14px}
+.content{padding:16px 18px 28px 18px;min-width:0}
+.topbar{background:#fff;border:1px solid var(--sap-line);border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:14px;box-shadow:0 1px 4px rgba(29,45,62,.08)}
+.querybar{display:grid;grid-template-columns:minmax(220px,1fr) 160px 150px;gap:10px}
+.querybar input,.querybar select{border:1px solid #b8c7d4;border-radius:4px;padding:10px;background:#fff}
+.btn-sap{border:1px solid #0854a0;background:var(--sap-blue);color:#fff;border-radius:4px;padding:10px 14px;font-weight:700;cursor:pointer}
+.btn-ghost{border:1px solid #9eb4c8;background:#fff;color:#0a4f8f;border-radius:4px;padding:9px 12px;font-weight:700;cursor:pointer}
+.btn-lite{border:1px solid #d0dce7;background:#f7fafd;color:#1d5d90;border-radius:4px;padding:7px 10px;font-weight:700;cursor:pointer}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid var(--sap-line);border-radius:6px;padding:12px;box-shadow:0 1px 4px rgba(29,45,62,.06)}
+.kpi span{display:block;font-size:12px;color:var(--sap-muted);font-weight:700}
+.kpi strong{font-size:24px;color:#0a365f}
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:14px}
+.panel{background:#fff;border:1px solid var(--sap-line);border-radius:6px;box-shadow:0 1px 4px rgba(29,45,62,.06);min-width:0}
+.panel-head{padding:12px 14px;border-bottom:1px solid var(--sap-line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-body{padding:12px 14px}
+.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+.data-table th{background:#edf3f8;color:#244761;text-align:left;font-size:12px;text-transform:uppercase;border-bottom:1px solid var(--sap-line);padding:9px}
+.data-table td{border-bottom:1px solid #edf2f6;padding:10px 9px;vertical-align:top}
+.data-table tr{cursor:pointer}
+.data-table tr:hover{background:#f6fafe}
+.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#e5f2ff;color:#075a9f}
+.pill.good{background:#e4f5ea;color:var(--sap-good)}
+.pill.warn{background:#fff3e5;color:var(--sap-warn)}
+.spec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.spec{border:1px solid #e1eaf2;background:#fbfdff;border-radius:4px;padding:9px}
+.spec span{display:block;font-size:11px;color:#607d95;text-transform:uppercase;font-weight:700}
+.spec strong{display:block;font-size:14px;color:#19344d;margin-top:3px}
+.cart{background:#fff;border-left:1px solid var(--sap-line);padding:16px;display:flex;flex-direction:column;gap:12px}
+.cart-list{display:flex;flex-direction:column;gap:8px;overflow:auto}
+.cart-item{border:1px solid #dfe8f0;border-radius:5px;padding:10px;background:#fbfdff}
+.cart-item strong{display:block;font-size:14px}
+.money{font-variant-numeric:tabular-nums;font-weight:800;color:#0a365f}
+.summary{border-top:1px solid var(--sap-line);padding-top:12px;margin-top:auto}
+.summary-row{display:flex;justify-content:space-between;margin:7px 0}
+.dropzone{border:1px dashed #8aa8c4;background:#f7fbff;border-radius:5px;padding:12px;text-align:center}
+.dropzone input{margin-top:8px}
+.empty{color:#607d95;font-size:14px;padding:14px;border:1px dashed #d1dde8;border-radius:5px;background:#fbfdff}
+@media(max-width:1100px){.workbench{grid-template-columns:1fr}.side,.cart{border:0}.layout,.querybar,.kpis{grid-template-columns:1fr}.cart{position:static}}
+</style>
+</head>
+<body data-product="">
+<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
+<main>
+<div class="workbench">
+  <aside class="side">
+    <h2>Parámetros</h2>
+    <div class="group"><label for="margin">Margen interno</label><input id="margin" type="number" value="20" min="0" max="80"></div>
+    <div class="group"><label for="currency">Moneda</label><select id="currency"><option value="USD">USD</option><option value="PEN">PEN</option><option value="COP">COP</option><option value="MXN">MXN</option></select></div>
+    <div class="group"><label for="sort">Orden</label><select id="sort"><option value="score">Confianza</option><option value="price_asc">Precio menor</option><option value="price_desc">Precio mayor</option><option value="category">Categoría</option></select></div>
+    <div class="group dropzone">
+      <label for="imageInput">Imagen / OCR</label>
+      <input id="imageInput" type="file" accept="image/*">
+    </div>
+    <button class="btn-ghost" id="schemaBtn" type="button">Ver esquema JSON</button>
+  </aside>
+
+  <section class="content">
+    <div class="topbar">
+      <div class="querybar">
+        <input id="query" type="search" placeholder="Buscar por producto, marca, modelo, especificación">
+        <select id="categoryFilter"><option value="">Todas las categorías</option></select>
+        <button class="btn-sap" id="runSearch" type="button">Ejecutar</button>
+      </div>
+      <button class="btn-ghost" id="clearBtn" type="button">Limpiar</button>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span>Productos</span><strong id="kpiProducts">0</strong></div>
+      <div class="kpi"><span>Categorías</span><strong id="kpiCategories">0</strong></div>
+      <div class="kpi"><span>Margen</span><strong id="kpiMargin">20%</strong></div>
+      <div class="kpi"><span>Carrito</span><strong id="kpiCart">0</strong></div>
+    </div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-head"><h2>Resultados</h2><span class="pill" id="resultCount">0 registros</span></div>
+        <div class="panel-body">
+          <table class="data-table">
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Especificaciones</th><th>Precio</th><th>Acción</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Ficha técnica</h2><span class="pill good" id="confidencePill">IA lista</span></div>
+        <div class="panel-body" id="detailPanel"><div class="empty">Seleccione un producto.</div></div>
+      </section>
+    </div>
+  </section>
+
+  <aside class="cart">
+    <div class="panel-head" style="padding:0 0 10px 0"><h2>Carrito</h2><button class="btn-lite" id="emptyCart" type="button">Vaciar</button></div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="summary">
+      <div class="summary-row"><span>Subtotal base</span><strong class="money" id="baseSubtotal">$0.00</strong></div>
+      <div class="summary-row"><span>Margen interno</span><strong class="money" id="marginAmount">$0.00</strong></div>
+      <div class="summary-row"><span>Total venta</span><strong class="money" id="saleTotal">$0.00</strong></div>
+      <button class="btn-sap" style="width:100%;margin-top:10px" id="checkoutBtn" type="button">Generar pedido</button>
+    </div>
+  </aside>
+</div>
+</main>
+<script>
+const basePrices = {
+  "Portable Mini Blender": 28,
+  "Home Cable Organizer": 8,
+  "Car Seat Gap Organizer": 15,
+  "Protector Solar Facial SPF50": 12
+};
+const fx = {USD:1, PEN:3.75, COP:3900, MXN:17};
+let products = [];
+let filtered = [];
+let selected = null;
+let cart = JSON.parse(localStorage.getItem("smartCart") || "[]");
+
+function money(value) {
+  const currency = document.getElementById("currency").value;
+  return new Intl.NumberFormat("es", {style:"currency", currency}).format(value * fx[currency]);
+}
+
+function basePrice(product) {
+  return Number(product.price_base || product.base_price || basePrices[product.name] || 10);
+}
+
+function salePrice(product) {
+  const margin = Number(document.getElementById("margin").value || 20) / 100;
+  return basePrice(product) * (1 + margin);
+}
+
+function specsArray(product) {
+  if (Array.isArray(product.especificaciones_dinamicas)) return product.especificaciones_dinamicas;
+  const specs = String(product.specs || "").split(",").map(item => item.trim()).filter(Boolean);
+  return specs.map(item => {
+    const parts = item.split(":");
+    return {etiqueta: parts[0] || "Dato", valor: parts.slice(1).join(":").trim() || item};
+  });
+}
+
+function normalize(product) {
+  const flat = ProductAIGuard.flattenProduct(product);
+  return Object.assign(flat, {
+    confidence: Number(product.image_match_score || product.producto_principal?.nivel_confianza || 0.78),
+    specs_list: specsArray(flat)
+  });
+}
+
+function loadCategories() {
+  const select = document.getElementById("categoryFilter");
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+  select.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(cat => `<option value="${ProductAIGuard.escapeHtml(cat)}">${ProductAIGuard.escapeHtml(cat)}</option>`).join("");
+  document.getElementById("kpiCategories").textContent = cats.length;
+}
+
+function applyFilters() {
+  const q = document.getElementById("query").value.trim().toLowerCase();
+  const cat = document.getElementById("categoryFilter").value;
+  const sort = document.getElementById("sort").value;
+  filtered = products.filter(p => {
+    const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query].join(" ").toLowerCase();
+    return (!q || blob.includes(q)) && (!cat || p.category === cat);
+  });
+  filtered.sort((a,b) => {
+    if (sort === "price_asc") return salePrice(a) - salePrice(b);
+    if (sort === "price_desc") return salePrice(b) - salePrice(a);
+    if (sort === "category") return String(a.category).localeCompare(String(b.category));
+    return b.confidence - a.confidence;
+  });
+  renderResults();
+}
+
+function renderResults() {
+  document.getElementById("resultCount").textContent = `${filtered.length} registros`;
+  document.getElementById("kpiProducts").textContent = filtered.length;
+  document.getElementById("kpiMargin").textContent = `${Number(document.getElementById("margin").value || 20)}%`;
+  const body = document.getElementById("resultsBody");
+  body.innerHTML = filtered.map((p, index) => `
+    <tr onclick="selectProduct(${index})">
+      <td><strong>${ProductAIGuard.escapeHtml(p.name)}</strong><br><span style="color:#607d95">${ProductAIGuard.escapeHtml(p.brand || "Marca por validar")}</span></td>
+      <td><span class="pill">${ProductAIGuard.escapeHtml(p.category)}</span></td>
+      <td>${ProductAIGuard.escapeHtml((p.specs_list[0]?.etiqueta || "Specs") + ": " + (p.specs_list[0]?.valor || "Por validar"))}</td>
+      <td><span class="money">${money(salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small></td>
+      <td><button class="btn-lite" onclick="event.stopPropagation(); addToCart(${index})" type="button">Agregar</button></td>
+    </tr>
+  `).join("");
+  if (!selected && filtered[0]) selectProduct(0);
+}
+
+function selectProduct(index) {
+  selected = filtered[index];
+  const confidence = Math.round((selected.confidence || 0) * 100);
+  document.getElementById("confidencePill").textContent = `${confidence}% confianza`;
+  document.getElementById("detailPanel").innerHTML = `
+    <h3 style="margin-top:0">${ProductAIGuard.escapeHtml(selected.name)}</h3>
+    <p style="color:#607d95">${ProductAIGuard.escapeHtml(selected.short_desc || selected.reason || "")}</p>
+    <div class="spec-grid">
+      ${selected.specs_list.map(s => `<div class="spec"><span>${ProductAIGuard.escapeHtml(s.etiqueta)}</span><strong>${ProductAIGuard.escapeHtml(s.valor)}</strong></div>`).join("")}
+      <div class="spec"><span>Precio base</span><strong>${money(basePrice(selected))}</strong></div>
+      <div class="spec"><span>Precio venta</span><strong>${money(salePrice(selected))}</strong></div>
+    </div>
+    <h4>Argumento comercial</h4>
+    <p>${ProductAIGuard.escapeHtml(selected.reason || "Producto pendiente de validación comercial.")}</p>
+    <h4>Búsqueda marketplace</h4>
+    <p><code>${ProductAIGuard.escapeHtml(selected.search_query || selected.name)}</code></p>
+    <button class="btn-sap" onclick="addSelected()" type="button">Agregar al carrito</button>
+  `;
+}
+
+function addSelected() {
+  if (!selected) return;
+  cart.push(selected);
+  saveCart();
+}
+
+function addToCart(index) {
+  cart.push(filtered[index]);
+  saveCart();
+}
+
+function saveCart() {
+  localStorage.setItem("smartCart", JSON.stringify(cart));
+  renderCart();
+}
+
+function renderCart() {
+  document.getElementById("kpiCart").textContent = cart.length;
+  const list = document.getElementById("cartList");
+  if (!cart.length) {
+    list.innerHTML = '<div class="empty">Carrito vacío.</div>';
+  } else {
+    list.innerHTML = cart.map((item, index) => `
+      <div class="cart-item">
+        <strong>${ProductAIGuard.escapeHtml(item.name)}</strong>
+        <span>${ProductAIGuard.escapeHtml(item.category)} - ${money(salePrice(item))}</span>
+        <button class="btn-lite" style="margin-top:8px" onclick="removeCart(${index})" type="button">Quitar</button>
+      </div>
+    `).join("");
+  }
+  const base = cart.reduce((sum,item) => sum + basePrice(item), 0);
+  const sale = cart.reduce((sum,item) => sum + salePrice(item), 0);
+  document.getElementById("baseSubtotal").textContent = money(base);
+  document.getElementById("marginAmount").textContent = money(sale - base);
+  document.getElementById("saleTotal").textContent = money(sale);
+}
+
+function removeCart(index) {
+  cart.splice(index, 1);
+  saveCart();
+}
+
+document.getElementById("runSearch").addEventListener("click", applyFilters);
+document.getElementById("query").addEventListener("input", applyFilters);
+document.getElementById("categoryFilter").addEventListener("change", applyFilters);
+document.getElementById("sort").addEventListener("change", applyFilters);
+document.getElementById("margin").addEventListener("input", () => { renderResults(); renderCart(); });
+document.getElementById("currency").addEventListener("change", () => { renderResults(); renderCart(); });
+document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("query").value = ""; document.getElementById("categoryFilter").value = ""; applyFilters(); });
+document.getElementById("emptyCart").addEventListener("click", () => { cart = []; saveCart(); });
+document.getElementById("checkoutBtn").addEventListener("click", () => {
+  const total = document.getElementById("saleTotal").textContent;
+  alert(`Pedido preparado. Total venta: ${total}`);
+});
+document.getElementById("schemaBtn").addEventListener("click", () => {
+  window.open("assets/product_ai_prompts.json", "_blank");
+});
+document.getElementById("imageInput").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById("query").value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+  applyFilters();
+});
+
+fetch("assets/trending_products.json")
+  .then(r => r.json())
+  .then(data => {
+    products = ProductAIGuard.extractProducts(data).map(normalize);
+    filtered = products.slice();
+    loadCategories();
+    applyFilters();
+    renderCart();
+  });
+</script>
+</body>
+</html>
