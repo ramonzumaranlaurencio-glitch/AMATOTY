@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Oye Bonita - Diagnóstico Facial y Belleza</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .ob-card {background:#fff7ed;border-radius:16px;box-shadow:0 2px 12px #e2e8f0;padding:24px;max-width:480px;margin:32px auto;}
+    .ob-title {color:#d81b60;font-size:2em;text-align:center;margin-bottom:10px;}
+    .ob-section {margin-bottom:24px;}
+    .ob-img-preview {width:180px;height:180px;object-fit:cover;border-radius:12px;display:block;margin:10px auto;box-shadow:0 2px 8px #fbbf24;}
+    .ob-products {display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .ob-product-card {background:#f8fafc;border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 6px #e0e7ff;}
+    .ob-product-card img {width:100px;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;}
+    .ob-btn {background:#d81b60;color:#fff;padding:10px 22px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px #fbbf24;}
+    .ob-btn:disabled {background:#e5e7eb;color:#aaa;}
+    .ob-diagnosis {background:#f1f5f9;border-radius:10px;padding:12px;margin:12px 0;color:#374151;}
+    .ob-cart {background:#fffbe8;border-radius:14px;box-shadow:0 2px 8px #fde68a;padding:18px;max-width:420px;margin:24px auto;}
+    .ob-cart-title {color:#d97706;font-size:1.2em;font-weight:bold;margin-bottom:8px;text-align:center;}
+    .ob-cart-list {margin-bottom:10px;}
+    .ob-cart-list-item {display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .ob-cart-list-item span {font-size:1em;}
+    .ob-cart-total {font-weight:bold;color:#d97706;text-align:right;margin-bottom:10px;}
+    .ob-cart-btns {text-align:center;}
+    .ob-checkout-form {background:#f1f5f9;border-radius:10px;padding:14px;margin-top:12px;}
+    .ob-checkout-form label {display:block;margin-bottom:4px;font-weight:bold;}
+    .ob-checkout-form input {width:100%;padding:6px;margin-bottom:10px;border-radius:6px;border:1px solid #e5e7eb;}
+    .ob-checkout-success {background:#d1fae5;color:#065f46;padding:14px;border-radius:10px;text-align:center;font-weight:bold;margin-top:16px;}
+  </style>
+</head>
+<body>
+  <div class="ob-card">
+    <div class="ob-title">Oye Bonita: Diagnóstico Facial y Belleza</div>
+    <div class="ob-section">
+      <label for="ob-country">Selecciona tu país:</label><br>
+      <select id="ob-country" required>
+        <option value="">-- País --</option>
+        <option value="PE">Perú</option>
+        <option value="MX">México</option>
+        <option value="CL">Chile</option>
+        <option value="CO">Colombia</option>
+        <option value="AR">Argentina</option>
+        <option value="US">Estados Unidos</option>
+        <option value="EC">Ecuador</option>
+        <option value="BO">Bolivia</option>
+        <option value="PY">Paraguay</option>
+        <option value="UY">Uruguay</option>
+        <option value="BR">Brasil</option>
+        <option value="VE">Venezuela</option>
+        <option value="OTRO">Otro</option>
+      </select>
+      <br><label for="ob-photo">Sube tu foto (rostro):</label><br>
+      <input type="file" id="ob-photo" accept="image/*">
+      <img id="ob-img-preview" class="ob-img-preview" style="display:none;">
+      <button class="ob-btn" id="ob-analyze-btn" disabled>Analizar rostro</button>
+    </div>
+    <div id="ob-diagnosis" class="ob-diagnosis" style="display:none;"></div>
+    <div id="ob-products-section" class="ob-section" style="display:none;">
+      <h3 style="color:#d81b60;text-align:center;">Productos recomendados para ti</h3>
+      <div id="ob-products" class="ob-products"></div>
+    </div>
+    <div id="ob-cart" class="ob-cart" style="display:none;"></div>
+  </div>
+  <script>
+    // --- Vista previa de imagen ---
+    const photoInput = document.getElementById('ob-photo');
+    const imgPreview = document.getElementById('ob-img-preview');
+    const analyzeBtn = document.getElementById('ob-analyze-btn');
+    let uploadedImage = null;
+    const countrySelect = document.getElementById('ob-country');
+    function checkReady() {
+      analyzeBtn.disabled = !(photoInput.files[0] && countrySelect.value);
+    }
+    countrySelect.addEventListener('change', checkReady);
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          imgPreview.src = ev.target.result;
+          imgPreview.style.display = 'block';
+          uploadedImage = ev.target.result;
+          checkReady();
+        };
+        reader.readAsDataURL(file);
+      }
+      checkReady();
+    });
+    // --- Análisis facial REAL vía backend Flask ---
+    // --- Carrito de compras PRO ---
+    let obCart = [];
+    function renderCart() {
+      const cartDiv = document.getElementById('ob-cart');
+      if (!obCart.length) { cartDiv.style.display = 'none'; return; }
+      cartDiv.style.display = 'block';
+      let html = `<div class='ob-cart-title'>🛒 Tu carrito</div><div class='ob-cart-list'>`;
+      let total = 0;
+      obCart.forEach((item, idx) => {
+        const price = parseFloat((item.precio||'').replace(/[^\d.]/g, '')) || 0;
+        total += price * item.cantidad;
+        html += `<div class='ob-cart-list-item'><span>${item.nombre} <b>x${item.cantidad}</b></span><span>${item.precio}</span><button class='ob-btn' style='background:#ef4444;padding:2px 10px;font-size:0.9em;' onclick='removeFromCart(${idx})'>✕</button></div>`;
+      });
+      html += `</div><div class='ob-cart-total'>Total: S/ ${total.toFixed(2)}</div>`;
+      html += `<div class='ob-cart-btns'><button class='ob-btn' onclick='showCheckout()'>Finalizar compra</button></div>`;
+      cartDiv.innerHTML = html;
+    }
+    window.removeFromCart = function(idx) {
+      obCart.splice(idx,1); renderCart(); };
+    // --- Checkout PRO ---
+    function showCheckout() {
+      const cartDiv = document.getElementById('ob-cart');
+      let html = `<div class='ob-cart-title'>Finalizar compra</div><form class='ob-checkout-form' onsubmit='return submitCheckout(event)'>`;
+      html += `<label>Nombre completo</label><input required name='nombre'><label>Email</label><input required type='email' name='email'><label>Dirección</label><input required name='direccion'><label>WhatsApp</label><input required name='whatsapp' placeholder='+51...'><button class='ob-btn' type='submit'>Pagar ahora</button></form>`;
+      cartDiv.innerHTML = html;
+    }
+    window.submitCheckout = function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const datos = {
+        nombre: form.nombre.value,
+        email: form.email.value,
+        direccion: form.direccion.value,
+        whatsapp: form.whatsapp.value,
+        carrito: obCart
+      };
+      const cartDiv = document.getElementById('ob-cart');
+      cartDiv.innerHTML = `<div class='ob-checkout-success'>Procesando pedido...</div>`;
+      fetch('http://localhost:5050/api/pedido', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(datos)
+      })
+      .then(r=>r.json())
+      .then(resp => {
+        let msg = `<div class='ob-checkout-success'>¡Gracias por tu compra!<br>Te enviaremos la confirmación a tu email.`;
+        if(resp.wa_url) {
+          msg += `<br><a href='${resp.wa_url}' target='_blank' style='color:#059669;font-weight:bold;'>Enviar pedido por WhatsApp</a>`;
+        }
+        msg += `</div>`;
+        cartDiv.innerHTML = msg;
+        obCart = [];
+        setTimeout(()=>{cartDiv.style.display='none';}, 7000);
+      })
+      .catch(()=>{
+        cartDiv.innerHTML = `<div class='ob-checkout-success' style='background:#fee2e2;color:#b91c1c;'>Error al enviar el pedido. Intenta de nuevo.</div>`;
+      });
+      return false;
+    }
+    // --- Análisis facial REAL vía backend Flask + integración carrito ---
+    analyzeBtn.onclick = function() {
+      const file = photoInput.files[0];
+      const country = countrySelect.value;
+      if (!file || !country) return;
+      const formData = new FormData();
+      formData.append('foto', file);
+      formData.append('pais', country);
+      document.getElementById('ob-diagnosis').style.display = 'block';
+      document.getElementById('ob-diagnosis').innerHTML = 'Analizando...';
+      fetch('http://localhost:5050/api/diagnostico', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('ob-diagnosis').style.display = 'block';
+        document.getElementById('ob-diagnosis').innerHTML =
+          `<b>Tipo de piel:</b> ${data.tipo_piel}<br>` +
+          `<b>Subtono:</b> ${data.subtono}<br>` +
+          `<b>Recomendación:</b> ${data.recomendacion}`;
+        document.getElementById('ob-products-section').style.display = 'block';
+        const prodCont = document.getElementById('ob-products');
+        prodCont.innerHTML = '';
+        (data.productos || []).forEach((p, idx) => {
+          const card = document.createElement('div');
+          card.className = 'ob-product-card';
+          card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><button class='ob-btn' onclick='addToCart(${idx})'>${data.textos && data.textos.btn_agregar || 'Agregar al carrito'}</button>`;
+          prodCont.appendChild(card);
+        });
+        // Guardar productos para agregar al carrito
+        window._obLastProducts = data.productos || [];
+      })
+      .catch(err => {
+        document.getElementById('ob-diagnosis').innerHTML = 'Error en el análisis. Intenta de nuevo.';
+      });
+    };
+    window.addToCart = function(idx) {
+      const prod = (window._obLastProducts||[])[idx];
+      if (!prod) return;
+      // Si ya está en el carrito, suma cantidad
+      const found = obCart.find(p => p.nombre === prod.nombre);
+      if (found) { found.cantidad += 1; } else { obCart.push({...prod, cantidad:1}); }
+      renderCart();
+    }
+  </script>
+</body>
+</html>
