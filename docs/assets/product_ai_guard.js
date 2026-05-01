@@ -55,6 +55,7 @@
 
   function productCard(product, options) {
     const opts = options || {};
+    product = flattenProduct(product);
     const prefix = opts.prefix || "";
     const image = productImage(product, prefix);
     const name = escapeHtml(product.name);
@@ -85,10 +86,42 @@
     `;
   }
 
+  function flattenProduct(product) {
+    const principal = product.producto_principal || {};
+    const sales = product.panel_de_ventas || {};
+    const publish = product.publicacion || {};
+    const specs = product.especificaciones_dinamicas || [];
+    return Object.assign({}, product, {
+      name: product.name || principal.nombre_generico || publish.titulo_seo || "Producto detectado",
+      brand: product.brand || principal.marca || "",
+      category: product.category || product.categoria_maestra || product.industria_detectada || "Otros",
+      short_desc: product.short_desc || publish.descripcion_corta || principal.descripcion_visual || "",
+      problem: product.problem || sales.beneficio_principal || "Necesidad por confirmar",
+      target: product.target || "Publico por validar",
+      specs: product.specs || specs.map((item) => `${item.etiqueta}: ${item.valor}`).join(", "),
+      cta: product.cta || "Ver opciones",
+      reason: product.reason || sales.mejor_opcion_argumento || "",
+      hook: product.hook || sales.recomendacion_cross_selling || "",
+      search_query: product.search_query || publish.search_query || principal.nombre_generico || "",
+      image_verified: product.image_verified ?? publish.image_verified,
+      image_match_score: product.image_match_score ?? publish.image_match_score
+    });
+  }
+
+  function extractProducts(payload) {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload.products)) return payload.products;
+    const universal = payload.deteccion_universal || {};
+    if (Array.isArray(universal.productos)) return universal.productos.map(flattenProduct);
+    return [];
+  }
+
   function renderProductGrid(containerId, products, options) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    if (!products || !products.length) {
+    products = extractProducts(products);
+    if (!products.length) {
       container.innerHTML = "<p>No hay productos tendencia hoy.</p>";
       return;
     }
@@ -104,6 +137,8 @@
   window.ProductAIGuard = {
     escapeHtml,
     imageIsAllowed,
+    extractProducts,
+    flattenProduct,
     productCard,
     productImage,
     renderProductGrid,
