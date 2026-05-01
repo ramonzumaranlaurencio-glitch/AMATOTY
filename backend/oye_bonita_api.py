@@ -117,6 +117,13 @@ def diagnostico_real(img):
 
 @app.route("/api/diagnostico", methods=["POST", "GET"])
 def api_diagnostico():
+    try:
+        from main import diagnostico as diagnostico_principal
+
+        return diagnostico_principal()
+    except Exception:
+        pass
+
     if request.method == "GET":
         return (
             jsonify(

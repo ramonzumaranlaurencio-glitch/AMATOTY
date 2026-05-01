@@ -191,11 +191,35 @@
         console.log('Respuesta backend:', data);
         if (r.ok && data && !data.error) {
           document.getElementById('ob-diagnosis').style.display = 'block';
+          const calidad = data.calidad_foto
+            ? `<br><b>Calidad foto:</b> luz ${data.calidad_foto.iluminacion || '-'}, nitidez ${data.calidad_foto.nitidez || '-'}, ángulo ${data.calidad_foto.angulo || '-'}`
+            : '';
+          const detalles = [
+            data.nivel_grasa ? `<b>Grasa/brillo:</b> ${data.nivel_grasa}` : '',
+            data.nivel_hidratacion ? `<b>Hidratación:</b> ${data.nivel_hidratacion}` : '',
+            data.textura ? `<b>Textura:</b> ${data.textura}` : '',
+            data.ojeras ? `<b>Ojeras:</b> ${data.ojeras}` : '',
+            data.manchas_o_tono ? `<b>Tono/manchas:</b> ${data.manchas_o_tono}` : '',
+            data.labios ? `<b>Labios:</b> ${data.labios}` : ''
+          ].filter(Boolean).join('<br>');
+          const rutinaManana = (data.rutina_manana || []).length
+            ? `<br><b>Rutina mañana:</b><ul>${data.rutina_manana.map(x => `<li>${x}</li>`).join('')}</ul>`
+            : '';
+          const rutinaNoche = (data.rutina_noche || []).length
+            ? `<b>Rutina noche:</b><ul>${data.rutina_noche.map(x => `<li>${x}</li>`).join('')}</ul>`
+            : '';
+          const evitar = (data.evitar || []).length
+            ? `<b>Evitar:</b> ${data.evitar.join(', ')}<br>`
+            : '';
           document.getElementById('ob-diagnosis').innerHTML =
+            `<b>Modo análisis:</b> ${data.analysis_mode || 'local'} ${data.confianza ? `(confianza ${Math.round(data.confianza * 100)}%)` : ''}<br>` +
             `<b>Tipo de piel:</b> ${data.tipo_piel}<br>` +
             `<b>Subtono:</b> ${data.subtono}<br>` +
             `<b>Recomendación:</b> ${data.recomendacion}<br>` +
-            `<b>Análisis de productos:</b> ${data.analisis_productos || ''}`;
+            calidad + (detalles ? `<br>${detalles}` : '') + '<br>' +
+            evitar +
+            `<b>Análisis de productos:</b> ${data.analisis_productos || ''}` +
+            rutinaManana + rutinaNoche;
           document.getElementById('ob-products-section').style.display = 'block';
           document.getElementById('ob-products-title').textContent =
             `Productos disponibles (${data.total_productos || 0})`;
@@ -211,7 +235,8 @@
             const stock = Number(p.stock || 0);
             const disabled = stock <= 0 ? 'disabled' : '';
             const btnText = stock <= 0 ? 'Sin stock' : (data.textos && data.textos.btn_agregar || 'Agregar al carrito');
-            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>Stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
+            const aiBadge = p.recomendacion_ai ? `<div class='ob-product-stock'>Recomendado por IA</div><div class='ob-product-meta'>${p.motivo_recomendacion || ''}</div>` : '';
+            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div>${aiBadge}<div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>Stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
             prodCont.appendChild(card);
           });
           window._obLastProducts = data.productos || [];

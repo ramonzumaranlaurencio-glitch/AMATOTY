@@ -4,6 +4,7 @@ import re
 import sqlite3
 import urllib.parse
 import uuid
+from io import BytesIO
 from datetime import datetime
 
 from flask import jsonify, request, send_from_directory
@@ -73,6 +74,105 @@ def _data_path(*parts):
 SITE_DIR = _data_path("docs")
 LOCAL_SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "docs"))
 TRACKING_DB_PATH = _data_path("data", "lca_pro_final.db")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+GEMINI_DIAGNOSTICO_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "rostro_detectado": {"type": "boolean"},
+        "calidad_foto": {
+            "type": "object",
+            "properties": {
+                "iluminacion": {"type": "string"},
+                "nitidez": {"type": "string"},
+                "angulo": {"type": "string"},
+                "observaciones": {"type": "string"},
+            },
+            "required": ["iluminacion", "nitidez", "angulo", "observaciones"],
+        },
+        "tipo_piel": {"type": "string"},
+        "subtono": {"type": "string"},
+        "nivel_grasa": {"type": "string"},
+        "nivel_hidratacion": {"type": "string"},
+        "textura": {"type": "string"},
+        "ojeras": {"type": "string"},
+        "sensibilidad": {"type": "string"},
+        "manchas_o_tono": {"type": "string"},
+        "labios": {"type": "string"},
+        "confianza": {"type": "number"},
+        "recomendacion": {"type": "string"},
+        "rutina_manana": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "rutina_noche": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "ingredientes_recomendados": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "evitar": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "maquillaje_sugerido": {
+            "type": "object",
+            "properties": {
+                "base": {"type": "string"},
+                "polvo": {"type": "string"},
+                "rubor": {"type": "string"},
+                "labial": {"type": "string"},
+            },
+            "required": ["base", "polvo", "rubor", "labial"],
+        },
+        "resumen_venta": {"type": "string"},
+    },
+    "required": [
+        "rostro_detectado",
+        "calidad_foto",
+        "tipo_piel",
+        "subtono",
+        "nivel_grasa",
+        "nivel_hidratacion",
+        "textura",
+        "ojeras",
+        "sensibilidad",
+        "manchas_o_tono",
+        "labios",
+        "confianza",
+        "recomendacion",
+        "rutina_manana",
+        "rutina_noche",
+        "ingredientes_recomendados",
+        "evitar",
+        "maquillaje_sugerido",
+        "resumen_venta",
+    ],
+}
+
+GEMINI_DIAGNOSTICO_PROMPT = """
+Eres Oye Bonita, una asesora visual experta en belleza, piel y venta consultiva.
+Analiza SOLO lo visible en la foto. No inventes datos medicos ni diagnostiques
+enfermedades. Tu tarea es producir un diagnostico cosmetico practico y diferente
+para cada imagen.
+
+Evalua con detalle:
+- presencia de rostro, iluminacion, nitidez, angulo y sombras;
+- tipo de piel aparente: seca, grasa, mixta, normal o sensible;
+- subtono aparente: frio, calido, neutro u oliva;
+- brillo en zona T, resequedad, textura, poros visibles, ojeras, tono desigual,
+  labios y sensibilidad aparente;
+- rutina de manana, rutina de noche, ingredientes utiles y que evitar;
+- maquillaje sugerido: base, polvo, rubor y labial.
+
+Reglas:
+- Si la foto no permite ver bien el rostro, dilo en calidad_foto y baja confianza.
+- Cada campo debe responder a esa imagen, no uses una plantilla fija.
+- Responde en espanol latino, claro y comercial.
+- Devuelve exclusivamente JSON valido con el schema solicitado.
+"""
 
 
 def _fallback_oye_bonita_html():
@@ -118,7 +218,18 @@ def _fallback_oye_bonita_html():
         const r=await fetch('/api/diagnostico',{method:'POST',body:fd});
         const data=await r.json();
         if(!r.ok||data.error) throw new Error(data.error||'Error del servidor');
-        res.innerHTML='<b>Tipo de piel:</b> '+(data.tipo_piel||'')+'<br><b>Subtono:</b> '+(data.subtono||'')+'<br><b>Recomendacion:</b> '+(data.recomendacion||'');
+        const detalles=[
+          data.analysis_mode?'<b>Modo:</b> '+data.analysis_mode:'',
+          data.confianza?'<b>Confianza:</b> '+Math.round(data.confianza*100)+'%':'',
+          data.tipo_piel?'<b>Tipo de piel:</b> '+data.tipo_piel:'',
+          data.subtono?'<b>Subtono:</b> '+data.subtono:'',
+          data.nivel_grasa?'<b>Grasa/brillo:</b> '+data.nivel_grasa:'',
+          data.nivel_hidratacion?'<b>Hidratacion:</b> '+data.nivel_hidratacion:'',
+          data.textura?'<b>Textura:</b> '+data.textura:'',
+          data.recomendacion?'<b>Recomendacion:</b> '+data.recomendacion:''
+        ].filter(Boolean).join('<br>');
+        const rutina=(data.rutina_manana||[]).length?'<br><b>Rutina manana:</b><ul>'+data.rutina_manana.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
+        res.innerHTML=detalles+rutina;
         productos.innerHTML=(data.productos||[]).map(p=>'<div class="prod"><img src="'+(p.imagen||'/assets/home.jpg')+'" alt=""><b>'+p.nombre+'</b><br><span>'+p.marca+'</span><p>'+p.desc+'</p><b>'+p.precio+'</b></div>').join('');
       }catch(e){res.innerHTML='Error en el analisis.<br><span style="color:#b91c1c">'+e.message+'</span>'}
     });
@@ -201,6 +312,105 @@ def _load_beauty_products():
             "imagen_ref": "assets/placeholder.png",
         }
     ]
+
+
+def _extract_json(text):
+    raw = (text or "").strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?", "", raw).strip()
+        raw = re.sub(r"```$", "", raw).strip()
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        raw = raw[start : end + 1]
+    return json.loads(raw)
+
+
+def _analizar_imagen_con_gemini(image_bytes, mime_type, pais):
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return None
+
+    try:
+        from google import genai
+        from google.genai import types
+    except Exception as exc:
+        raise RuntimeError(
+            "Falta instalar google-genai para usar Gemini."
+        ) from exc
+
+    client = genai.Client(api_key=api_key)
+    image_part = types.Part.from_bytes(
+        data=image_bytes,
+        mime_type=mime_type or "image/jpeg",
+    )
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=[
+            image_part,
+            f"Pais del usuario: {pais}. {GEMINI_DIAGNOSTICO_PROMPT}",
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_json_schema": GEMINI_DIAGNOSTICO_SCHEMA,
+            "temperature": 0.35,
+        },
+    )
+    return _extract_json(response.text)
+
+
+def _productos_personalizados(productos, diagnostico_ai):
+    if not diagnostico_ai:
+        return productos
+
+    texto = " ".join(
+        [
+            str(diagnostico_ai.get("tipo_piel", "")),
+            str(diagnostico_ai.get("subtono", "")),
+            str(diagnostico_ai.get("nivel_grasa", "")),
+            str(diagnostico_ai.get("nivel_hidratacion", "")),
+            str(diagnostico_ai.get("textura", "")),
+            str(diagnostico_ai.get("manchas_o_tono", "")),
+            " ".join(diagnostico_ai.get("ingredientes_recomendados") or []),
+        ]
+    ).lower()
+    prioridades = [
+        ("grasa", ["mate", "polvo", "sellado", "oil", "brillo"]),
+        ("mixta", ["base", "mate", "hidrat", "sellado"]),
+        ("seca", ["hidrat", "glow", "crema", "luminos"]),
+        ("sensible", ["suave", "calm", "sin fragancia", "sensible"]),
+        ("mancha", ["tono", "proteccion", "vitamina", "uniform"]),
+        ("labios", ["labial", "lip", "balsamo"]),
+    ]
+
+    def score(prod):
+        base = 0
+        blob = " ".join(
+            [
+                str(prod.get("nombre", "")),
+                str(prod.get("marca", "")),
+                str(prod.get("categoria", "")),
+                str(prod.get("desc", "")),
+                " ".join(prod.get("beneficios") or []),
+            ]
+        ).lower()
+        for condition, keywords in prioridades:
+            if condition in texto:
+                base += sum(2 for keyword in keywords if keyword in blob)
+        if int(prod.get("stock") or 0) > 0:
+            base += 1
+        return base
+
+    ranked = sorted(productos, key=score, reverse=True)
+    for idx, prod in enumerate(ranked, start=1):
+        prod["recomendacion_ai"] = idx <= 3
+        prod["motivo_recomendacion"] = (
+            f"Prioridad {idx}: compatible con {diagnostico_ai.get('tipo_piel', 'tu piel')} "
+            f"y subtono {diagnostico_ai.get('subtono', 'detectado')}."
+            if idx <= 3
+            else ""
+        )
+    return ranked
 
 
 def _detectar_rostro(img):
@@ -397,56 +607,109 @@ def diagnostico():
     if not file:
         return jsonify({"error": "No llego ninguna imagen."}), 400
 
+    image_bytes = file.read()
+    mime_type = file.mimetype or "image/jpeg"
     try:
-        img = Image.open(file.stream)
+        img = Image.open(BytesIO(image_bytes))
         img.verify()
-        file.stream.seek(0)
-        img = Image.open(file.stream)
+        img = Image.open(BytesIO(image_bytes))
     except Exception as exc:
         return jsonify({"error": f"No se pudo abrir la imagen: {exc}"}), 400
 
     pais = request.form.get("pais", "PE").upper()
     simbolo, _factor = MONEDAS.get(pais, MONEDAS["OTRO"])
-    rostro_detectado = _detectar_rostro(img)
+    gemini_error = ""
+    diagnostico_ai = None
+    try:
+        diagnostico_ai = _analizar_imagen_con_gemini(image_bytes, mime_type, pais)
+    except Exception as exc:
+        gemini_error = str(exc)
 
-    tipo_piel = "Mixta"
-    subtono = "Neutro"
-    if rostro_detectado:
+    rostro_detectado = (
+        bool(diagnostico_ai.get("rostro_detectado"))
+        if diagnostico_ai
+        else _detectar_rostro(img)
+    )
+
+    if diagnostico_ai:
+        tipo_piel = diagnostico_ai.get("tipo_piel", "No determinado")
+        subtono = diagnostico_ai.get("subtono", "No determinado")
+        recomendacion = diagnostico_ai.get("recomendacion", "")
+        analisis_modo = "gemini_vision"
+    elif rostro_detectado:
+        tipo_piel = "Mixta"
+        subtono = "Neutro"
         recomendacion = (
             "Rutina equilibrada: limpieza suave, hidratacion ligera, "
-            "proteccion solar y acabado mate en zona T."
+            "proteccion solar y acabado mate en zona T. Activa GEMINI_API_KEY "
+            "para obtener analisis visual real por foto."
         )
+        analisis_modo = "local_fallback"
     else:
+        tipo_piel = "No determinado"
+        subtono = "No determinado"
         recomendacion = (
             "No se detecto un rostro claro. Puedes probar con una foto frontal "
-            "y buena luz; mientras tanto te muestro recomendaciones generales."
+            "y buena luz; activa GEMINI_API_KEY para analisis visual avanzado."
         )
+        analisis_modo = "local_fallback"
 
     try:
         productos = _productos_belleza(simbolo)
     except Exception as exc:
         return jsonify({"error": f"No se pudieron cargar productos: {exc}"}), 500
+    productos = _productos_personalizados(productos, diagnostico_ai)
 
     total_productos = len(productos)
     inventario_total = sum(int(prod.get("stock") or 0) for prod in productos)
-    analisis_productos = (
-        f"Se encontraron {total_productos} productos disponibles en tu lista "
-        f"con {inventario_total} unidades en inventario."
-    )
+    if diagnostico_ai:
+        analisis_productos = diagnostico_ai.get("resumen_venta") or (
+            f"Se encontraron {total_productos} productos disponibles y se ordenaron "
+            "segun el analisis visual de la foto."
+        )
+    else:
+        analisis_productos = (
+            f"Se encontraron {total_productos} productos disponibles en tu lista "
+            f"con {inventario_total} unidades en inventario."
+        )
 
-    return jsonify(
-        {
-            "analisis": "facial_producto",
-            "tipo_piel": tipo_piel,
-            "subtono": subtono,
-            "recomendacion": recomendacion,
-            "analisis_productos": analisis_productos,
-            "total_productos": total_productos,
-            "inventario_total": inventario_total,
-            "productos": productos,
-            "textos": CULTURA.get(pais, CULTURA["OTRO"]),
-        }
-    )
+    respuesta = {
+        "analisis": "facial_producto",
+        "analysis_mode": analisis_modo,
+        "modelo": GEMINI_MODEL if diagnostico_ai else "local",
+        "rostro_detectado": rostro_detectado,
+        "tipo_piel": tipo_piel,
+        "subtono": subtono,
+        "recomendacion": recomendacion,
+        "analisis_productos": analisis_productos,
+        "total_productos": total_productos,
+        "inventario_total": inventario_total,
+        "productos": productos,
+        "textos": CULTURA.get(pais, CULTURA["OTRO"]),
+    }
+    if diagnostico_ai:
+        respuesta.update(
+            {
+                "confianza": diagnostico_ai.get("confianza"),
+                "calidad_foto": diagnostico_ai.get("calidad_foto"),
+                "nivel_grasa": diagnostico_ai.get("nivel_grasa"),
+                "nivel_hidratacion": diagnostico_ai.get("nivel_hidratacion"),
+                "textura": diagnostico_ai.get("textura"),
+                "ojeras": diagnostico_ai.get("ojeras"),
+                "sensibilidad": diagnostico_ai.get("sensibilidad"),
+                "manchas_o_tono": diagnostico_ai.get("manchas_o_tono"),
+                "labios": diagnostico_ai.get("labios"),
+                "rutina_manana": diagnostico_ai.get("rutina_manana") or [],
+                "rutina_noche": diagnostico_ai.get("rutina_noche") or [],
+                "ingredientes_recomendados": diagnostico_ai.get("ingredientes_recomendados") or [],
+                "evitar": diagnostico_ai.get("evitar") or [],
+                "maquillaje_sugerido": diagnostico_ai.get("maquillaje_sugerido") or {},
+            }
+        )
+    elif gemini_error:
+        respuesta["gemini_error"] = gemini_error
+
+    return jsonify(respuesta)
 
 
 @app.route("/api/pedido", methods=["POST"])

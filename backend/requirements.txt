@@ -4,3 +4,4 @@ pillow
 mediapipe
 numpy
 gunicorn
+google-genai
