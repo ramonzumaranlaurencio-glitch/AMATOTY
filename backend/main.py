@@ -779,55 +779,52 @@ def _market_context(country, currency):
     }
 
 
-def _official_brand_source(brand):
+def _clean_link_query(item):
+    name = _clean_search_text(item.get("link_query") or item.get("name") or "")
+    query = _plain_text(name or _clean_search_text(item.get("search_query") or ""))
+    query = re.sub(
+        r"\b(precio|price|amazon\s*us|amazon|mercadolibre|mercado\s+libre|aliexpress|ficha\s+tecnica|ficha\s+t[eé]cnica)\b",
+        " ",
+        query,
+        flags=re.I,
+    )
+    query = re.sub(r"\s+", " ", query).strip()
+    return query or "producto"
+
+
+def _official_brand_source(brand, product_name=""):
     brand = (brand or "").lower()
-    if "samsung" in brand:
-        return {"name": "Samsung oficial", "url": "https://www.samsung.com/us/home-appliances/washers/", "type": "official"}
-    if brand == "lg" or " lg" in f" {brand}":
-        return {"name": "LG oficial", "url": "https://www.lg.com/us/washers-dryers", "type": "official"}
-    if "whirlpool" in brand:
-        return {"name": "Whirlpool oficial", "url": "https://www.whirlpool.com/laundry/washers.html", "type": "official"}
-    if "midea" in brand:
-        return {"name": "Midea oficial", "url": "https://www.midea.com/us/laundry/washers", "type": "official"}
-    if "bosch" in brand:
-        return {"name": "Bosch oficial", "url": "https://www.bosch-home.com/us/productslist/washers-dryers/washing-machines", "type": "official"}
-    if "electrolux" in brand:
-        return {"name": "Electrolux oficial", "url": "https://www.electrolux.com/en/laundry/washing-machines", "type": "official"}
-    if brand == "ge" or " ge" in f" {brand}":
-        return {"name": "GE Appliances oficial", "url": "https://www.geappliances.com/ge-appliances/laundry/washers/", "type": "official"}
-    if "maytag" in brand:
-        return {"name": "Maytag oficial", "url": "https://www.maytag.com/washers-and-dryers/washers.html", "type": "official"}
-    if "michelin" in brand:
-        return {"name": "Michelin oficial", "url": "https://www.michelinman.com/auto/tires", "type": "official"}
-    if "goodyear" in brand:
-        return {"name": "Goodyear oficial", "url": "https://www.goodyear.com/en_US/tires.html", "type": "official"}
-    if "bridgestone" in brand:
-        return {"name": "Bridgestone oficial", "url": "https://www.bridgestonetire.com/tire-search/", "type": "official"}
-    if "pirelli" in brand:
-        return {"name": "Pirelli oficial", "url": "https://www.pirelli.com/tires/en-us/car/catalog", "type": "official"}
-    if "continental" in brand:
-        return {"name": "Continental oficial", "url": "https://continentaltire.com/tires", "type": "official"}
-    return None
+    if not brand or brand.startswith("generic") or brand in {"por validar"}:
+        return None
+    brand_tokens = set(re.findall(r"[a-z0-9]+", brand))
+    long_brands = [
+        "samsung",
+        "whirlpool",
+        "midea",
+        "bosch",
+        "electrolux",
+        "maytag",
+        "michelin",
+        "goodyear",
+        "bridgestone",
+        "pirelli",
+        "continental",
+    ]
+    is_short_brand = "lg" in brand_tokens or "ge" in brand_tokens
+    if not is_short_brand and not any(token in brand for token in long_brands):
+        return None
+    query = urllib.parse.quote_plus(_clean_search_text(f"{product_name} {brand} oficial"))
+    return {"name": "Buscar oficial", "url": f"https://www.google.com/search?q={query}", "type": "official_search"}
 
 
 def _provider_source_links(item):
-    query = urllib.parse.quote_plus(
-        item.get("search_query")
-        or " ".join(
-            [
-                str(item.get("name", "")),
-                str(item.get("brand", "")),
-                str(item.get("specs", "")),
-            ]
-        ).strip()
-        or "producto"
-    )
+    query = urllib.parse.quote_plus(_clean_link_query(item))
     links = [
         {"name": "Amazon", "url": f"https://www.amazon.com/s?k={query}", "type": "marketplace"},
         {"name": "AliExpress", "url": f"https://www.aliexpress.com/wholesale?SearchText={query}", "type": "marketplace"},
         {"name": "Mercado Libre", "url": f"https://listado.mercadolibre.com/{query}", "type": "marketplace"},
     ]
-    official = _official_brand_source(item.get("brand"))
+    official = _official_brand_source(item.get("brand"), item.get("name"))
     if official:
         links.append(official)
     return links
@@ -1026,7 +1023,8 @@ def _catalog_template_products(query, context, margin, count=SMART_MIN_OPTIONS):
                     "warranty": "Validar con vendedor",
                     "rating": 4.2,
                     "quality": quality,
-                    "search_query": f"{name} precio {marketplace}",
+                    "search_query": name,
+                    "link_query": name,
                     "price_base": price,
                     "image": "",
                     "image_verified": False,
@@ -1070,7 +1068,8 @@ def _catalog_template_products(query, context, margin, count=SMART_MIN_OPTIONS):
                     "warranty": "Validar con vendedor",
                     "rating": 4.0,
                     "quality": quality,
-                    "search_query": f"{clean_query} {suffix} precio {marketplace}",
+                    "search_query": clean_query,
+                    "link_query": clean_query,
                     "price_base": base,
                     "image": "",
                     "image_verified": False,
@@ -1089,6 +1088,7 @@ def _candidate_queries(query, products):
             candidates.append(clean)
     for item in products or []:
         for value in [
+            item.get("link_query"),
             item.get("search_query"),
             " ".join([str(item.get("brand", "")), str(item.get("name", ""))]),
             item.get("product_type"),
@@ -1176,6 +1176,7 @@ def _search_mercadolibre_products(query, context, margin, limit=SMART_LIVE_SEARC
             "specs": ", ".join(spec_parts),
             "model": model,
             "search_query": query,
+            "link_query": title,
             "price_base": price_usd,
             "price_sale": round(price_usd * (1 + margin / 100), 2),
             "currency": context.get("currency"),
@@ -1193,7 +1194,7 @@ def _search_mercadolibre_products(query, context, margin, limit=SMART_LIVE_SEARC
             "image_match_score": score,
             "source_links": [
                 {"name": "Mercado Libre", "url": permalink, "type": "marketplace"},
-                *_provider_source_links({"search_query": query, "brand": ""})[:2],
+                *_provider_source_links({"name": title, "search_query": query, "brand": ""})[:2],
             ],
         }
         products.append(item)

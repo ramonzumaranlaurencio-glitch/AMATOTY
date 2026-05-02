@@ -318,25 +318,35 @@ function normalize(product) {
 }
 
 function buildSourceLinks(product) {
-  const query = encodeURIComponent(product.search_query || [product.name, product.brand, product.specs].filter(Boolean).join(" "));
+  const query = encodeURIComponent(cleanLinkQuery(product));
   const brand = String(product.brand || "").toLowerCase();
   const links = [
     {name: "Amazon", url: `https://www.amazon.com/s?k=${query}`},
     {name: "AliExpress", url: `https://www.aliexpress.com/wholesale?SearchText=${query}`},
     {name: "Mercado Libre", url: `https://listado.mercadolibre.com/${query}`}
   ];
-  const official = officialBrandLink(brand);
+  const official = officialBrandLink(brand, product);
   if (official) links.push(official);
   return links;
 }
 
-function officialBrandLink(brand) {
-  if (brand.includes("michelin")) return {name: "Michelin oficial", url: "https://www.michelinman.com/auto/tires"};
-  if (brand.includes("goodyear")) return {name: "Goodyear oficial", url: "https://www.goodyear.com/en_US/tires.html"};
-  if (brand.includes("bridgestone")) return {name: "Bridgestone oficial", url: "https://www.bridgestonetire.com/tire-search/"};
-  if (brand.includes("pirelli")) return {name: "Pirelli oficial", url: "https://www.pirelli.com/tires/en-us/car/catalog"};
-  if (brand.includes("continental")) return {name: "Continental oficial", url: "https://continentaltire.com/tires"};
-  return null;
+function cleanLinkQuery(product) {
+  const raw = String(product.link_query || product.name || product.search_query || "").trim();
+  const ascii = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const cleaned = ascii
+    .replace(/\b(precio|price|amazon\s*us|amazon|mercadolibre|mercado\s+libre|aliexpress|ficha\s+t[eé]cnica|ficha\s+tecnica)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned || "producto";
+}
+
+function officialBrandLink(brand, product) {
+  const known = ["samsung","whirlpool","midea","bosch","electrolux","maytag","michelin","goodyear","bridgestone","pirelli","continental"];
+  const tokens = brand.split(/[^a-z0-9]+/).filter(Boolean);
+  if (!brand || brand.startsWith("generic") || brand === "por validar") return null;
+  if (!tokens.includes("lg") && !tokens.includes("ge") && !known.some(item => brand.includes(item))) return null;
+  const query = encodeURIComponent(cleanLinkQuery(product) + " " + brand + " oficial");
+  return {name: "Buscar oficial", url: `https://www.google.com/search?q=${query}`};
 }
 
 function providerLinks(product) {
