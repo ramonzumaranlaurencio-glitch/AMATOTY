@@ -1,0 +1,61 @@
+{
+  "version": "2026-05-01-universal",
+  "rules": {
+    "mode": "universal_multicategory",
+    "publish_image_only_if": "image_verified is true and image_match_score is greater than or equal to 0.82",
+    "never_publish_sources": ["source.unsplash.com", "picsum.photos", "empty placeholder"],
+    "fallback_behavior": "Use a local category image and show that the image is referential until IA verification passes.",
+    "multi_object_behavior": "Return productos as an array. Each detected object must become one independent product card.",
+    "ocr_required": "Always extract visible text, labels, model codes, serial-like codes, package text and specs plates when present."
+  },
+  "universal_visual_agent_prompt": "Rol: Eres un Agente de Inteligencia Visual experto en reconocimiento de productos a nivel global y estratega de ventas. Tarea: analiza la imagen y detecta todos los productos presentes. Para cada producto identificado, extrae atributos unicos sin importar categoria: tecnologia, hogar, construccion, moda, belleza, cocina, automocion, herramientas, consumo masivo u otra. Logica: identifica marca, modelo, color, material, estado nuevo/usado, textos visibles mediante OCR, industria/categoria dinamica, uso principal, publico objetivo y propuesta de valor. Si el producto parece costoso, prioriza estatus, durabilidad, precision o rendimiento. Si es generico o economico, prioriza ahorro, practicidad y solucion rapida. Responde exclusivamente JSON valido.",
+  "universal_output_schema": {
+    "deteccion_universal": {
+      "version": "2026-05-01-universal",
+      "idioma": "es",
+      "resumen_escena": "Descripcion breve de la escena y cantidad de productos detectados",
+      "productos": [
+        {
+          "id_temporal": "prod_1",
+          "categoria_maestra": "Tecnologia / Hogar / Construccion / Moda / Belleza / Cocina / Automocion / Otro",
+          "industria_detectada": "Industria inferida automaticamente",
+          "producto_principal": {
+            "nombre_generico": "Nombre comun del objeto",
+            "marca": "Nombre de la marca o Desconocida",
+            "modelo": "Codigo/modelo detectado por OCR o Desconocido",
+            "descripcion_visual": "Colores, formas, logos, empaque, estado y elementos visibles",
+            "estado": "nuevo / usado / reacondicionado / desconocido",
+            "nivel_confianza": 0.0
+          },
+          "ocr": {
+            "texto_detectado": [],
+            "posibles_modelos": [],
+            "posibles_especificaciones": []
+          },
+          "especificaciones_dinamicas": [
+            {"etiqueta": "Potencia/Capacidad/Medida/Material/Conectividad/Talla", "valor": "Valor detectado o inferido"}
+          ],
+          "panel_de_ventas": {
+            "mejor_opcion_argumento": "Propuesta de valor comparativa y honesta",
+            "beneficio_principal": "Ahorro / durabilidad / estatus / practicidad / rendimiento",
+            "etiquetas_busqueda": ["tag1", "tag2", "tag3"],
+            "recomendacion_cross_selling": "Producto complementario universal",
+            "riesgos_o_validaciones": ["Que deberia confirmar el usuario antes de publicar"]
+          },
+          "publicacion": {
+            "titulo_seo": "Titulo listo para ecommerce o afiliado",
+            "descripcion_corta": "Descripcion comercial breve sin promesas falsas",
+            "search_query": "consulta de busqueda para marketplace",
+            "image_must_show": [],
+            "image_must_not_show": [],
+            "image_verified": false,
+            "image_match_score": 0.0
+          }
+        }
+      ]
+    }
+  },
+  "trend_prompt": "Eres un investigador de productos para ecommerce afiliado. Devuelve SOLO JSON valido. Selecciona productos multicategoria con problema real, intencion de compra clara, utilidad demostrable y busqueda probable en Amazon, MercadoLibre o AliExpress. No inventes URLs de imagen. No incluyas productos medicos de alto riesgo ni promesas exageradas. Para cada producto genera campos compatibles con deteccion_universal.productos y tambien campos planos: name, brand, category, product_type, problem, target, short_desc, seo_title, hook, reason, specs, search_query, image_must_show, image_must_not_show. Si no puedes verificar imagen, deja image vacio e image_verified false.",
+  "image_validation_prompt": "Analiza la imagen y el producto esperado. Haz OCR sobre textos, placas, etiquetas, codigos de modelo y empaque. Responde SOLO JSON con: match, score, caption, detected_objects, detected_text, detected_brand, detected_model, reason. Marca match false si la imagen parece decorativa, paisaje, placeholder, producto distinto, empaque ilegible, foto generica o si hay conflicto entre texto detectado y producto esperado.",
+  "image_generation_prompt": "Fotografia realista de producto ecommerce sobre fondo blanco. Producto: {product_type}. Debe verse claramente: {image_must_show}. Sin texto, sin logos falsos, sin manos, sin personas, sin paisaje, sin decoracion. Estilo: foto de catalogo limpia, iluminacion suave, alta nitidez."
+}

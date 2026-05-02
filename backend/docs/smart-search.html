@@ -123,6 +123,22 @@ main{max-width:none;padding:0}
 </div>
 </main>
 <script>
+if (!window.ProductAIGuard) {
+  window.ProductAIGuard = {
+    escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[ch]);
+    },
+    flattenProduct(product) { return Object.assign({}, product); },
+    extractProducts(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (payload && Array.isArray(payload.products)) return payload.products;
+      return [];
+    }
+  };
+}
+
 const basePrices = {
   "Portable Mini Blender": 28,
   "Home Cable Organizer": 8,
@@ -153,6 +169,28 @@ async function loadJson(path) {
   } catch (err) {
     if (fallback !== primary) {
       const response = await fetch(fallback, {cache: "no-store"});
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return await response.json();
+    }
+    throw err;
+  }
+}
+
+async function postJson(path, body) {
+  const primary = `${API_ORIGIN}${path}`;
+  const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+  const options = {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  };
+  try {
+    const response = await fetch(primary, options);
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return await response.json();
+  } catch (err) {
+    if (fallback !== primary) {
+      const response = await fetch(fallback, options);
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
       return await response.json();
     }
@@ -216,6 +254,40 @@ function applyFilters() {
     return b.confidence - a.confidence;
   });
   renderResults();
+}
+
+async function executeSearch() {
+  const button = document.getElementById("runSearch");
+  if (!products.length) {
+    setStatus("Sin catálogo");
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Ejecutando...";
+  setStatus("Ejecutando...");
+  const payload = {
+    query: document.getElementById("query").value.trim(),
+    category: document.getElementById("categoryFilter").value,
+    currency: document.getElementById("currency").value,
+    margin: Number(document.getElementById("margin").value || 20)
+  };
+  try {
+    const response = await postJson("/api/smart-search", payload);
+    const apiProducts = ProductAIGuard.extractProducts(response).map(normalize);
+    filtered = apiProducts;
+    renderResults();
+    setStatus(`${filtered.length} registros`);
+  } catch (err) {
+    applyFilters();
+    if (filtered.length) {
+      setStatus(`${filtered.length} registros`);
+    } else {
+      setStatus("Sin resultados");
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = "Ejecutar";
+  }
 }
 
 function renderResults() {
@@ -305,18 +377,12 @@ function removeCart(index) {
 }
 
 document.getElementById("runSearch").addEventListener("click", () => {
-  if (!products.length) {
-    setStatus("Sin catálogo");
-    return;
-  }
-  applyFilters();
-  document.getElementById("runSearch").textContent = "Ejecutado";
-  setTimeout(() => { document.getElementById("runSearch").textContent = "Ejecutar"; }, 900);
+  executeSearch();
 });
 document.getElementById("query").addEventListener("keydown", event => {
   if (event.key === "Enter") {
     event.preventDefault();
-    applyFilters();
+    executeSearch();
   }
 });
 document.getElementById("query").addEventListener("input", applyFilters);

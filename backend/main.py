@@ -606,6 +606,65 @@ def catalogo_belleza():
     )
 
 
+def _load_trending_products():
+    candidates = [
+        _data_path("docs", "assets", "trending_products.json"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "docs", "assets", "trending_products.json")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "assets", "trending_products.json")),
+    ]
+    for products_path in candidates:
+        if products_path and os.path.exists(products_path):
+            with open(products_path, encoding="utf-8") as f:
+                payload = json.load(f)
+            return payload.get("products") or []
+    return []
+
+
+@app.route("/api/smart-search", methods=["POST"])
+def smart_search():
+    data = request.get_json(silent=True) or {}
+    query = str(data.get("query") or "").strip().lower()
+    category = str(data.get("category") or "").strip().lower()
+    currency = str(data.get("currency") or "USD").upper()
+    margin = float(data.get("margin") or 20)
+
+    products = _load_trending_products()
+    if query or category:
+        products = [
+            product
+            for product in products
+            if (
+                not query
+                or query
+                in " ".join(
+                    [
+                        str(product.get("name", "")),
+                        str(product.get("brand", "")),
+                        str(product.get("category", "")),
+                        str(product.get("product_type", "")),
+                        str(product.get("problem", "")),
+                        str(product.get("target", "")),
+                        str(product.get("specs", "")),
+                        str(product.get("search_query", "")),
+                    ]
+                ).lower()
+            )
+            and (not category or str(product.get("category", "")).lower() == category)
+        ]
+
+    return jsonify(
+        {
+            "ok": True,
+            "mode": "smart_search_catalog",
+            "query": query,
+            "currency": currency,
+            "margin": margin,
+            "total_productos": len(products),
+            "products": products,
+        }
+    )
+
+
 @app.route("/api/diagnostico", methods=["POST", "GET"])
 def diagnostico():
     if request.method == "GET":
