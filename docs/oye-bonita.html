@@ -250,8 +250,7 @@
             const stock = Number(p.stock || 0);
             const disabled = stock <= 0 ? 'disabled' : '';
             const btnText = stock <= 0 ? 'Sin stock' : (data.textos && data.textos.btn_agregar || 'Agregar al carrito');
-            const aiBadge = p.recomendacion_ai ? `<div class='ob-product-stock'>Recomendado por IA</div><div class='ob-product-meta'>${p.motivo_recomendacion || ''}</div>` : '';
-            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div>${aiBadge}<div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>Stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
+            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#d81b60;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>Stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
             prodCont.appendChild(card);
           });
           window._obLastProducts = data.productos || [];

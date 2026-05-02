@@ -417,13 +417,7 @@ def _productos_personalizados(productos, diagnostico_ai):
 
     ranked = sorted(productos, key=score, reverse=True)
     for idx, prod in enumerate(ranked, start=1):
-        prod["recomendacion_ai"] = idx <= 3
-        prod["motivo_recomendacion"] = (
-            f"Prioridad {idx}: compatible con {diagnostico_ai.get('tipo_piel', 'tu piel')} "
-            f"y subtono {diagnostico_ai.get('subtono', 'detectado')}."
-            if idx <= 3
-            else ""
-        )
+        prod["destacado"] = idx <= 3
     return ranked
 
 
@@ -594,6 +588,20 @@ def universal_product_schema():
                     ],
                 }
             },
+        }
+    )
+
+
+@app.route("/api/catalogo-belleza", methods=["GET"])
+def catalogo_belleza():
+    pais = request.args.get("pais", "PE").upper()
+    simbolo, _factor = MONEDAS.get(pais, MONEDAS["OTRO"])
+    productos = _productos_belleza(simbolo)
+    return jsonify(
+        {
+            "catalog_version": "2026-05-01-8-productos",
+            "total_productos": len(productos),
+            "productos": productos,
         }
     )
 
