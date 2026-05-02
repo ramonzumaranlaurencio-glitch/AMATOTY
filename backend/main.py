@@ -304,6 +304,7 @@ def _load_beauty_products():
     candidates = [
         os.environ.get("BEAUTY_PRODUCTS_PATH"),
         _data_path("docs", "assets", "beauty_products.json"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "docs", "assets", "beauty_products.json")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "assets", "beauty_products.json")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "beauty_products.json")),
     ]
