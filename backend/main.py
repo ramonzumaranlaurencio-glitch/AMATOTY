@@ -734,22 +734,311 @@ def _smart_search_fallback(query, category, currency, margin):
     return products
 
 
+def _extract_smart_products(payload):
+    if not payload:
+        return []
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload.get("products"), list):
+        return payload["products"]
+    if isinstance(payload.get("productos"), list):
+        return payload["productos"]
+    universal = payload.get("deteccion_universal") or {}
+    if isinstance(universal.get("productos"), list):
+        products = []
+        for product in universal["productos"]:
+            principal = product.get("producto_principal") or {}
+            sales = product.get("panel_de_ventas") or {}
+            publish = product.get("publicacion") or {}
+            specs = product.get("especificaciones_dinamicas") or []
+            products.append(
+                {
+                    **product,
+                    "name": product.get("name")
+                    or principal.get("nombre_generico")
+                    or publish.get("titulo_seo")
+                    or "Producto detectado",
+                    "brand": product.get("brand") or principal.get("marca") or "Generic",
+                    "category": product.get("category")
+                    or product.get("categoria_maestra")
+                    or product.get("industria_detectada")
+                    or "Otros",
+                    "short_desc": product.get("short_desc")
+                    or publish.get("descripcion_corta")
+                    or principal.get("descripcion_visual")
+                    or "",
+                    "problem": product.get("problem")
+                    or sales.get("beneficio_principal")
+                    or "Necesidad por confirmar",
+                    "target": product.get("target") or "Comprador por validar",
+                    "specs": product.get("specs")
+                    or ", ".join(
+                        [
+                            f"{item.get('etiqueta')}: {item.get('valor')}"
+                            for item in specs
+                            if isinstance(item, dict)
+                        ]
+                    ),
+                    "reason": product.get("reason")
+                    or sales.get("mejor_opcion_argumento")
+                    or "",
+                    "hook": product.get("hook")
+                    or sales.get("recomendacion_cross_selling")
+                    or "",
+                    "search_query": product.get("search_query")
+                    or publish.get("search_query")
+                    or principal.get("nombre_generico")
+                    or "",
+                    "image_verified": product.get("image_verified")
+                    if "image_verified" in product
+                    else publish.get("image_verified", False),
+                    "image_match_score": product.get("image_match_score")
+                    if "image_match_score" in product
+                    else publish.get("image_match_score", 0),
+                }
+            )
+        return products
+    return []
+
+
+def _normalize_smart_products(products, currency, margin):
+    normalized = []
+    for product in products or []:
+        if not isinstance(product, dict):
+            continue
+        item = dict(product)
+        base = float(
+            item.get("price_base")
+            or item.get("base_price")
+            or item.get("precio_base")
+            or item.get("precio_numero")
+            or item.get("precio")
+            or 10
+        )
+        item["price_base"] = round(base, 2)
+        item["price_sale"] = round(
+            float(item.get("price_sale") or item.get("precio_venta") or base * (1 + margin / 100)),
+            2,
+        )
+        item["currency"] = item.get("currency") or currency
+        item["brand"] = item.get("brand") or "Generic"
+        item["category"] = item.get("category") or "Otros"
+        item["product_type"] = item.get("product_type") or item["category"]
+        item["search_query"] = item.get("search_query") or " ".join(
+            [str(item.get("name", "")), str(item.get("brand", "")), str(item.get("specs", ""))]
+        ).strip()
+        item["image_verified"] = bool(item.get("image_verified", False))
+        item["image_match_score"] = float(item.get("image_match_score") or item.get("confidence") or 0.78)
+        normalized.append(item)
+    return normalized
+
+
+def _generic_smart_products(query, context, margin):
+    query_text = (query or "").lower()
+    is_tire = any(term in query_text for term in ["llanta", "neumatic", "neumático", "295", "r22", "22.5", "truck tire"])
+    marketplace = context["marketplace"]
+    currency = context["currency"]
+    if is_tire:
+        products = [
+            {
+                "name": "Llanta de camion 295/80 R22.5 regional",
+                "brand": "Generic",
+                "category": "automocion",
+                "product_type": "neumatico pesado",
+                "short_desc": "Neumatico radial para camion, buses o tractomula en ruta regional.",
+                "problem": "reemplazo de llanta de carga con medida 295/80 R22.5",
+                "target": "flotas, transporte pesado, talleres y compradores B2B",
+                "reason": "Medida comercial frecuente para carga pesada; valida indice de carga, posicion y labrado antes de comprar.",
+                "hook": "Comparar precio por kilometro y garantia.",
+                "specs": "Medida: 295/80 R22.5, Tipo: radial tubeless, Uso: camion/carga, Posicion: direccional o traccion por validar",
+                "search_query": f"295/80R22.5 truck tire radial {marketplace}",
+                "price_base": 280,
+                "image_verified": False,
+                "image_match_score": 0.82,
+            },
+            {
+                "name": "Michelin X Multi 295/80 R22.5",
+                "brand": "Michelin",
+                "category": "automocion",
+                "product_type": "llanta camion premium",
+                "short_desc": "Opcion premium para rendimiento, kilometraje y operacion de flota.",
+                "problem": "durabilidad y estabilidad en transporte de larga distancia",
+                "target": "empresas de transporte, buses y carga pesada",
+                "reason": "Marca de fabricante reconocida; conviene validar ficha exacta, disponibilidad y DOT con proveedor autorizado.",
+                "hook": "Alta confianza para flotas que priorizan vida util.",
+                "specs": "Medida: 295/80R22.5, Segmento: premium, Uso: regional/larga distancia, Fabricante: Michelin",
+                "search_query": f"Michelin 295/80R22.5 ficha tecnica precio {marketplace}",
+                "price_base": 430,
+                "image_verified": False,
+                "image_match_score": 0.84,
+            },
+            {
+                "name": "Goodyear KMAX / Marathon 295/80 R22.5",
+                "brand": "Goodyear",
+                "category": "automocion",
+                "product_type": "neumatico camion",
+                "short_desc": "Alternativa de fabricante para carga pesada con enfoque en kilometraje.",
+                "problem": "necesidad de llanta nueva confiable para camion",
+                "target": "mantenimiento de flota y talleres",
+                "reason": "Busqueda recomendada cuando el comprador pide Goodyear o equivalentes en 295/80 R22.5.",
+                "hook": "Buena opcion para cotizar por eje y servicio.",
+                "specs": "Medida: 295/80 R22.5, Marca: Goodyear, Aplicacion: camion, Validar: indice de carga y labrado",
+                "search_query": f"Goodyear 295/80R22.5 truck tire price {marketplace}",
+                "price_base": 390,
+                "image_verified": False,
+                "image_match_score": 0.83,
+            },
+            {
+                "name": "Bridgestone 295/80 R22.5 para carga",
+                "brand": "Bridgestone",
+                "category": "automocion",
+                "product_type": "llanta camion",
+                "short_desc": "Llanta de fabricante para servicio regional, urbano o carretera segun labrado.",
+                "problem": "cotizar marca reconocida para camion pesado",
+                "target": "compras tecnicas, transporte y mantenimiento",
+                "reason": "Alternativa de fabricante fuerte; revisar ficha tecnica de la referencia exacta.",
+                "hook": "Ideal para comparar contra Michelin y Goodyear.",
+                "specs": "Medida: 295/80R22.5, Tipo: radial, Uso: carga pesada, Validar: eje y aplicacion",
+                "search_query": f"Bridgestone 295/80R22.5 ficha tecnica precio {marketplace}",
+                "price_base": 410,
+                "image_verified": False,
+                "image_match_score": 0.82,
+            },
+            {
+                "name": "Llanta economica 295/80 R22.5 tubeless",
+                "brand": "Generic",
+                "category": "automocion",
+                "product_type": "llanta camion economica",
+                "short_desc": "Opcion generica para cotizacion rapida cuando no hay marca obligatoria.",
+                "problem": "presupuesto limitado para reemplazo de neumatico pesado",
+                "target": "talleres, pequenos transportadores y reventa",
+                "reason": "Sirve para iniciar busqueda cuando la evidencia solo confirma medida y tipo de producto.",
+                "hook": "Pedir garantia, fecha DOT y certificaciones antes de cerrar.",
+                "specs": "Medida: 295/80 R22.5, Construccion: radial, Camara: tubeless, Uso: camion",
+                "search_query": f"llanta 295/80R22.5 nueva precio {marketplace}",
+                "price_base": 250,
+                "image_verified": False,
+                "image_match_score": 0.8,
+            },
+        ]
+    else:
+        clean_query = (query or "producto comercial").strip()
+        products = [
+            {
+                "name": f"{clean_query.title()} profesional",
+                "brand": "Generic",
+                "category": "industria",
+                "product_type": "producto tecnico",
+                "short_desc": "Resultado generico listo para cotizar cuando no hay coincidencia exacta.",
+                "problem": "identificar proveedores y especificaciones de compra",
+                "target": "compras, mantenimiento, comercio e industria",
+                "reason": "La busqueda amplia se convierte en una consulta tecnica para comparar proveedores.",
+                "hook": "Validar marca, modelo, certificacion y garantia.",
+                "specs": "Uso: comercial/industrial, Estado: nuevo, Validar: ficha tecnica y compatibilidad",
+                "search_query": f"{clean_query} ficha tecnica precio {marketplace}",
+                "price_base": 50,
+                "image_verified": False,
+                "image_match_score": 0.72,
+            }
+        ]
+    return _normalize_smart_products(products, currency, margin)
+
+
+def _smart_text_with_gemini(query, category, context, margin):
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key or not query:
+        return None
+    try:
+        from google import genai
+        from google.genai import types
+
+        prompt = f"""
+Eres un motor comercial tipo Google Shopping, Alibaba y compras B2B.
+Convierte una busqueda corta en productos comprables con ficha tecnica.
+
+Entrada del usuario: {query}
+Categoria elegida: {category or 'todas'}
+Pais: {context['country']}
+Moneda: {context['currency']}
+Marketplace probable: {context['marketplace']}
+Tono cultural: {context['tone']}
+Margen de ganancia: {margin}%
+
+Reglas:
+- Si la busqueda es amplia, infiere el producto probable. Ejemplo: LLANTA puede ser neumatico; si hay imagen/nombre con 295 80 r 22.5, tratalo como llanta de camion 295/80 R22.5.
+- Para marcas/fabricantes, usa nombres buscables y recomienda validar ficha oficial, medida, modelo, compatibilidad y garantia.
+- Incluye opciones de fabricante y genericas si no hay modelo exacto.
+- Cubre cualquier sector: comercio, industria, construccion, mantenimiento, medicina, automocion, tecnologia, hogar.
+- No afirmes que viste ofertas en vivo. Genera consultas precisas para encontrar ofertas actuales.
+- Devuelve SOLO JSON valido con el mismo schema de SMART_SEARCH_PROMPT.
+
+{SMART_SEARCH_PROMPT}
+"""
+        response = genai.Client(api_key=api_key).models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[prompt],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.2,
+            ),
+        )
+        return _extract_json(response.text)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 @app.route("/api/smart-search", methods=["POST"])
 def smart_search():
     data = request.get_json(silent=True) or {}
-    query = str(data.get("query") or "").strip().lower()
+    query_raw = str(data.get("query") or "").strip()
+    query = query_raw.lower()
     category = str(data.get("category") or "").strip().lower()
     currency = str(data.get("currency") or "USD").upper()
     margin = float(data.get("margin") or 20)
+    country = data.get("country", "US")
+    context = _market_context(country, currency)
 
     products = _smart_search_fallback(query, category, currency, margin)
+    analysis_mode = "smart_search_catalog"
+    evidence = {
+        "summary": f"Catalogo local filtrado por: {query_raw or 'todos'}",
+        "detected_text": [query_raw] if query_raw else [],
+        "visual_or_audio_clues": [],
+        "uncertainties": [],
+    }
+
+    if not products and query_raw:
+        ai_payload = _smart_text_with_gemini(query_raw, category, context, margin)
+        ai_products = _extract_smart_products(ai_payload or {})
+        if ai_products:
+            products = _normalize_smart_products(ai_products, context["currency"], margin)
+            analysis_mode = "gemini_text_search"
+            evidence = (ai_payload or {}).get("evidence") or {
+                "summary": f"Busqueda IA generada para {query_raw}",
+                "detected_text": [query_raw],
+                "visual_or_audio_clues": ["consulta textual"],
+                "uncertainties": ["Valida disponibilidad y precio final en el marketplace."],
+            }
+        else:
+            products = _generic_smart_products(query_raw, context, margin)
+            analysis_mode = "generic_market_fallback"
+            evidence = {
+                "summary": f"Sin coincidencia local; se genero una busqueda comercial para {query_raw}.",
+                "detected_text": [query_raw],
+                "visual_or_audio_clues": ["consulta textual amplia"],
+                "uncertainties": ["Precios estimados: valida ofertas actuales, DOT/ficha tecnica y garantia."],
+            }
 
     return jsonify(
         {
             "ok": True,
-            "mode": "smart_search_catalog",
-            "query": query,
-            "currency": currency,
+            "mode": analysis_mode,
+            "analysis_mode": analysis_mode,
+            "query": query_raw,
+            "country": context["country"],
+            "currency": context["currency"],
+            "marketplace_hint": context["marketplace"],
+            "evidence": evidence,
             "margin": margin,
             "total_productos": len(products),
             "products": products,
@@ -785,6 +1074,8 @@ def smart_analyze_media():
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         products = _smart_search_fallback(query or file.filename, category, context["currency"], margin)
+        if not products:
+            products = _generic_smart_products(query or file.filename, context, margin)
         return jsonify(
             {
                 "ok": True,
@@ -799,6 +1090,7 @@ def smart_analyze_media():
                     "visual_or_audio_clues": [file.filename],
                     "uncertainties": ["Configura GEMINI_API_KEY para analisis real de imagen/audio."],
                 },
+                "total_productos": len(products),
                 "products": products,
             }
         )
@@ -826,19 +1118,42 @@ def smart_analyze_media():
         )
         payload = _extract_json(response.text)
     except Exception as exc:
-        return jsonify({"error": "No se pudo analizar con IA.", "detail": str(exc)}), 500
+        products = _generic_smart_products(query or file.filename, context, margin)
+        return jsonify(
+            {
+                "ok": True,
+                "analysis_mode": "generic_market_fallback",
+                "blocked": False,
+                "country": context["country"],
+                "currency": context["currency"],
+                "marketplace_hint": context["marketplace"],
+                "margin": margin,
+                "evidence": {
+                    "summary": "La IA multimedia no respondio; se uso texto/nombre del archivo como pista comercial.",
+                    "detected_text": [query or file.filename],
+                    "visual_or_audio_clues": [file.filename],
+                    "uncertainties": [f"Detalle tecnico del analisis: {str(exc)[:180]}"],
+                },
+                "total_productos": len(products),
+                "products": products,
+            }
+        )
 
     if payload.get("blocked"):
         return jsonify(payload), 200
 
-    products = payload.get("products") or []
-    for product in products:
-        base = float(product.get("price_base") or 10)
-        product["price_base"] = base
-        product["price_sale"] = round(float(product.get("price_sale") or base * (1 + margin / 100)), 2)
-        product["currency"] = product.get("currency") or context["currency"]
-        product["image_verified"] = bool(product.get("image_verified", False))
-        product["image_match_score"] = float(product.get("image_match_score") or 0)
+    products = _extract_smart_products(payload)
+    if products:
+        products = _normalize_smart_products(products, context["currency"], margin)
+    else:
+        products = _generic_smart_products(query or file.filename, context, margin)
+        payload["analysis_mode"] = "generic_market_fallback"
+        payload["evidence"] = payload.get("evidence") or {
+            "summary": "La evidencia no devolvio productos exactos; se genero busqueda comercial por pista.",
+            "detected_text": [query or file.filename],
+            "visual_or_audio_clues": [file.filename],
+            "uncertainties": ["Valida marca, modelo y medidas contra la foto original."],
+        }
 
     payload.update(
         {

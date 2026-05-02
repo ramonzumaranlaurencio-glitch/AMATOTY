@@ -268,6 +268,13 @@ function normalize(product) {
   });
 }
 
+function extractResultProducts(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload.products)) return payload.products;
+  if (Array.isArray(payload.productos)) return payload.productos;
+  return ProductAIGuard.extractProducts(payload);
+}
+
 function loadCategories() {
   const select = document.getElementById("categoryFilter");
   const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
@@ -295,10 +302,6 @@ function applyFilters() {
 
 async function executeSearch() {
   const button = document.getElementById("runSearch");
-  if (!products.length) {
-    setStatus("Sin catálogo");
-    return;
-  }
   button.disabled = true;
   button.textContent = "Ejecutando...";
   setStatus("Ejecutando...");
@@ -333,17 +336,27 @@ async function executeSearch() {
       document.getElementById("detailPanel").innerHTML = `<div class="empty">${ProductAIGuard.escapeHtml(response.block_reason || "Contenido no permitido para búsqueda comercial.")}</div>`;
       return;
     }
-    const apiProducts = ProductAIGuard.extractProducts(response).map(normalize);
+    const apiProducts = extractResultProducts(response).map(normalize);
     filtered = apiProducts;
     renderResults();
-    setStatus(`${filtered.length} registros`);
-  } catch (err) {
-    applyFilters();
     if (filtered.length) {
       setStatus(`${filtered.length} registros`);
     } else {
-      setStatus("Sin resultados");
+      setStatus("Sin resultados IA");
+      document.getElementById("detailPanel").innerHTML = `<div class="empty">La IA no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
     }
+  } catch (err) {
+    const message = err.message || String(err);
+    filtered = products.length ? products.filter(p => {
+      const q = document.getElementById("query").value.trim().toLowerCase();
+      const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query].join(" ").toLowerCase();
+      return !q || blob.includes(q);
+    }) : [];
+    renderResults();
+    setStatus("Error API");
+    document.getElementById("aiMode").textContent = "Error de conexión";
+    document.getElementById("evidenceSummary").textContent = "No se pudo ejecutar la búsqueda IA";
+    document.getElementById("detailPanel").innerHTML = `<div class="empty">El backend no respondió correctamente: ${ProductAIGuard.escapeHtml(message)}. Verifica que Render esté desplegado y que GEMINI_API_KEY esté activa.</div>`;
   } finally {
     button.disabled = false;
     button.textContent = "Ejecutar";
@@ -477,7 +490,7 @@ document.getElementById("imageInput").addEventListener("change", event => {
   if (!file) return;
   document.getElementById("mediaName").textContent = `${file.type.startsWith("audio/") ? "Audio" : "Imagen"} cargada: ${file.name}`;
   document.getElementById("query").value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-  setStatus("Archivo listo");
+  setStatus("Archivo listo: pulsa Ejecutar");
 });
 
 async function loadProducts() {

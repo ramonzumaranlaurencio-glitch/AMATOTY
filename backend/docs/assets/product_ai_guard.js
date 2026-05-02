@@ -112,6 +112,7 @@
     if (!payload) return [];
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload.products)) return payload.products;
+    if (Array.isArray(payload.productos)) return payload.productos;
     const universal = payload.deteccion_universal || {};
     if (Array.isArray(universal.productos)) return universal.productos.map(flattenProduct);
     return [];
