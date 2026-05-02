@@ -72,6 +72,21 @@
     const analyzeBtn = document.getElementById('ob-analyze-btn');
     let uploadedImage = null;
     const countrySelect = document.getElementById('ob-country');
+    const API_ORIGIN = window.location.hostname.includes('github.io')
+      ? 'https://amatoty.onrender.com'
+      : '';
+    async function apiFetch(path, options) {
+      const primary = `${API_ORIGIN}${path}`;
+      const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+      try {
+        return await fetch(primary, options);
+      } catch (err) {
+        if (fallback !== primary) {
+          return await fetch(fallback, options);
+        }
+        throw err;
+      }
+    }
     function checkReady() {
       analyzeBtn.disabled = !(photoInput.files[0] && countrySelect.value);
     }
@@ -131,7 +146,7 @@
       };
       const cartDiv = document.getElementById('ob-cart');
       cartDiv.innerHTML = `<div class='ob-checkout-success'>Procesando pedido...</div>`;
-      fetch('https://amatoty.onrender.com/api/pedido', {
+      apiFetch('/api/pedido', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(datos)
@@ -169,8 +184,8 @@
       }
       document.getElementById('ob-diagnosis').style.display = 'block';
       document.getElementById('ob-diagnosis').innerHTML = 'Analizando...';
-      const apiUrl = 'https://amatoty.onrender.com/api/diagnostico';
-      fetch(apiUrl, {
+      const apiUrl = '/api/diagnostico';
+      apiFetch(apiUrl, {
         method: 'POST',
         body: formData
       })
