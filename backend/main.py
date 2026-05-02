@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sqlite3
+import unicodedata
 import urllib.parse
 import urllib.request
 import uuid
@@ -66,6 +67,55 @@ CULTURA = {
     "VE": {"carrito": "carrito", "btn_agregar": "Agregar al carrito"},
     "OTRO": {"carrito": "carrito", "btn_agregar": "Agregar al carrito"},
 }
+
+SMART_MIN_OPTIONS = 10
+SMART_LIVE_SEARCH_LIMIT = 12
+FX_TO_USD = {
+    "USD": 1.0,
+    "PEN": 1 / 3.75,
+    "COP": 1 / 3900,
+    "MXN": 1 / 17,
+    "CLP": 1 / 930,
+    "ARS": 1 / 1050,
+    "BOB": 1 / 6.9,
+    "PYG": 1 / 7300,
+    "UYU": 1 / 39,
+    "BRL": 1 / 5,
+}
+
+SHOPPING_FAMILIES = [
+    {
+        "key": "lavadora",
+        "terms": [
+            "lavadora",
+            "lavarropa",
+            "lavarropas",
+            "lavaseca",
+            "washing machine",
+            "washer",
+            "washer dryer",
+        ],
+        "category": "electrodomesticos",
+        "product_type": "lavadora",
+        "sector": "hogar",
+        "problem": "lavar ropa con mejor capacidad, ahorro de tiempo y ciclos adecuados",
+        "target": "hogares, apartamentos, lavanderias pequenas y compradores que comparan capacidad",
+        "material": "acero/plastico",
+        "compatibility": "capacidad en kg o pies cubicos, carga frontal/superior, voltaje y espacio disponible",
+        "templates": [
+            ("Midea 7 kg carga superior", "Midea", 285, "Capacidad: 7 kg, Carga: superior, Uso: hogar pequeno", "economy"),
+            ("Whirlpool 8 kg carga superior", "Whirlpool", 360, "Capacidad: 8 kg, Carga: superior, Programas: basicos", "professional"),
+            ("Samsung 9 kg carga superior", "Samsung", 430, "Capacidad: 9 kg, Carga: superior, Motor: inverter por validar", "professional"),
+            ("LG 8 kg carga frontal inverter", "LG", 520, "Capacidad: 8 kg, Carga: frontal, Motor: inverter", "professional"),
+            ("Electrolux 10 kg carga superior", "Electrolux", 610, "Capacidad: 10 kg, Carga: superior, Uso: familiar", "professional"),
+            ("GE 4.5 cu ft carga superior", "GE", 690, "Capacidad: 4.5 cu ft, Carga: superior, Uso: familiar", "professional"),
+            ("Bosch Serie 300 carga frontal", "Bosch", 780, "Carga: frontal, Segmento: premium compacto, Uso: apartamento", "premium"),
+            ("Maytag 4.7 cu ft alta eficiencia", "Maytag", 870, "Capacidad: 4.7 cu ft, Tipo: alta eficiencia, Uso: familiar", "premium"),
+            ("Samsung Bespoke 5.3 cu ft", "Samsung", 1040, "Capacidad: 5.3 cu ft, Tipo: smart washer, Uso: alto volumen", "premium"),
+            ("LG WashTower lavadora/secadora", "LG", 1450, "Tipo: torre lavadora secadora, Uso: combo premium, Espacio: vertical", "premium"),
+        ],
+    }
+]
 
 
 def _data_path(*parts):
@@ -635,6 +685,12 @@ Debes:
 - No procesar ni describir contenido sexual, desnudez, explotación, violencia
   grafica o solicitudes indecentes. Si aparece, responde blocked=true.
 - No inventes una imagen externa ni URL falsa.
+- Para cada producto detectado, devuelve minimo 10 opciones comprables cuando
+  haya intencion de compra. Deben estar ordenadas por price_sale de menor a
+  mayor e incluir marcas/fabricantes y opciones genericas cuando no exista
+  modelo exacto.
+- Usa imagen solo si viene de marketplace, fabricante o fuente verificable.
+  Si no puedes verificarla, deja image vacio e image_verified=false.
 - Prioriza fuentes autorizadas: Amazon, AliExpress y Mercado Libre. Si no hay
   coincidencia suficiente, recomienda consultar fabricante oficial de la marca
   detectada o alternativas reconocidas del sector.
@@ -725,6 +781,22 @@ def _market_context(country, currency):
 
 def _official_brand_source(brand):
     brand = (brand or "").lower()
+    if "samsung" in brand:
+        return {"name": "Samsung oficial", "url": "https://www.samsung.com/us/home-appliances/washers/", "type": "official"}
+    if brand == "lg" or " lg" in f" {brand}":
+        return {"name": "LG oficial", "url": "https://www.lg.com/us/washers-dryers", "type": "official"}
+    if "whirlpool" in brand:
+        return {"name": "Whirlpool oficial", "url": "https://www.whirlpool.com/laundry/washers.html", "type": "official"}
+    if "midea" in brand:
+        return {"name": "Midea oficial", "url": "https://www.midea.com/us/laundry/washers", "type": "official"}
+    if "bosch" in brand:
+        return {"name": "Bosch oficial", "url": "https://www.bosch-home.com/us/productslist/washers-dryers/washing-machines", "type": "official"}
+    if "electrolux" in brand:
+        return {"name": "Electrolux oficial", "url": "https://www.electrolux.com/en/laundry/washing-machines", "type": "official"}
+    if brand == "ge" or " ge" in f" {brand}":
+        return {"name": "GE Appliances oficial", "url": "https://www.geappliances.com/ge-appliances/laundry/washers/", "type": "official"}
+    if "maytag" in brand:
+        return {"name": "Maytag oficial", "url": "https://www.maytag.com/washers-and-dryers/washers.html", "type": "official"}
     if "michelin" in brand:
         return {"name": "Michelin oficial", "url": "https://www.michelinman.com/auto/tires", "type": "official"}
     if "goodyear" in brand:
@@ -777,9 +849,283 @@ def _mercadolibre_site(country):
     }.get((country or "US").upper(), "MLM")
 
 
-def _search_mercadolibre_products(query, context, margin, limit=8):
+def _plain_text(value):
+    text = unicodedata.normalize("NFD", str(value or ""))
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    return text.lower()
+
+
+def _clean_search_text(value):
+    text = str(value or "").strip()
+    text = re.sub(r"\.[a-z0-9]{2,5}$", "", text, flags=re.I)
+    text = re.sub(r"[_-]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _tokens(value):
+    stop = {
+        "de",
+        "del",
+        "la",
+        "el",
+        "para",
+        "con",
+        "sin",
+        "foto",
+        "image",
+        "img",
+        "producto",
+        "precio",
+    }
+    return set(re.findall(r"[a-z0-9]+", _plain_text(value))) - stop
+
+
+def _infer_product_family(value):
+    haystack = _plain_text(value)
+    for family in SHOPPING_FAMILIES:
+        if any(term in haystack for term in family["terms"]):
+            return family
+    return None
+
+
+def _market_match_score(query, title):
+    query_tokens = _tokens(query)
+    title_tokens = _tokens(title)
+    if not query_tokens:
+        return 0.5
+    overlap = len(query_tokens & title_tokens) / max(len(query_tokens), 1)
+    family = _infer_product_family(query)
+    if family and any(term in _plain_text(title) for term in family["terms"]):
+        overlap += 0.25
+    return min(overlap, 0.96)
+
+
+def _to_usd_amount(amount, currency):
+    try:
+        value = float(amount or 0)
+    except (TypeError, ValueError):
+        value = 0
+    factor = FX_TO_USD.get(str(currency or "USD").upper(), 1.0)
+    return round(value * factor, 2)
+
+
+def _secure_image_url(url):
+    url = str(url or "").strip()
+    if url.startswith("http://"):
+        url = "https://" + url[7:]
+    return url
+
+
+def _ml_attribute(result, *keys):
+    wanted = {_plain_text(key) for key in keys}
+    for attr in result.get("attributes") or []:
+        attr_keys = {
+            _plain_text(attr.get("id")),
+            _plain_text(attr.get("name")),
+        }
+        if wanted & attr_keys:
+            return attr.get("value_name") or attr.get("value_id") or ""
+    return ""
+
+
+def _guess_brand(title):
+    known = [
+        "Samsung",
+        "LG",
+        "Whirlpool",
+        "Midea",
+        "Bosch",
+        "Electrolux",
+        "GE",
+        "Maytag",
+        "Hisense",
+        "Haier",
+        "Sony",
+        "Apple",
+        "Lenovo",
+        "HP",
+        "Dell",
+        "Xiaomi",
+        "Oster",
+        "Black+Decker",
+        "Philips",
+        "Michelin",
+        "Goodyear",
+        "Bridgestone",
+        "Pirelli",
+        "Continental",
+    ]
+    plain_title = _plain_text(title)
+    for brand in known:
+        if _plain_text(brand) in plain_title:
+            return brand
+    return "Por validar"
+
+
+def _family_source_fields(query, title=""):
+    family = _infer_product_family(f"{query} {title}")
+    if not family:
+        return {
+            "category": "marketplace",
+            "product_type": "resultado marketplace",
+            "sector": "comercio",
+            "problem": "comparar opciones actuales, precio y disponibilidad",
+            "target": "comprador que necesita cotizar opciones reales",
+            "material": "",
+            "compatibility": "validar modelo, medidas y garantia",
+        }
+    return {
+        "category": family["category"],
+        "product_type": family["product_type"],
+        "sector": family["sector"],
+        "problem": family["problem"],
+        "target": family["target"],
+        "material": family["material"],
+        "compatibility": family["compatibility"],
+    }
+
+
+def _sort_smart_products(products):
+    def key(item):
+        try:
+            price = float(item.get("price_sale") or item.get("price_base") or 0)
+        except (TypeError, ValueError):
+            price = 0
+        try:
+            score = float(item.get("image_match_score") or item.get("confidence") or 0)
+        except (TypeError, ValueError):
+            score = 0
+        return (price <= 0, price, -score, str(item.get("name", "")))
+
+    return sorted(products or [], key=key)
+
+
+def _catalog_template_products(query, context, margin, count=SMART_MIN_OPTIONS):
+    clean_query = _clean_search_text(query) or "producto comercial"
+    family = _infer_product_family(clean_query)
+    marketplace = context["marketplace"]
+    products = []
+
+    if family:
+        for name, brand, price, specs, quality in family["templates"][:count]:
+            fields = _family_source_fields(clean_query, name)
+            products.append(
+                {
+                    "name": name,
+                    "brand": brand,
+                    **fields,
+                    "short_desc": f"Opcion {quality} para comparar {family['product_type']} por precio, capacidad y garantia.",
+                    "reason": "Opcion comercial sugerida para completar la comparacion cuando no hay suficientes resultados vivos.",
+                    "hook": "Validar capacidad, consumo, garantia y entrega antes de comprar.",
+                    "specs": specs,
+                    "model": "",
+                    "provider": marketplace,
+                    "supplier": "Proveedor por validar",
+                    "stock": 0,
+                    "warranty": "Validar con vendedor",
+                    "rating": 4.2,
+                    "quality": quality,
+                    "search_query": f"{name} precio {marketplace}",
+                    "price_base": price,
+                    "image": "",
+                    "image_verified": False,
+                    "image_match_score": 0,
+                }
+            )
+    else:
+        tiers = [
+            ("economica", "Generic", 0.55, "economy"),
+            ("compacta", "Generic", 0.75, "economy"),
+            ("estandar", "Generic", 1.0, "professional"),
+            ("profesional", "Generic Pro", 1.35, "professional"),
+            ("alta capacidad", "Generic Pro", 1.7, "professional"),
+            ("premium", "Premium Choice", 2.2, "premium"),
+            ("industrial ligera", "Industrial Choice", 2.8, "professional"),
+            ("industrial premium", "Industrial Choice", 3.5, "premium"),
+            ("smart", "Smart Choice", 4.2, "premium"),
+            ("enterprise", "Enterprise Choice", 5.0, "premium"),
+        ]
+        for idx, (suffix, brand, multiplier, quality) in enumerate(tiers[:count], start=1):
+            base = round(50 * multiplier, 2)
+            products.append(
+                {
+                    "name": f"{clean_query.title()} {suffix}",
+                    "brand": brand,
+                    "category": "comercio",
+                    "product_type": clean_query,
+                    "sector": "comercio",
+                    "short_desc": "Opcion generada para comparar proveedores, ficha tecnica y precio.",
+                    "problem": "identificar alternativas comprables para una busqueda amplia",
+                    "target": "compradores, reventa, mantenimiento y usuarios finales",
+                    "reason": "Sirve como consulta precisa cuando la evidencia no alcanza para un modelo exacto.",
+                    "hook": "Compara precio, garantia, ficha tecnica y devolucion.",
+                    "specs": f"Uso: comercial, Nivel: {suffix}, Validar: marca/modelo/compatibilidad",
+                    "model": "",
+                    "material": "",
+                    "compatibility": "validar ficha tecnica",
+                    "provider": marketplace,
+                    "supplier": "Proveedor por validar",
+                    "stock": 0,
+                    "warranty": "Validar con vendedor",
+                    "rating": 4.0,
+                    "quality": quality,
+                    "search_query": f"{clean_query} {suffix} precio {marketplace}",
+                    "price_base": base,
+                    "image": "",
+                    "image_verified": False,
+                    "image_match_score": 0,
+                }
+            )
+
+    return _normalize_smart_products(products, context["currency"], margin)
+
+
+def _candidate_queries(query, products):
+    candidates = []
+    for value in [query]:
+        clean = _clean_search_text(value)
+        if clean:
+            candidates.append(clean)
+    for item in products or []:
+        for value in [
+            item.get("search_query"),
+            " ".join([str(item.get("brand", "")), str(item.get("name", ""))]),
+            item.get("product_type"),
+        ]:
+            clean = _clean_search_text(value)
+            if clean and clean not in candidates:
+                candidates.append(clean)
+    return candidates[:4]
+
+
+def _ensure_minimum_options(products, query, context, margin, min_count=SMART_MIN_OPTIONS):
+    merged = _merge_product_lists(products)
+    if not query or len(merged) >= min_count:
+        return _sort_smart_products(merged)
+
+    for candidate in _candidate_queries(query, merged):
+        if len(merged) >= min_count:
+            break
+        live = _search_mercadolibre_products(
+            candidate,
+            context,
+            margin,
+            limit=max(SMART_LIVE_SEARCH_LIMIT, min_count - len(merged)),
+        )
+        merged = _merge_product_lists(merged, live)
+
+    if len(merged) < min_count:
+        templates = _catalog_template_products(query, context, margin, count=min_count)
+        merged = _merge_product_lists(merged, templates)
+
+    return _sort_smart_products(merged)[: max(len(merged), min_count)]
+
+
+def _search_mercadolibre_products(query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT):
     if not query:
         return []
+    query = _clean_search_text(query)
     site = _mercadolibre_site(context.get("country"))
     url = (
         f"https://api.mercadolibre.com/sites/{site}/search?"
@@ -795,33 +1141,56 @@ def _search_mercadolibre_products(query, context, margin, limit=8):
     products = []
     for result in payload.get("results", [])[:limit]:
         title = result.get("title") or "Producto Mercado Libre"
+        relevance = _market_match_score(query, title)
+        if relevance < 0.24:
+            continue
+        source_currency = result.get("currency_id") or context.get("currency")
         price = float(result.get("price") or 0) or 10
+        price_usd = _to_usd_amount(price, source_currency)
         seller = result.get("seller") or {}
         permalink = result.get("permalink") or ""
+        brand = _ml_attribute(result, "BRAND", "Marca") or _guess_brand(title)
+        model = _ml_attribute(result, "MODEL", "Modelo")
+        line = _ml_attribute(result, "LINE", "Linea")
+        fields = _family_source_fields(query, title)
+        condition = result.get("condition") or "validar"
+        sold = result.get("sold_quantity", 0)
+        thumbnail = _secure_image_url(result.get("secure_thumbnail") or result.get("thumbnail") or "")
+        score = round(max(0.82, min(0.96, relevance)), 2) if thumbnail else round(relevance, 2)
+        spec_parts = [
+            f"Condicion: {condition}",
+            f"Vendidos: {sold}",
+            f"Precio fuente: {source_currency} {price:.2f}",
+        ]
+        if model:
+            spec_parts.append(f"Modelo: {model}")
+        if line:
+            spec_parts.append(f"Linea: {line}")
         item = {
             "name": title,
-            "brand": "Por validar",
-            "category": "marketplace",
-            "product_type": "resultado marketplace",
+            "brand": brand,
+            **fields,
             "short_desc": "Resultado encontrado en Mercado Libre mediante API publica autorizada.",
-            "problem": "comparar precio y disponibilidad real",
-            "target": "comprador que necesita cotizar opciones actuales",
             "reason": "Coincidencia comercial real; validar ficha, vendedor, garantia y compatibilidad.",
             "hook": "Precio y enlace disponibles para revision inmediata.",
-            "specs": f"Condicion: {result.get('condition') or 'validar'}, Vendidos: {result.get('sold_quantity', 0)}",
+            "specs": ", ".join(spec_parts),
+            "model": model,
             "search_query": query,
-            "price_base": price,
-            "price_sale": round(price * (1 + margin / 100), 2),
-            "currency": result.get("currency_id") or context.get("currency"),
+            "price_base": price_usd,
+            "price_sale": round(price_usd * (1 + margin / 100), 2),
+            "currency": context.get("currency"),
+            "original_price": price,
+            "original_currency": source_currency,
             "provider": "Mercado Libre",
             "supplier": seller.get("nickname") or "Vendedor Mercado Libre",
             "stock": int(result.get("available_quantity") or 0),
             "warranty": "Validar en publicacion",
             "rating": 4.2,
             "quality": "professional",
-            "image": result.get("thumbnail") or "",
-            "image_verified": bool(result.get("thumbnail")),
-            "image_match_score": 0.78,
+            "image": thumbnail,
+            "image_source": "marketplace_thumbnail",
+            "image_verified": bool(thumbnail),
+            "image_match_score": score,
             "source_links": [
                 {"name": "Mercado Libre", "url": permalink, "type": "marketplace"},
                 *_provider_source_links({"search_query": query, "brand": ""})[:2],
@@ -847,7 +1216,7 @@ def _merge_product_lists(*lists):
                 continue
             seen.add(key)
             merged.append(item)
-    return merged
+    return _sort_smart_products(merged)
 
 
 def _smart_search_fallback(query, category, currency, margin):
@@ -881,7 +1250,7 @@ def _smart_search_fallback(query, category, currency, margin):
         product["price_base"] = base
         product["price_sale"] = round(base * (1 + margin / 100), 2)
         product["currency"] = currency
-    return products
+    return _sort_smart_products(products)
 
 
 def _extract_smart_products(payload):
@@ -1017,6 +1386,9 @@ def _normalize_smart_products(products, currency, margin):
 
 def _generic_smart_products(query, context, margin):
     query_text = (query or "").lower()
+    if _infer_product_family(query_text):
+        return _catalog_template_products(query, context, margin, count=SMART_MIN_OPTIONS)
+
     is_tire = any(term in query_text for term in ["llanta", "neumatic", "neumático", "295", "r22", "22.5", "truck tire"])
     marketplace = context["marketplace"]
     currency = context["currency"]
@@ -1123,7 +1495,13 @@ def _generic_smart_products(query, context, margin):
                 "image_match_score": 0.72,
             }
         ]
-    return _normalize_smart_products(products, currency, margin)
+    normalized = _normalize_smart_products(products, currency, margin)
+    if len(normalized) < SMART_MIN_OPTIONS:
+        normalized = _merge_product_lists(
+            normalized,
+            _catalog_template_products(query, context, margin, count=SMART_MIN_OPTIONS),
+        )
+    return normalized
 
 
 def _smart_text_with_gemini(query, category, context, margin):
@@ -1150,6 +1528,7 @@ Reglas:
 - Si la busqueda es amplia, infiere el producto probable. Ejemplo: LLANTA puede ser neumatico; si hay imagen/nombre con 295 80 r 22.5, tratalo como llanta de camion 295/80 R22.5.
 - Para marcas/fabricantes, usa nombres buscables y recomienda validar ficha oficial, medida, modelo, compatibilidad y garantia.
 - Incluye opciones de fabricante y genericas si no hay modelo exacto.
+- Devuelve minimo 10 productos comprables y ordenalos por precio_venta/price_sale ascendente.
 - Cubre cualquier sector: comercio, industria, construccion, mantenimiento, medicina, automocion, tecnologia, hogar.
 - No afirmes que viste ofertas en vivo. Genera consultas precisas para encontrar ofertas actuales.
 - Devuelve SOLO JSON valido con el mismo schema de SMART_SEARCH_PROMPT.
@@ -1211,8 +1590,25 @@ def smart_search():
                 "uncertainties": ["Precios estimados: valida ofertas actuales, DOT/ficha tecnica y garantia."],
             }
 
-    live_products = _search_mercadolibre_products(query_raw, context, margin) if query_raw else []
+    live_products = (
+        _search_mercadolibre_products(query_raw, context, margin, limit=SMART_LIVE_SEARCH_LIMIT)
+        if query_raw
+        else []
+    )
     products = _merge_product_lists(products, live_products)
+    if query_raw:
+        products = _ensure_minimum_options(products, query_raw, context, margin)
+        if live_products and analysis_mode == "smart_search_catalog":
+            analysis_mode = "smart_search_marketplace"
+            evidence["summary"] = f"Opciones de compra para: {query_raw}"
+        evidence["uncertainties"] = list(
+            dict.fromkeys(
+                [
+                    *evidence.get("uncertainties", []),
+                    "Precios ordenados de menor a mayor; valida precio final, stock y garantia en el enlace.",
+                ]
+            )
+        )
 
     return jsonify(
         {
@@ -1258,9 +1654,15 @@ def smart_analyze_media():
 
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        products = _smart_search_fallback(query or file.filename, category, context["currency"], margin)
+        seed_query = _clean_search_text(query or file.filename)
+        products = _smart_search_fallback(seed_query, category, context["currency"], margin)
         if not products:
-            products = _generic_smart_products(query or file.filename, context, margin)
+            products = _generic_smart_products(seed_query, context, margin)
+        products = _merge_product_lists(
+            products,
+            _search_mercadolibre_products(seed_query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT),
+        )
+        products = _ensure_minimum_options(products, seed_query, context, margin)
         return jsonify(
             {
                 "ok": True,
@@ -1273,7 +1675,10 @@ def smart_analyze_media():
                     "summary": "Sin GEMINI_API_KEY: se uso el nombre del archivo como pista.",
                     "detected_text": [],
                     "visual_or_audio_clues": [file.filename],
-                    "uncertainties": ["Configura GEMINI_API_KEY para analisis real de imagen/audio."],
+                    "uncertainties": [
+                        "Configura GEMINI_API_KEY para analisis real de imagen/audio.",
+                        "Mientras tanto se entregan minimo 10 opciones por texto/nombre de archivo.",
+                    ],
                 },
                 "total_productos": len(products),
                 "products": products,
@@ -1302,8 +1707,15 @@ def smart_analyze_media():
             ),
         )
         payload = _extract_json(response.text)
+        payload["analysis_mode"] = (
+            "gemini_audio_search" if mime_type.startswith("audio/") else "gemini_image_search"
+        )
+        payload["ai_provider"] = "gemini"
+        payload["model"] = GEMINI_MODEL
     except Exception as exc:
-        products = _generic_smart_products(query or file.filename, context, margin)
+        seed_query = _clean_search_text(query or file.filename)
+        products = _generic_smart_products(seed_query, context, margin)
+        products = _ensure_minimum_options(products, seed_query, context, margin)
         return jsonify(
             {
                 "ok": True,
@@ -1341,7 +1753,21 @@ def smart_analyze_media():
         }
 
     provider_query = query or (products[0].get("search_query") if products else "") or file.filename
-    products = _merge_product_lists(products, _search_mercadolibre_products(provider_query, context, margin))
+    products = _merge_product_lists(
+        products,
+        _search_mercadolibre_products(provider_query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT),
+    )
+    products = _ensure_minimum_options(products, provider_query, context, margin)
+    evidence = payload.get("evidence") or {}
+    evidence["uncertainties"] = list(
+        dict.fromkeys(
+            [
+                *evidence.get("uncertainties", []),
+                "Precios ordenados de menor a mayor; valida precio final, stock y garantia en el enlace.",
+            ]
+        )
+    )
+    payload["evidence"] = evidence
 
     payload.update(
         {

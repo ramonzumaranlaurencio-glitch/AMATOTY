@@ -20,6 +20,21 @@
     "81Qe0euJJZL"
   ];
 
+  const TRUSTED_IMAGE_PATTERNS = [
+    "mlstatic.com",
+    "m.media-amazon.com",
+    "alicdn.com",
+    "ae01.alicdn.com"
+  ];
+
+  const TRUSTED_IMAGE_SOURCES = [
+    "marketplace_thumbnail",
+    "mercadolibre",
+    "amazon",
+    "aliexpress",
+    "official"
+  ];
+
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -43,10 +58,16 @@
   }
 
   function imageIsAllowed(product) {
-    const url = String(product.image || "");
+    const url = String(product.image || "").trim();
+    const urlLower = url.toLowerCase();
     if (!url) return false;
-    if (BAD_IMAGE_PATTERNS.some((bad) => url.includes(bad))) return false;
-    return product.image_verified === true && Number(product.image_match_score || 0) >= 0.82;
+    if (BAD_IMAGE_PATTERNS.some((bad) => urlLower.includes(String(bad).toLowerCase()))) return false;
+    const score = Number(product.image_match_score || 0);
+    const source = String(product.image_source || product.source || "").toLowerCase();
+    const trustedSource = TRUSTED_IMAGE_SOURCES.some((item) => source.includes(item));
+    const trustedUrl = TRUSTED_IMAGE_PATTERNS.some((item) => urlLower.includes(item));
+    if (product.image_verified === true && (trustedSource || trustedUrl) && score >= 0.72) return true;
+    return product.image_verified === true && score >= 0.82;
   }
 
   function productImage(product, prefix) {
@@ -64,7 +85,7 @@
     const cta = escapeHtml(product.cta || "Ver opciones");
     const query = encodeURIComponent(product.search_query || product.name || "");
     const sourceNote = imageIsAllowed(product)
-      ? "Imagen verificada por IA"
+      ? (String(product.image_source || "").includes("marketplace") ? "Imagen de marketplace" : "Imagen verificada por IA")
       : "Imagen referencial: pendiente de verificacion IA";
 
     return `

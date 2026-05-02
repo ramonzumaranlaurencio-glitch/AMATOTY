@@ -7,6 +7,12 @@
 - Recibe diagnostico facial/producto por POST en `/api/diagnostico`.
 - Si configuras `GEMINI_API_KEY`, el diagnostico usa Gemini 2.5 Flash con vision
   y respuesta JSON estructurada para que cada foto tenga un analisis real.
+- `/api/smart-analyze-media` analiza imagen/audio de producto con Gemini. Para
+  una foto como una lavadora, debe devolver minimo 10 opciones comprables,
+  ordenadas por precio, y completa con miniaturas reales de marketplace cuando
+  Mercado Libre responde.
+- Si no hay `GEMINI_API_KEY`, la busqueda usa texto o nombre de archivo como
+  pista; no puede reconocer pixeles reales sin esa clave.
 - Recibe pedidos por POST en `/api/pedido`.
 - El archivo que Render debe arrancar es `main.py`.
 

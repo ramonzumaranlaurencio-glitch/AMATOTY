@@ -84,7 +84,7 @@ main{max-width:none;padding:0}
     <div class="group hidden-commerce"><label for="margin">Margen interno</label><input id="margin" type="number" value="30" min="0" max="80"></div>
     <div class="group"><label for="country">País mercado</label><select id="country"><option value="US">Estados Unidos</option><option value="PE">Perú</option><option value="CO">Colombia</option><option value="MX">México</option><option value="CL">Chile</option><option value="AR">Argentina</option><option value="EC">Ecuador</option><option value="BO">Bolivia</option><option value="PY">Paraguay</option><option value="UY">Uruguay</option><option value="BR">Brasil</option><option value="VE">Venezuela</option></select></div>
     <div class="group"><label for="currency">Moneda</label><select id="currency"><option value="USD">USD</option><option value="PEN">PEN</option><option value="COP">COP</option><option value="MXN">MXN</option><option value="CLP">CLP</option><option value="ARS">ARS</option><option value="BOB">BOB</option><option value="PYG">PYG</option><option value="UYU">UYU</option><option value="BRL">BRL</option></select></div>
-    <div class="group"><label for="sort">Orden</label><select id="sort"><option value="score">Mejor recomendado</option><option value="price_asc">Mejor precio</option><option value="price_desc">Mayor precio</option><option value="quality">Mejor calidad profesional</option><option value="category">Categoría</option></select></div>
+    <div class="group"><label for="sort">Orden</label><select id="sort"><option value="price_asc">Mejor precio</option><option value="score">Mejor recomendado</option><option value="price_desc">Mayor precio</option><option value="quality">Mejor calidad profesional</option><option value="category">Categoría</option></select></div>
     <div class="group">
       <h2>Filtros Pro</h2>
       <div class="filter-grid">
@@ -472,11 +472,10 @@ async function executeSearch() {
       return;
     }
     const apiProducts = extractResultProducts(response).map(normalize);
-    filtered = apiProducts;
     products = mergeProducts(products, apiProducts);
     loadCategories();
     loadAdvancedFilters();
-    renderResults();
+    applyFilters();
     if (filtered.length) {
       setStatus(`${filtered.length} registros`);
     } else {
@@ -757,7 +756,7 @@ document.getElementById("imageInput").addEventListener("change", event => {
   if (!file) return;
   document.getElementById("mediaName").textContent = `${file.type.startsWith("audio/") ? "Audio" : "Imagen"} cargada: ${file.name}`;
   document.getElementById("query").value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-  setStatus("Archivo listo: pulsa Ejecutar");
+  setStatus("Archivo listo: pulsa Buscar Pro");
 });
 document.getElementById("recordAudioBtn")?.addEventListener("click", async event => {
   const button = event.currentTarget;
