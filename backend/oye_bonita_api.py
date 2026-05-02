@@ -15,6 +15,20 @@ CORS(app)
 SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
 
 
+@app.errorhandler(Exception)
+def handle_unexpected_error(exc):
+    return (
+        jsonify(
+            {
+                "error": "Error interno del backend.",
+                "detail": str(exc),
+                "analysis_mode": "error",
+            }
+        ),
+        500,
+    )
+
+
 def _send_site_file(filename):
     from main import _send_site_file as send_site_file
 
@@ -117,12 +131,9 @@ def diagnostico_real(img):
 
 @app.route("/api/diagnostico", methods=["POST", "GET"])
 def api_diagnostico():
-    try:
-        from main import diagnostico as diagnostico_principal
+    from main import diagnostico as diagnostico_principal
 
-        return diagnostico_principal()
-    except Exception:
-        pass
+    return diagnostico_principal()
 
     if request.method == "GET":
         return (

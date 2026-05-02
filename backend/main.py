@@ -175,6 +175,20 @@ Reglas:
 """
 
 
+@app.errorhandler(Exception)
+def handle_unexpected_error(exc):
+    return (
+        jsonify(
+            {
+                "error": "Error interno del backend.",
+                "detail": str(exc),
+                "analysis_mode": "error",
+            }
+        ),
+        500,
+    )
+
+
 def _fallback_oye_bonita_html():
     return """<!doctype html>
 <html lang="es">
@@ -350,11 +364,10 @@ def _analizar_imagen_con_gemini(image_bytes, mime_type, pais):
             image_part,
             f"Pais del usuario: {pais}. {GEMINI_DIAGNOSTICO_PROMPT}",
         ],
-        config={
-            "response_mime_type": "application/json",
-            "response_json_schema": GEMINI_DIAGNOSTICO_SCHEMA,
-            "temperature": 0.35,
-        },
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.35,
+        ),
     )
     return _extract_json(response.text)
 
