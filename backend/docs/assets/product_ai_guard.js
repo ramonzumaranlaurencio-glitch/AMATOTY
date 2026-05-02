@@ -68,9 +68,9 @@
       : "Imagen referencial: pendiente de verificacion IA";
 
     return `
-      <div class="card" style="background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #e2e8f0;">
+      <div class="card" style="background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #d5d9d9;">
         <img src="${escapeHtml(image)}" alt="${name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
-        <h3 style="color:#0a6ed1;">${name}</h3>
+        <h3 style="color:#b12704;">${name}</h3>
         <div style="font-size:0.95em;color:#64748b;margin-bottom:6px;">${brand ? brand + " - " : ""}${category}</div>
         <p style="font-size:1.05em;margin-bottom:8px;">${escapeHtml(product.short_desc)}</p>
         <ul style="font-size:0.97em;color:#334155;margin-bottom:8px;">
@@ -78,7 +78,7 @@
           <li><b>Publico:</b> ${escapeHtml(product.target)}</li>
           <li><b>Specs:</b> ${escapeHtml(product.specs || "")}</li>
         </ul>
-        <a href="https://www.amazon.com/s?k=${query}" target="_blank" rel="nofollow noopener" style="display:inline-block;background:#0a6ed1;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;box-shadow:0 2px 8px #bae6fd;">${cta}</a>
+        <a href="https://www.amazon.com/s?k=${query}" target="_blank" rel="nofollow noopener" style="display:inline-block;background:linear-gradient(180deg,#ffd814,#f7ca00);color:#111;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;border:1px solid #fcd200;box-shadow:0 2px 5px rgba(213,217,217,.5);">${cta}</a>
         <div style="font-size:0.9em;color:#64748b;margin-top:8px;">${sourceNote}</div>
         <div style="font-size:0.93em;color:#0e7490;margin-top:6px;">${escapeHtml(product.reason)}</div>
         <div style="font-size:0.93em;color:#0369a1;margin-top:4px;">${escapeHtml(product.hook)}</div>

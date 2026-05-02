@@ -1,4 +1,4 @@
-﻿<!doctype html><html><head><meta charset="utf-8"><title>Categorías</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../assets/style.css">
+<!doctype html><html><head><meta charset="utf-8"><title>Categorías</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../assets/style.css">
 <style>
 .badge {display:inline-block;background:#e0e7ff;color:#3730a3;font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;margin-bottom:8px;margin-right:6px;}
 .card .cta {margin-top:18px;font-size:16px;font-weight:700;color:var(--accent);}
@@ -10,11 +10,11 @@
 </head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="../index.html">Inicio</a><a href="index.html">Categorías</a><a href="../smart-search.html">Busca inteligente</a><a href="../blog/index.html">Blog</a><a href="../about.html">Sobre</a><a href="../affiliate-disclosure.html">Divulgación</a><a href="../contact.html">Contacto</a><a href="../editorial-policy.html">Editorial</a></nav></header><main>
 <h1 style="margin-bottom:28px;">Explora nuestras categorías</h1>
 <div class="grid">
-  <div class="card" style="border:3px solid #d81b60;box-shadow:0 6px 32px #fbbf24;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:340px;background:linear-gradient(90deg,#fff0f6 0%,#fbbf24 100%);margin-bottom:24px;">
-    <span class="badge" style="background:#d81b60;color:#fff;font-size:1.1em;padding:6px 18px;">Diagnóstico Belleza</span>
-    <h2 style="color:#d81b60;margin-bottom:18px;font-size:2em;">Oye Bonita</h2>
-    <a class="btn" href="../oye-bonita.html" style="background:#d81b60;color:#fff;font-size:1.3em;padding:20px 38px;border-radius:16px;box-shadow:0 2px 16px #fbbf24;display:inline-block;margin-bottom:10px;">Diagnóstico facial personalizado</a>
-    <div style="font-size:1.1em;color:#d81b60;margin-top:10px;max-width:340px;margin-left:auto;margin-right:auto;">Sube tu foto, conoce tu tipo de piel y recibe productos recomendados para ti. ¡Haz clic y vive la experiencia!</div>
+  <div class="card" style="border:3px solid #ff9900;box-shadow:0 6px 32px #febd69;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:340px;background:linear-gradient(90deg,#fff8e6 0%,#febd69 100%);margin-bottom:24px;">
+    <span class="badge" style="background:#ff9900;color:#fff;font-size:1.1em;padding:6px 18px;">Diagnóstico Belleza</span>
+    <h2 style="color:#ff9900;margin-bottom:18px;font-size:2em;">Oye Bonita</h2>
+    <a class="btn" href="../oye-bonita.html" style="background:#ff9900;color:#fff;font-size:1.3em;padding:20px 38px;border-radius:16px;box-shadow:0 2px 16px #febd69;display:inline-block;margin-bottom:10px;">Diagnóstico facial personalizado</a>
+    <div style="font-size:1.1em;color:#ff9900;margin-top:10px;max-width:340px;margin-left:auto;margin-right:auto;">Sube tu foto, conoce tu tipo de piel y recibe productos recomendados para ti. ¡Haz clic y vive la experiencia!</div>
   </div>
   <div class="card">
     <span class="badge">Más práctico</span>
@@ -41,8 +41,8 @@
     <a class="btn" href="home.html">Ver productos de hogar</a>
   </div>
 </div>
-<section id="trending-categories" class="card" style="background:#f1f5f9;margin-top:32px;">
-  <h2 style="color:#0a6ed1;">Productos tendencia por categoría</h2>
+<section id="trending-categories" class="card" style="background:#f3f3f3;margin-top:32px;">
+  <h2 style="color:#b12704;">Productos tendencia por categoría</h2>
   <div id="trending-categories-list"></div>
 </section>
 <script>
@@ -62,7 +62,7 @@ fetch('../assets/trending_products.json')
     });
     Object.keys(cats).forEach(cat => {
       const catBlock = document.createElement('div');
-      catBlock.innerHTML = `<h3 style='color:#0a6ed1;margin-top:24px;'>${cat}</h3>`;
+      catBlock.innerHTML = `<h3 style='color:#b12704;margin-top:24px;'>${cat}</h3>`;
       const grid = document.createElement('div');
       grid.className = 'grid';
       cats[cat].forEach(prod => {

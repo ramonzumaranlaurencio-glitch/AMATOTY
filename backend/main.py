@@ -3,6 +3,7 @@ import os
 import re
 import sqlite3
 import urllib.parse
+import urllib.request
 import uuid
 from io import BytesIO
 from datetime import datetime
@@ -621,17 +622,26 @@ def _load_trending_products():
 
 
 SMART_SEARCH_PROMPT = """
-Eres un agente de busqueda comercial visual y auditiva tipo Google Shopping /
-Alibaba, pero mas especifico porque analizas evidencias de imagen o audio.
+Eres un asesor, analista e inspector comercial visual y auditivo tipo Google
+Shopping / Alibaba, pero mas especifico porque analizas evidencias de imagen o
+audio y produces opciones comprables con ficha tecnica.
 
 Debes:
-- Si es imagen: leer pixel por pixel a nivel visual, detectar objetos, OCR,
-  marcas, modelo, medidas, materiales, color, conectores, empaque y contexto.
+- Si es imagen: inspeccionar pixel por pixel a nivel visual, detectar objetos,
+  OCR, marcas, modelo, medidas, materiales, color, conectores, empaque, estado
+  visible, compatibilidad, eje/posicion de uso cuando aplique y contexto.
 - Si es audio: transcribir la intencion, detectar producto, marca, modelo,
   especificaciones mencionadas y necesidad de compra.
 - No procesar ni describir contenido sexual, desnudez, explotación, violencia
   grafica o solicitudes indecentes. Si aparece, responde blocked=true.
 - No inventes una imagen externa ni URL falsa.
+- Prioriza fuentes autorizadas: Amazon, AliExpress y Mercado Libre. Si no hay
+  coincidencia suficiente, recomienda consultar fabricante oficial de la marca
+  detectada o alternativas reconocidas del sector.
+- Para neumaticos identifica tipo de vehiculo, medida, aro/rin, perfil, ancho,
+  indice de carga, indice de velocidad, labrado, posicion recomendada
+  delantera/trasera/eje de traccion cuando sea inferible, marca visible,
+  compatibilidades y ficha tecnica.
 - Actua por pais: adapta moneda, texto comercial, marketplace probable y cultura.
 - Calcula precio_venta aplicando el margen indicado sobre precio_base.
 - Devuelve SOLO JSON valido.
@@ -662,6 +672,19 @@ Schema:
       "reason": "argumento comercial honesto",
       "hook": "gancho breve",
       "specs": "Capacidad: ..., Material: ..., Uso: ...",
+      "model": "modelo/referencia si existe",
+      "sector": "hogar|belleza|mecanica|industrial|medicina|construccion|tecnologia|seguridad|automotriz|otros",
+      "material": "material principal si se detecta",
+      "compatibility": "medidas, modelos, normas o equipos compatibles",
+      "provider": "proveedor o marketplace autorizado sugerido",
+      "source_links": [{"name": "Amazon", "url": "https://...", "type": "marketplace"}],
+      "stock": 0,
+      "warranty": "garantia esperada o pendiente de validar",
+      "rating": 4.2,
+      "quality": "professional|premium|economy",
+      "pros": ["ventaja tecnica 1", "ventaja comercial 2"],
+      "cons": ["validacion pendiente 1", "limitacion 2"],
+      "similar_products": ["alternativa comparable 1"],
       "search_query": "consulta precisa para marketplace del pais",
       "price_base": 0,
       "price_sale": 0,
@@ -698,6 +721,133 @@ def _market_context(country, currency):
         "cart_word": cart_word,
         "tone": tone,
     }
+
+
+def _official_brand_source(brand):
+    brand = (brand or "").lower()
+    if "michelin" in brand:
+        return {"name": "Michelin oficial", "url": "https://www.michelinman.com/auto/tires", "type": "official"}
+    if "goodyear" in brand:
+        return {"name": "Goodyear oficial", "url": "https://www.goodyear.com/en_US/tires.html", "type": "official"}
+    if "bridgestone" in brand:
+        return {"name": "Bridgestone oficial", "url": "https://www.bridgestonetire.com/tire-search/", "type": "official"}
+    if "pirelli" in brand:
+        return {"name": "Pirelli oficial", "url": "https://www.pirelli.com/tires/en-us/car/catalog", "type": "official"}
+    if "continental" in brand:
+        return {"name": "Continental oficial", "url": "https://continentaltire.com/tires", "type": "official"}
+    return None
+
+
+def _provider_source_links(item):
+    query = urllib.parse.quote_plus(
+        item.get("search_query")
+        or " ".join(
+            [
+                str(item.get("name", "")),
+                str(item.get("brand", "")),
+                str(item.get("specs", "")),
+            ]
+        ).strip()
+        or "producto"
+    )
+    links = [
+        {"name": "Amazon", "url": f"https://www.amazon.com/s?k={query}", "type": "marketplace"},
+        {"name": "AliExpress", "url": f"https://www.aliexpress.com/wholesale?SearchText={query}", "type": "marketplace"},
+        {"name": "Mercado Libre", "url": f"https://listado.mercadolibre.com/{query}", "type": "marketplace"},
+    ]
+    official = _official_brand_source(item.get("brand"))
+    if official:
+        links.append(official)
+    return links
+
+
+def _mercadolibre_site(country):
+    return {
+        "AR": "MLA",
+        "BO": "MBO",
+        "BR": "MLB",
+        "CL": "MLC",
+        "CO": "MCO",
+        "EC": "MEC",
+        "MX": "MLM",
+        "PE": "MPE",
+        "PY": "MPY",
+        "UY": "MLU",
+        "VE": "MLV",
+    }.get((country or "US").upper(), "MLM")
+
+
+def _search_mercadolibre_products(query, context, margin, limit=8):
+    if not query:
+        return []
+    site = _mercadolibre_site(context.get("country"))
+    url = (
+        f"https://api.mercadolibre.com/sites/{site}/search?"
+        f"q={urllib.parse.quote_plus(query)}&limit={int(limit)}"
+    )
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "AMATOTY-Product-Advisor/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return []
+
+    products = []
+    for result in payload.get("results", [])[:limit]:
+        title = result.get("title") or "Producto Mercado Libre"
+        price = float(result.get("price") or 0) or 10
+        seller = result.get("seller") or {}
+        permalink = result.get("permalink") or ""
+        item = {
+            "name": title,
+            "brand": "Por validar",
+            "category": "marketplace",
+            "product_type": "resultado marketplace",
+            "short_desc": "Resultado encontrado en Mercado Libre mediante API publica autorizada.",
+            "problem": "comparar precio y disponibilidad real",
+            "target": "comprador que necesita cotizar opciones actuales",
+            "reason": "Coincidencia comercial real; validar ficha, vendedor, garantia y compatibilidad.",
+            "hook": "Precio y enlace disponibles para revision inmediata.",
+            "specs": f"Condicion: {result.get('condition') or 'validar'}, Vendidos: {result.get('sold_quantity', 0)}",
+            "search_query": query,
+            "price_base": price,
+            "price_sale": round(price * (1 + margin / 100), 2),
+            "currency": result.get("currency_id") or context.get("currency"),
+            "provider": "Mercado Libre",
+            "supplier": seller.get("nickname") or "Vendedor Mercado Libre",
+            "stock": int(result.get("available_quantity") or 0),
+            "warranty": "Validar en publicacion",
+            "rating": 4.2,
+            "quality": "professional",
+            "image": result.get("thumbnail") or "",
+            "image_verified": bool(result.get("thumbnail")),
+            "image_match_score": 0.78,
+            "source_links": [
+                {"name": "Mercado Libre", "url": permalink, "type": "marketplace"},
+                *_provider_source_links({"search_query": query, "brand": ""})[:2],
+            ],
+        }
+        products.append(item)
+    return _normalize_smart_products(products, context.get("currency"), margin)
+
+
+def _merge_product_lists(*lists):
+    merged = []
+    seen = set()
+    for product_list in lists:
+        for item in product_list or []:
+            key = "|".join(
+                [
+                    str(item.get("name", "")),
+                    str(item.get("provider", "")),
+                    str(item.get("price_base", "")),
+                ]
+            ).lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(item)
+    return merged
 
 
 def _smart_search_fallback(query, category, currency, margin):
@@ -824,6 +974,38 @@ def _normalize_smart_products(products, currency, margin):
         item["brand"] = item.get("brand") or "Generic"
         item["category"] = item.get("category") or "Otros"
         item["product_type"] = item.get("product_type") or item["category"]
+        item["model"] = item.get("model") or item.get("modelo") or ""
+        item["sector"] = item.get("sector") or item["category"]
+        item["material"] = item.get("material") or ""
+        item["compatibility"] = item.get("compatibility") or item.get("compatibilidad") or ""
+        item["provider"] = item.get("provider") or item.get("supplier") or item.get("marketplace") or "Proveedor por validar"
+        item["supplier"] = item.get("supplier") or item["provider"]
+        item["source_links"] = item.get("source_links") if isinstance(item.get("source_links"), list) else _provider_source_links(item)
+        item["stock"] = int(float(item.get("stock") or item.get("availability_count") or 0))
+        item["warranty"] = item.get("warranty") or item.get("garantia") or "Validar con proveedor"
+        item["rating"] = float(item.get("rating") or item.get("calificacion") or 4.2)
+        text_blob = " ".join(
+            [
+                str(item.get("name", "")),
+                str(item.get("brand", "")),
+                str(item.get("category", "")),
+                str(item.get("product_type", "")),
+                str(item.get("specs", "")),
+                str(item.get("reason", "")),
+            ]
+        ).lower()
+        item["quality"] = item.get("quality") or (
+            "premium" if "premium" in text_blob else "economy" if "econom" in text_blob else "professional"
+        )
+        item["pros"] = item.get("pros") if isinstance(item.get("pros"), list) else [
+            item.get("reason") or "Producto listo para comparacion tecnica.",
+            item.get("hook") or "Permite comparar precio, ficha y proveedor.",
+        ]
+        item["cons"] = item.get("cons") if isinstance(item.get("cons"), list) else [
+            "Precio, stock y garantia deben validarse con proveedor real.",
+            "Ficha tecnica final depende del modelo exacto.",
+        ]
+        item["similar_products"] = item.get("similar_products") if isinstance(item.get("similar_products"), list) else []
         item["search_query"] = item.get("search_query") or " ".join(
             [str(item.get("name", "")), str(item.get("brand", "")), str(item.get("specs", ""))]
         ).strip()
@@ -1029,6 +1211,9 @@ def smart_search():
                 "uncertainties": ["Precios estimados: valida ofertas actuales, DOT/ficha tecnica y garantia."],
             }
 
+    live_products = _search_mercadolibre_products(query_raw, context, margin) if query_raw else []
+    products = _merge_product_lists(products, live_products)
+
     return jsonify(
         {
             "ok": True,
@@ -1154,6 +1339,9 @@ def smart_analyze_media():
             "visual_or_audio_clues": [file.filename],
             "uncertainties": ["Valida marca, modelo y medidas contra la foto original."],
         }
+
+    provider_query = query or (products[0].get("search_query") if products else "") or file.filename
+    products = _merge_product_lists(products, _search_mercadolibre_products(provider_query, context, margin))
 
     payload.update(
         {

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -7,64 +7,71 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/product_ai_guard.js"></script>
 <style>
-:root{--sap-blue:#0a6ed1;--sap-ink:#1d2d3e;--sap-muted:#5b738b;--sap-line:#d9e4ee;--sap-bg:#f3f6f9;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff6a00;--ali-ink:#17233c}
+:root{--sap-blue:#b12704;--sap-ink:#131921;--sap-muted:#565959;--sap-line:#d5d9d9;--sap-bg:#eaeded;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff9900;--ali-ink:#131921}
 body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
-header{background:#0b1f33;padding:14px 22px;border-bottom:1px solid #244761}
+header{background:#ffd814;color:#131921;padding:14px 22px;border-bottom:4px solid #febd69}
 header h1{font-size:20px;margin:0 0 8px 0;letter-spacing:0}
-nav a{font-size:14px;margin-right:16px}
+nav a{color:#131921;font-size:14px;margin-right:16px}
 main{max-width:none;padding:0}
 .workbench{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;min-height:calc(100vh - 95px)}
 .side{background:#fff;border-right:1px solid var(--sap-line);padding:16px}
-.side h2,.panel h2{font-size:14px;text-transform:uppercase;color:#365b75;margin:0 0 12px 0}
-.side label,.field label{display:block;font-size:12px;font-weight:700;color:#496b84;margin-bottom:5px}
-.side input,.side select,.field input,.field select{width:100%;box-sizing:border-box;border:1px solid #b8c7d4;border-radius:4px;padding:9px 10px;background:#fff;color:#1d2d3e}
+.side h2,.panel h2{font-size:14px;text-transform:uppercase;color:#232f3e;margin:0 0 12px 0}
+.side label,.field label{display:block;font-size:12px;font-weight:700;color:#565959;margin-bottom:5px}
+.side input,.side select,.field input,.field select{width:100%;box-sizing:border-box;border:1px solid #a6a6a6;border-radius:4px;padding:9px 10px;background:#fff;color:#131921}
 .side .group{margin-bottom:14px}
 .content{padding:16px 18px 28px 18px;min-width:0}
 .topbar{background:#fff;border:1px solid var(--sap-line);border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:14px;box-shadow:0 1px 4px rgba(29,45,62,.08)}
-.querybar{display:grid;grid-template-columns:minmax(220px,1fr) 160px 150px;gap:10px}
-.querybar input,.querybar select{border:1px solid #b8c7d4;border-radius:4px;padding:10px;background:#fff}
-.btn-sap{border:1px solid #c94f00;background:linear-gradient(180deg,#ff7a1a,#f05a00);color:#fff;border-radius:4px;padding:10px 14px;font-weight:700;cursor:pointer}
+.querybar{display:grid;grid-template-columns:minmax(220px,1fr) 160px 170px 132px;gap:10px}
+.querybar input,.querybar select{border:1px solid #a6a6a6;border-radius:4px;padding:10px;background:#fff}
+.btn-sap{border:1px solid #a88734;background:linear-gradient(180deg,#ff9900,#e47911);color:#fff;border-radius:4px;padding:10px 14px;font-weight:700;cursor:pointer}
 .btn-sap:disabled{opacity:.65;cursor:wait}
-.btn-ghost{border:1px solid #9eb4c8;background:#fff;color:#0a4f8f;border-radius:4px;padding:9px 12px;font-weight:700;cursor:pointer}
-.btn-lite{border:1px solid #d0dce7;background:#f7fafd;color:#1d5d90;border-radius:4px;padding:7px 10px;font-weight:700;cursor:pointer}
+.btn-ghost{border:1px solid #d5d9d9;background:#fff;color:#b12704;border-radius:4px;padding:9px 12px;font-weight:700;cursor:pointer}
+.btn-lite{border:1px solid #d0dce7;background:#f7fafd;color:#b12704;border-radius:4px;padding:7px 10px;font-weight:700;cursor:pointer}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .kpi{background:#fff;border:1px solid var(--sap-line);border-radius:6px;padding:12px;box-shadow:0 1px 4px rgba(29,45,62,.06)}
 .kpi span{display:block;font-size:12px;color:var(--sap-muted);font-weight:700}
-.kpi strong{font-size:24px;color:#0a365f}
+.kpi strong{font-size:24px;color:#131921}
 .layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:14px}
 .panel{background:#fff;border:1px solid var(--sap-line);border-radius:6px;box-shadow:0 1px 4px rgba(29,45,62,.06);min-width:0}
 .panel-head{padding:12px 14px;border-bottom:1px solid var(--sap-line);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .panel-body{padding:12px 14px}
 .data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-.data-table th{background:#edf3f8;color:#244761;text-align:left;font-size:12px;text-transform:uppercase;border-bottom:1px solid var(--sap-line);padding:9px}
+.data-table th{background:#f3f3f3;color:#232f3e;text-align:left;font-size:12px;text-transform:uppercase;border-bottom:1px solid var(--sap-line);padding:9px}
 .data-table td{border-bottom:1px solid #edf2f6;padding:10px 9px;vertical-align:top}
 .data-table tr{cursor:pointer}
-.data-table tr:hover{background:#f6fafe}
-.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#e5f2ff;color:#075a9f}
+.data-table tr:hover{background:#fff8e6}
+.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#fff8e6;color:#b12704}
 .pill.good{background:#e4f5ea;color:var(--sap-good)}
 .pill.warn{background:#fff3e5;color:var(--sap-warn)}
 .spec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.spec{border:1px solid #e1eaf2;background:#fbfdff;border-radius:4px;padding:9px}
-.spec span{display:block;font-size:11px;color:#607d95;text-transform:uppercase;font-weight:700}
-.spec strong{display:block;font-size:14px;color:#19344d;margin-top:3px}
+.spec{border:1px solid #d5d9d9;background:#fff;border-radius:4px;padding:9px}
+.spec span{display:block;font-size:11px;color:#565959;text-transform:uppercase;font-weight:700}
+.spec strong{display:block;font-size:14px;color:#131921;margin-top:3px}
 .cart{background:#fff;border-left:1px solid var(--sap-line);padding:16px;display:flex;flex-direction:column;gap:12px}
 .cart-list{display:flex;flex-direction:column;gap:8px;overflow:auto}
-.cart-item{border:1px solid #dfe8f0;border-radius:5px;padding:10px;background:#fbfdff}
+.cart-item{border:1px solid #d5d9d9;border-radius:5px;padding:10px;background:#fff}
 .cart-item strong{display:block;font-size:14px}
-.money{font-variant-numeric:tabular-nums;font-weight:800;color:#0a365f}
+.money{font-variant-numeric:tabular-nums;font-weight:800;color:#131921}
 .summary{border-top:1px solid var(--sap-line);padding-top:12px;margin-top:auto}
 .summary-row{display:flex;justify-content:space-between;margin:7px 0}
-.dropzone{border:1px dashed #8aa8c4;background:#f7fbff;border-radius:5px;padding:12px;text-align:center}
+.dropzone{border:1px dashed #a6a6a6;background:#fff8e6;border-radius:5px;padding:12px;text-align:center}
 .dropzone input{margin-top:8px}
-.empty{color:#607d95;font-size:14px;padding:14px;border:1px dashed #d1dde8;border-radius:5px;background:#fbfdff}
+.empty{color:#565959;font-size:14px;padding:14px;border:1px dashed #d5d9d9;border-radius:5px;background:#fff}
 .intel-strip{background:#fff;border:1px solid var(--sap-line);border-radius:6px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;box-shadow:0 1px 4px rgba(29,45,62,.06)}
 .intel-cell{padding:10px 12px;border-right:1px solid var(--sap-line)}
 .intel-cell:last-child{border-right:0}
-.intel-cell span{display:block;font-size:11px;color:#607d95;text-transform:uppercase;font-weight:800}
-.intel-cell strong{display:block;margin-top:3px;color:#17233c}
-.market-thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #dfe8f0;background:#fff;margin-right:10px;vertical-align:middle}
+.intel-cell span{display:block;font-size:11px;color:#565959;text-transform:uppercase;font-weight:800}
+.intel-cell strong{display:block;margin-top:3px;color:#131921}
+.market-thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #d5d9d9;background:#fff;margin-right:10px;vertical-align:middle}
 .product-cell{display:flex;align-items:center;gap:10px}
 .trade-badge{display:inline-block;background:#fff3e5;color:#a13b00;border:1px solid #ffd2a8;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:800;margin-top:4px}
+.filter-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.advisor-box{background:#fff8e6;border:1px solid #f7ca00;border-radius:6px;padding:12px;color:#3b2f00}
+.action-row{display:flex;flex-wrap:wrap;gap:6px}
+.tech-list{margin:6px 0 0 18px;padding:0}
+.hidden-commerce{display:none!important}
+.provider-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.provider-link{display:inline-block;border:1px solid #d5d9d9;background:#fff;color:#b12704;border-radius:4px;padding:6px 8px;text-decoration:none;font-size:12px;font-weight:700}
 @media(max-width:1100px){.workbench{grid-template-columns:1fr}.side,.cart{border:0}.layout,.querybar,.kpis{grid-template-columns:1fr}.cart{position:static}}
 </style>
 </head>
@@ -74,14 +81,29 @@ main{max-width:none;padding:0}
 <div class="workbench">
   <aside class="side">
     <h2>Parámetros</h2>
-    <div class="group"><label for="margin">Margen interno</label><input id="margin" type="number" value="30" min="0" max="80"></div>
+    <div class="group hidden-commerce"><label for="margin">Margen interno</label><input id="margin" type="number" value="30" min="0" max="80"></div>
     <div class="group"><label for="country">País mercado</label><select id="country"><option value="US">Estados Unidos</option><option value="PE">Perú</option><option value="CO">Colombia</option><option value="MX">México</option><option value="CL">Chile</option><option value="AR">Argentina</option><option value="EC">Ecuador</option><option value="BO">Bolivia</option><option value="PY">Paraguay</option><option value="UY">Uruguay</option><option value="BR">Brasil</option><option value="VE">Venezuela</option></select></div>
     <div class="group"><label for="currency">Moneda</label><select id="currency"><option value="USD">USD</option><option value="PEN">PEN</option><option value="COP">COP</option><option value="MXN">MXN</option><option value="CLP">CLP</option><option value="ARS">ARS</option><option value="BOB">BOB</option><option value="PYG">PYG</option><option value="UYU">UYU</option><option value="BRL">BRL</option></select></div>
-    <div class="group"><label for="sort">Orden</label><select id="sort"><option value="score">Confianza</option><option value="price_asc">Precio menor</option><option value="price_desc">Precio mayor</option><option value="category">Categoría</option></select></div>
+    <div class="group"><label for="sort">Orden</label><select id="sort"><option value="score">Mejor recomendado</option><option value="price_asc">Mejor precio</option><option value="price_desc">Mayor precio</option><option value="quality">Mejor calidad profesional</option><option value="category">Categoría</option></select></div>
+    <div class="group">
+      <h2>Filtros Pro</h2>
+      <div class="filter-grid">
+        <label for="brandFilter">Marca</label><select id="brandFilter"><option value="">Todas</option></select>
+        <label for="sectorFilter">Sector</label><select id="sectorFilter"><option value="">Todos</option></select>
+        <label for="useFilter">Uso</label><input id="useFilter" type="search" placeholder="industrial, hogar, flota">
+        <label for="compatibilityFilter">Compatibilidad</label><input id="compatibilityFilter" type="search" placeholder="modelo, medida, norma">
+        <label for="materialFilter">Material</label><input id="materialFilter" type="search" placeholder="acero, caucho, plastico">
+        <label for="qualityFilter">Calidad</label><select id="qualityFilter"><option value="">Todas</option><option value="professional">Profesional</option><option value="premium">Premium</option><option value="economy">Economica</option></select>
+        <label for="availabilityFilter">Disponibilidad</label><select id="availabilityFilter"><option value="">Todas</option><option value="available">Con stock</option><option value="quote">A cotizar</option></select>
+        <label for="minPrice">Precio minimo</label><input id="minPrice" type="number" min="0" placeholder="0">
+        <label for="maxPrice">Precio maximo</label><input id="maxPrice" type="number" min="0" placeholder="Sin limite">
+      </div>
+    </div>
     <div class="group dropzone">
       <label for="imageInput">Imagen o audio / OCR</label>
       <input id="imageInput" type="file" accept="image/*,audio/*">
-      <small id="mediaName" style="display:block;margin-top:6px;color:#607d95">Sube foto de producto o nota de voz.</small>
+      <small id="mediaName" style="display:block;margin-top:6px;color:#565959">Sube foto de producto, nota de voz o graba audio.</small>
+      <audio id="audioPreview" controls style="display:none;width:100%;margin-top:8px"></audio>
     </div>
     <button class="btn-ghost" id="schemaBtn" type="button">Ver esquema JSON</button>
   </aside>
@@ -91,13 +113,14 @@ main{max-width:none;padding:0}
       <div class="querybar">
         <input id="query" type="search" placeholder="Buscar por producto, marca, modelo, especificación">
         <select id="categoryFilter"><option value="">Todas las categorías</option></select>
-        <button class="btn-sap" id="runSearch" type="button">Ejecutar</button>
+        <button class="btn-sap" id="runSearch" type="button" style="font-size:17px;background:linear-gradient(90deg,#ffd814,#ff9900);">Buscar Pro</button>
+        <button class="btn-lite" id="recordAudioBtn" type="button" style="margin-left:8px">🎤 Grabar audio</button>
       </div>
       <button class="btn-ghost" id="clearBtn" type="button">Limpiar</button>
     </div>
 
     <div class="intel-strip">
-      <div class="intel-cell"><span>Modo IA</span><strong id="aiMode">Catálogo listo</strong></div>
+      <div class="intel-cell"><span>Modo experto</span><strong id="aiMode">Catálogo listo</strong></div>
       <div class="intel-cell"><span>Evidencia detectada</span><strong id="evidenceSummary">Texto, imagen o audio pendiente</strong></div>
       <div class="intel-cell"><span>Marketplace</span><strong id="marketplaceHint">Según país seleccionado</strong></div>
     </div>
@@ -105,23 +128,28 @@ main{max-width:none;padding:0}
     <div class="kpis">
       <div class="kpi"><span>Productos</span><strong id="kpiProducts">0</strong></div>
       <div class="kpi"><span>Categorías</span><strong id="kpiCategories">0</strong></div>
-      <div class="kpi"><span>Margen</span><strong id="kpiMargin">30%</strong></div>
+      <div class="kpi hidden-commerce"><span>Margen</span><strong id="kpiMargin">30%</strong></div>
       <div class="kpi"><span>Carrito</span><strong id="kpiCart">0</strong></div>
     </div>
 
     <div class="layout">
       <section class="panel">
         <div class="panel-head"><h2>Resultados</h2><span class="pill" id="resultCount">0 registros</span></div>
+        <div id="expertAdvice" style="background:#fff8e6;color:#b12704;padding:10px 12px;border-radius:6px;margin-bottom:10px;display:none"></div>
         <div class="panel-body">
           <table class="data-table">
             <thead><tr><th>Producto</th><th>Categoría</th><th>Especificaciones</th><th>Precio</th><th>Acción</th></tr></thead>
             <tbody id="resultsBody"></tbody>
           </table>
+          <div id="comparePanel" style="margin-top:18px;display:none">
+            <h3>Comparador técnico</h3>
+            <div id="compareList"></div>
+          </div>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-head"><h2>Ficha técnica</h2><span class="pill good" id="confidencePill">IA lista</span></div>
+        <div class="panel-head"><h2>Ficha técnica</h2><span class="pill good" id="confidencePill">Asesor listo</span></div>
         <div class="panel-body" id="detailPanel"><div class="empty">Seleccione un producto.</div></div>
       </section>
     </div>
@@ -132,7 +160,7 @@ main{max-width:none;padding:0}
     <div class="cart-list" id="cartList"></div>
     <div class="summary">
       <div class="summary-row"><span>Subtotal base</span><strong class="money" id="baseSubtotal">$0.00</strong></div>
-      <div class="summary-row"><span>Margen interno</span><strong class="money" id="marginAmount">$0.00</strong></div>
+      <div class="summary-row hidden-commerce"><span>Margen interno</span><strong class="money" id="marginAmount">$0.00</strong></div>
       <div class="summary-row"><span>Total venta</span><strong class="money" id="saleTotal">$0.00</strong></div>
       <button class="btn-sap" style="width:100%;margin-top:10px" id="checkoutBtn" type="button">Generar pedido</button>
     </div>
@@ -169,6 +197,7 @@ let filtered = [];
 let selected = null;
 let lastAiPayload = null;
 let cart = JSON.parse(localStorage.getItem("smartCart") || "[]");
+let compareItems = [];
 
 const API_ORIGIN = window.location.hostname.includes("github.io")
   ? "https://amatoty.onrender.com"
@@ -259,13 +288,81 @@ function specsArray(product) {
 
 function normalize(product) {
   const flat = ProductAIGuard.flattenProduct(product);
+  const specs = specsArray(flat);
+  const blob = [flat.name, flat.brand, flat.category, flat.product_type, flat.specs, flat.reason, flat.target].join(" ").toLowerCase();
+  const sector = flat.sector || flat.category || "general";
+  const quality = flat.quality || (blob.includes("premium") ? "premium" : (blob.includes("econom") ? "economy" : "professional"));
+  const provider = flat.provider || flat.supplier || flat.marketplace || "Proveedor por validar";
+  const stock = Number(flat.stock ?? flat.availability_count ?? 0);
   return Object.assign(flat, {
     price_base: Number(product.price_base || product.base_price || product.precio_numero || product.precio || flat.price_base || 10),
     price_sale: Number(product.price_sale || 0),
     search_query: flat.search_query || [flat.name, flat.brand, flat.category].filter(Boolean).join(" "),
     confidence: Number(product.image_match_score || product.producto_principal?.nivel_confianza || 0.78),
-    specs_list: specsArray(flat)
+    specs_list: specs,
+    model: flat.model || flat.modelo || "",
+    sector,
+    quality,
+    material: flat.material || findSpec(specs, ["material", "construccion"]) || "",
+    compatibility: flat.compatibility || flat.compatibilidad || findSpec(specs, ["compatibilidad", "medida", "uso"]) || "",
+    provider,
+    supplier: provider,
+    stock,
+    warranty: flat.warranty || flat.garantia || "Validar con proveedor",
+    rating: Number(flat.rating || flat.calificacion || flat.confidence || 4.2),
+    pros: Array.isArray(flat.pros) ? flat.pros : buildPros(flat),
+    cons: Array.isArray(flat.cons) ? flat.cons : buildCons(flat),
+    similar_products: Array.isArray(flat.similar_products) ? flat.similar_products : [],
+    source_links: Array.isArray(flat.source_links) ? flat.source_links : buildSourceLinks(flat)
   });
+}
+
+function buildSourceLinks(product) {
+  const query = encodeURIComponent(product.search_query || [product.name, product.brand, product.specs].filter(Boolean).join(" "));
+  const brand = String(product.brand || "").toLowerCase();
+  const links = [
+    {name: "Amazon", url: `https://www.amazon.com/s?k=${query}`},
+    {name: "AliExpress", url: `https://www.aliexpress.com/wholesale?SearchText=${query}`},
+    {name: "Mercado Libre", url: `https://listado.mercadolibre.com/${query}`}
+  ];
+  const official = officialBrandLink(brand);
+  if (official) links.push(official);
+  return links;
+}
+
+function officialBrandLink(brand) {
+  if (brand.includes("michelin")) return {name: "Michelin oficial", url: "https://www.michelinman.com/auto/tires"};
+  if (brand.includes("goodyear")) return {name: "Goodyear oficial", url: "https://www.goodyear.com/en_US/tires.html"};
+  if (brand.includes("bridgestone")) return {name: "Bridgestone oficial", url: "https://www.bridgestonetire.com/tire-search/"};
+  if (brand.includes("pirelli")) return {name: "Pirelli oficial", url: "https://www.pirelli.com/tires/en-us/car/catalog"};
+  if (brand.includes("continental")) return {name: "Continental oficial", url: "https://continentaltire.com/tires"};
+  return null;
+}
+
+function providerLinks(product) {
+  return (product.source_links || buildSourceLinks(product)).map(link =>
+    `<a class="provider-link" href="${ProductAIGuard.escapeHtml(link.url)}" target="_blank" rel="nofollow noopener">${ProductAIGuard.escapeHtml(link.name)}</a>`
+  ).join("");
+}
+
+function findSpec(specs, keys) {
+  const item = (specs || []).find(s => keys.some(key => String(s.etiqueta || "").toLowerCase().includes(key)));
+  return item ? item.valor : "";
+}
+
+function buildPros(product) {
+  return [
+    product.reason || "Busqueda tecnica lista para cotizar.",
+    product.hook || "Permite comparar precio, ficha y proveedor.",
+    "Compatible con flujo de carrito y proveedores."
+  ].filter(Boolean).slice(0, 3);
+}
+
+function buildCons(product) {
+  const cons = ["Precio y stock deben validarse con proveedor real."];
+  if (!product.image_verified) cons.push("Imagen referencial hasta confirmar evidencia.");
+  if (!product.brand || product.brand === "Generic") cons.push("Marca exacta pendiente de validacion.");
+  return cons.slice(0, 3);
 }
 
 function extractResultProducts(payload) {
@@ -282,22 +379,60 @@ function loadCategories() {
   document.getElementById("kpiCategories").textContent = cats.length;
 }
 
+function loadAdvancedFilters() {
+  fillSelect("brandFilter", [...new Set(products.map(p => p.brand).filter(Boolean))].sort(), "Todas");
+  fillSelect("sectorFilter", [...new Set(products.map(p => p.sector || p.category).filter(Boolean))].sort(), "Todos");
+}
+
+function fillSelect(id, values, label) {
+  const select = document.getElementById(id);
+  if (!select) return;
+  select.innerHTML = `<option value="">${label}</option>` + values.map(value => `<option value="${ProductAIGuard.escapeHtml(value)}">${ProductAIGuard.escapeHtml(value)}</option>`).join("");
+}
+
+function fieldValue(id) {
+  const el = document.getElementById(id);
+  return el ? String(el.value || "").trim().toLowerCase() : "";
+}
+
 function applyFilters() {
   setStatus("Buscando...");
   const q = document.getElementById("query").value.trim().toLowerCase();
   const cat = document.getElementById("categoryFilter").value;
   const sort = document.getElementById("sort").value;
+  const brand = fieldValue("brandFilter");
+  const sector = fieldValue("sectorFilter");
+  const use = fieldValue("useFilter");
+  const compat = fieldValue("compatibilityFilter");
+  const material = fieldValue("materialFilter");
+  const quality = fieldValue("qualityFilter");
+  const availability = fieldValue("availabilityFilter");
+  const minPrice = Number(document.getElementById("minPrice")?.value || 0);
+  const maxPrice = Number(document.getElementById("maxPrice")?.value || 0);
   filtered = products.filter(p => {
-    const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query].join(" ").toLowerCase();
-    return (!q || blob.includes(q)) && (!cat || p.category === cat);
+    const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query,p.compatibility,p.material,p.provider,p.supplier,p.sector,p.quality].join(" ").toLowerCase();
+    const price = salePrice(p);
+    return (!q || blob.includes(q))
+      && (!cat || p.category === cat)
+      && (!brand || String(p.brand || "").toLowerCase() === brand)
+      && (!sector || String(p.sector || p.category || "").toLowerCase() === sector)
+      && (!use || blob.includes(use))
+      && (!compat || blob.includes(compat))
+      && (!material || blob.includes(material))
+      && (!quality || String(p.quality || "").toLowerCase() === quality)
+      && (!availability || (availability === "available" ? Number(p.stock || 0) > 0 : Number(p.stock || 0) <= 0))
+      && (!minPrice || price >= minPrice)
+      && (!maxPrice || price <= maxPrice);
   });
   filtered.sort((a,b) => {
     if (sort === "price_asc") return salePrice(a) - salePrice(b);
     if (sort === "price_desc") return salePrice(b) - salePrice(a);
     if (sort === "category") return String(a.category).localeCompare(String(b.category));
+    if (sort === "quality") return String(b.quality).localeCompare(String(a.quality));
     return b.confidence - a.confidence;
   });
   renderResults();
+  showExpertAdvice();
 }
 
 async function executeSearch() {
@@ -338,29 +473,56 @@ async function executeSearch() {
     }
     const apiProducts = extractResultProducts(response).map(normalize);
     filtered = apiProducts;
+    products = mergeProducts(products, apiProducts);
+    loadCategories();
+    loadAdvancedFilters();
     renderResults();
     if (filtered.length) {
       setStatus(`${filtered.length} registros`);
     } else {
-      setStatus("Sin resultados IA");
-      document.getElementById("detailPanel").innerHTML = `<div class="empty">La IA no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
+      setStatus("Sin resultados del asesor");
+      document.getElementById("detailPanel").innerHTML = `<div class="empty">El asesor no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
     }
   } catch (err) {
+    // Si la API falla, buscar en todos los catálogos internos disponibles
     const message = err.message || String(err);
-    filtered = products.length ? products.filter(p => {
-      const q = document.getElementById("query").value.trim().toLowerCase();
+    let allProducts = [];
+    try {
+      // Intenta cargar productos de varios catálogos internos
+      const trending = await loadJson("/assets/trending_products.json");
+      const productsJson = await loadJson("/data/products.json");
+      allProducts = [
+        ...ProductAIGuard.extractProducts(trending),
+        ...ProductAIGuard.extractProducts(productsJson)
+      ].map(normalize);
+    } catch (e) {
+      // Si no se pueden cargar, usar los productos ya cargados
+      allProducts = products.length ? products.slice() : [];
+    }
+    const q = document.getElementById("query").value.trim().toLowerCase();
+    filtered = allProducts.filter(p => {
       const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query].join(" ").toLowerCase();
       return !q || blob.includes(q);
-    }) : [];
+    });
     renderResults();
-    setStatus("Error API");
-    document.getElementById("aiMode").textContent = "Error de conexión";
-    document.getElementById("evidenceSummary").textContent = "No se pudo ejecutar la búsqueda IA";
-    document.getElementById("detailPanel").innerHTML = `<div class="empty">El backend no respondió correctamente: ${ProductAIGuard.escapeHtml(message)}. Verifica que Render esté desplegado y que GEMINI_API_KEY esté activa.</div>`;
+    setStatus("Error API, mostrando productos locales");
+    document.getElementById("aiMode").textContent = "Catálogo local";
+    document.getElementById("evidenceSummary").textContent = "Mostrando productos encontrados en catálogos internos";
+    document.getElementById("detailPanel").innerHTML = `<div class="empty">El backend no respondió correctamente: ${ProductAIGuard.escapeHtml(message)}.<br>Se muestran todos los productos encontrados en catálogos internos.</div>`;
   } finally {
     button.disabled = false;
-    button.textContent = "Ejecutar";
+    button.textContent = "Buscar Pro";
   }
+}
+
+function mergeProducts(current, incoming) {
+  const seen = new Set();
+  return [...incoming, ...current].filter(item => {
+    const key = [item.name, item.brand, item.category].join("|").toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function renderEvidence(payload) {
@@ -382,15 +544,32 @@ function renderResults() {
     document.getElementById("confidencePill").textContent = "Sin resultados";
     return;
   }
-  body.innerHTML = filtered.map((p, index) => `
+  body.innerHTML = filtered.map((p, index) => {
+    // Ocultar campos internos y etiquetas técnicas
+    const name = ProductAIGuard.escapeHtml(p.name || "");
+    const brand = ProductAIGuard.escapeHtml(p.brand || "");
+    const category = ProductAIGuard.escapeHtml(p.category || "");
+    // Mostrar solo specs relevantes (ocultar search_query, nivel_confianza, etc)
+    const visibleSpecs = (p.specs_list || []).filter(s => {
+      const key = (s.etiqueta || "").toLowerCase();
+      return !["search_query","nivel_confianza","producto_principal","rfq listo","id","codigo","internal","interno"].some(w => key.includes(w));
+    });
+    const specText = visibleSpecs.length ? `${ProductAIGuard.escapeHtml(visibleSpecs[0].etiqueta)}: ${ProductAIGuard.escapeHtml(visibleSpecs[0].valor)}` : "Por validar";
+    return `
     <tr onclick="selectProduct(${index})">
-      <td><div class="product-cell"><img class="market-thumb" src="${ProductAIGuard.escapeHtml(ProductAIGuard.productImage ? ProductAIGuard.productImage(p) : (p.image || 'assets/home.jpg'))}" alt=""><div><strong>${ProductAIGuard.escapeHtml(p.name)}</strong><br><span style="color:#607d95">${ProductAIGuard.escapeHtml(p.brand || "Marca por validar")}</span><br><span class="trade-badge">RFQ listo</span></div></div></td>
-      <td><span class="pill">${ProductAIGuard.escapeHtml(p.category)}</span></td>
-      <td>${ProductAIGuard.escapeHtml((p.specs_list[0]?.etiqueta || "Specs") + ": " + (p.specs_list[0]?.valor || "Por validar"))}</td>
-      <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small></td>
-      <td><button class="btn-lite" onclick="event.stopPropagation(); addToCart(${index})" type="button">Agregar</button></td>
+      <td><div class="product-cell"><img class="market-thumb" src="${ProductAIGuard.escapeHtml(ProductAIGuard.productImage ? ProductAIGuard.productImage(p) : (p.image || 'assets/home.jpg'))}" alt=""><div><strong>${name}</strong><br><span style="color:#565959">${brand || "Marca por validar"}</span></div></div></td>
+      <td><span class="pill">${category}</span><br><small>${ProductAIGuard.escapeHtml(p.sector || p.product_type || "")}</small></td>
+      <td>${specText}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small><div class="provider-links">${providerLinks(p)}</div></td>
+      <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small><br><small>Rating ${Number(p.rating || 4.2).toFixed(1)}/5</small></td>
+      <td><div class="action-row">
+        <button class="btn-lite" onclick="event.stopPropagation(); addToCart(${index})" type="button">Agregar</button>
+        <button class="btn-lite" onclick="event.stopPropagation(); addToCompare(${index})" type="button">Comparar</button>
+        <button class="btn-lite" onclick="event.stopPropagation(); viewTechSheet(${index})" type="button">Ver ficha tecnica</button>
+        <button class="btn-lite" onclick="event.stopPropagation(); consultAvailability(${index})" type="button">Consultar disponibilidad</button>
+      </div></td>
     </tr>
-  `).join("");
+    `;
+  }).join("");
   selectProduct(0);
 }
 
@@ -398,19 +577,36 @@ function selectProduct(index) {
   selected = filtered[index];
   const confidence = Math.round((selected.confidence || 0) * 100);
   document.getElementById("confidencePill").textContent = `${confidence}% confianza`;
+  // Ocultar specs y campos internos en ficha técnica
+  const visibleSpecs = (selected.specs_list || []).filter(s => {
+    const key = (s.etiqueta || "").toLowerCase();
+    return !["search_query","nivel_confianza","producto_principal","rfq listo","id","codigo","internal","interno"].some(w => key.includes(w));
+  });
   document.getElementById("detailPanel").innerHTML = `
     <h3 style="margin-top:0">${ProductAIGuard.escapeHtml(selected.name)}</h3>
-    <p style="color:#607d95">${ProductAIGuard.escapeHtml(selected.short_desc || selected.reason || "")}</p>
+    <p style="color:#565959">${ProductAIGuard.escapeHtml(selected.short_desc || selected.reason || "")}</p>
     <div class="spec-grid">
-      ${selected.specs_list.map(s => `<div class="spec"><span>${ProductAIGuard.escapeHtml(s.etiqueta)}</span><strong>${ProductAIGuard.escapeHtml(s.valor)}</strong></div>`).join("")}
+      <div class="spec"><span>Marca</span><strong>${ProductAIGuard.escapeHtml(selected.brand || "Por validar")}</strong></div>
+      <div class="spec"><span>Modelo</span><strong>${ProductAIGuard.escapeHtml(selected.model || "Por validar")}</strong></div>
+      <div class="spec"><span>Proveedor</span><strong>${ProductAIGuard.escapeHtml(selected.provider || selected.supplier || "Por validar")}</strong></div>
+      <div class="spec"><span>Garantia</span><strong>${ProductAIGuard.escapeHtml(selected.warranty || "Validar")}</strong></div>
+      <div class="spec"><span>Compatibilidad</span><strong>${ProductAIGuard.escapeHtml(selected.compatibility || "Validar medida/modelo")}</strong></div>
+      <div class="spec"><span>Material</span><strong>${ProductAIGuard.escapeHtml(selected.material || "Por validar")}</strong></div>
+      ${visibleSpecs.map(s => `<div class="spec"><span>${ProductAIGuard.escapeHtml(s.etiqueta)}</span><strong>${ProductAIGuard.escapeHtml(s.valor)}</strong></div>`).join("")}
       <div class="spec"><span>Precio base</span><strong>${money(basePrice(selected))}</strong></div>
       <div class="spec"><span>Precio venta</span><strong>${money(selected.price_sale || salePrice(selected))}</strong></div>
     </div>
-    <h4>Argumento comercial</h4>
+    <h4>Asesor experto</h4>
     <p>${ProductAIGuard.escapeHtml(selected.reason || "Producto pendiente de validación comercial.")}</p>
-    <h4>Búsqueda marketplace</h4>
-    <p><code>${ProductAIGuard.escapeHtml(selected.search_query || selected.name)}</code></p>
+    <h4>Ventajas</h4>
+    <ul class="tech-list">${(selected.pros || []).map(item => `<li>${ProductAIGuard.escapeHtml(item)}</li>`).join("")}</ul>
+    <h4>Desventajas / validaciones</h4>
+    <ul class="tech-list">${(selected.cons || []).map(item => `<li>${ProductAIGuard.escapeHtml(item)}</li>`).join("")}</ul>
+    <h4>Fuentes de consulta</h4>
+    <div class="provider-links">${providerLinks(selected)}</div>
     <button class="btn-sap" onclick="addSelected()" type="button">Agregar al carrito</button>
+    <button class="btn-lite" onclick="addToCompare(filtered.indexOf(selected))" type="button" style="margin-left:8px">Comparar</button>
+    <button class="btn-lite" onclick="consultAvailability(filtered.indexOf(selected))" type="button" style="margin-left:8px">Consultar disponibilidad</button>
   `;
 }
 
@@ -456,6 +652,72 @@ function removeCart(index) {
   saveCart();
 }
 
+function showExpertAdvice() {
+  const box = document.getElementById("expertAdvice");
+  if (!box) return;
+  if (!filtered.length) {
+    box.style.display = "none";
+    return;
+  }
+  const best = filtered[0];
+  const cheapest = filtered.reduce((winner, item) => salePrice(item) < salePrice(winner) ? item : winner, filtered[0]);
+  box.style.display = "block";
+  box.innerHTML = `<strong>Asesor experto:</strong> mejor recomendado: ${ProductAIGuard.escapeHtml(best.name)}. Mejor precio estimado: ${ProductAIGuard.escapeHtml(cheapest.name)}. Valida ficha tecnica, proveedor, garantia y disponibilidad antes de cerrar compra.`;
+}
+
+function addToCompare(index) {
+  const item = filtered[index];
+  if (!item) return;
+  if (!compareItems.some(p => p.name === item.name && p.brand === item.brand)) compareItems.push(item);
+  renderCompare();
+}
+
+function renderCompare() {
+  const panel = document.getElementById("comparePanel");
+  const list = document.getElementById("compareList");
+  if (!panel || !list) return;
+  panel.style.display = compareItems.length ? "block" : "none";
+  list.innerHTML = compareItems.map((p, index) => `
+    <div class="spec" style="margin-bottom:8px">
+      <strong>${ProductAIGuard.escapeHtml(p.name)}</strong>
+      <div>Marca: ${ProductAIGuard.escapeHtml(p.brand || "Por validar")} | Precio: ${money(p.price_sale || salePrice(p))}</div>
+      <div>Compatibilidad: ${ProductAIGuard.escapeHtml(p.compatibility || "Validar")}</div>
+      <button class="btn-lite" onclick="removeCompare(${index})" type="button">Quitar</button>
+    </div>
+  `).join("");
+}
+
+function removeCompare(index) {
+  compareItems.splice(index, 1);
+  renderCompare();
+}
+
+function viewTechSheet(index) {
+  selectProduct(index);
+  document.getElementById("detailPanel").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+function consultAvailability(index) {
+  const item = filtered[index];
+  if (!item) return;
+  const links = item.source_links || buildSourceLinks(item);
+  window.open(links[0].url, "_blank", "noopener,noreferrer");
+}
+
+function setAudioBlob(blob) {
+  const file = new File([blob], `busqueda-audio-${Date.now()}.webm`, {type: blob.type || "audio/webm"});
+  const transfer = new DataTransfer();
+  transfer.items.add(file);
+  const input = document.getElementById("imageInput");
+  input.files = transfer.files;
+  document.getElementById("mediaName").textContent = "Audio grabado listo: pulsa Buscar Pro.";
+  const preview = document.getElementById("audioPreview");
+  if (preview) {
+    preview.src = URL.createObjectURL(blob);
+    preview.style.display = "block";
+  }
+}
+
 document.getElementById("runSearch").addEventListener("click", () => {
   executeSearch();
 });
@@ -468,6 +730,11 @@ document.getElementById("query").addEventListener("keydown", event => {
 document.getElementById("query").addEventListener("input", applyFilters);
 document.getElementById("categoryFilter").addEventListener("change", applyFilters);
 document.getElementById("sort").addEventListener("change", applyFilters);
+["brandFilter","sectorFilter","useFilter","compatibilityFilter","materialFilter","qualityFilter","availabilityFilter","minPrice","maxPrice"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", applyFilters);
+  if (el) el.addEventListener("change", applyFilters);
+});
 document.getElementById("margin").addEventListener("input", () => { renderResults(); renderCart(); });
 document.getElementById("currency").addEventListener("change", () => { renderResults(); renderCart(); });
 document.getElementById("country").addEventListener("change", () => {
@@ -492,6 +759,31 @@ document.getElementById("imageInput").addEventListener("change", event => {
   document.getElementById("query").value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
   setStatus("Archivo listo: pulsa Ejecutar");
 });
+document.getElementById("recordAudioBtn")?.addEventListener("click", async event => {
+  const button = event.currentTarget;
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    alert("Tu navegador no permite grabar audio aqui. Puedes subir un archivo de audio.");
+    return;
+  }
+  if (button.dataset.recording === "1" && window.smartRecorder) {
+    window.smartRecorder.stop();
+    button.dataset.recording = "0";
+    button.textContent = "Grabar audio";
+    return;
+  }
+  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  const chunks = [];
+  const recorder = new MediaRecorder(stream);
+  window.smartRecorder = recorder;
+  recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  recorder.onstop = () => {
+    stream.getTracks().forEach(track => track.stop());
+    setAudioBlob(new Blob(chunks, {type: "audio/webm"}));
+  };
+  recorder.start();
+  button.dataset.recording = "1";
+  button.textContent = "Detener audio";
+});
 
 async function loadProducts() {
   setStatus("Cargando...");
@@ -501,9 +793,11 @@ async function loadProducts() {
     products = ProductAIGuard.extractProducts(trending).map(normalize);
     filtered = products.slice();
     loadCategories();
+    loadAdvancedFilters();
     applyFilters();
     renderCart();
     document.getElementById("runSearch").disabled = false;
+    showExpertAdvice();
   } catch (err) {
     products = [];
     filtered = [];
