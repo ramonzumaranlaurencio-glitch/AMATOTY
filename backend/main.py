@@ -620,15 +620,90 @@ def _load_trending_products():
     return []
 
 
-@app.route("/api/smart-search", methods=["POST"])
-def smart_search():
-    data = request.get_json(silent=True) or {}
-    query = str(data.get("query") or "").strip().lower()
-    category = str(data.get("category") or "").strip().lower()
-    currency = str(data.get("currency") or "USD").upper()
-    margin = float(data.get("margin") or 20)
+SMART_SEARCH_PROMPT = """
+Eres un agente de busqueda comercial visual y auditiva tipo Google Shopping /
+Alibaba, pero mas especifico porque analizas evidencias de imagen o audio.
 
+Debes:
+- Si es imagen: leer pixel por pixel a nivel visual, detectar objetos, OCR,
+  marcas, modelo, medidas, materiales, color, conectores, empaque y contexto.
+- Si es audio: transcribir la intencion, detectar producto, marca, modelo,
+  especificaciones mencionadas y necesidad de compra.
+- No procesar ni describir contenido sexual, desnudez, explotación, violencia
+  grafica o solicitudes indecentes. Si aparece, responde blocked=true.
+- No inventes una imagen externa ni URL falsa.
+- Actua por pais: adapta moneda, texto comercial, marketplace probable y cultura.
+- Calcula precio_venta aplicando el margen indicado sobre precio_base.
+- Devuelve SOLO JSON valido.
+
+Schema:
+{
+  "blocked": false,
+  "block_reason": "",
+  "analysis_mode": "image|audio",
+  "country": "codigo pais",
+  "currency": "moneda",
+  "marketplace_hint": "Amazon/MercadoLibre/AliExpress/Alibaba/local",
+  "evidence": {
+    "summary": "resumen de evidencia",
+    "detected_text": [],
+    "visual_or_audio_clues": [],
+    "uncertainties": []
+  },
+  "products": [
+    {
+      "name": "nombre comercial buscable",
+      "brand": "marca o Generic",
+      "category": "categoria",
+      "product_type": "tipo exacto",
+      "problem": "problema que resuelve",
+      "target": "publico objetivo",
+      "short_desc": "descripcion comercial",
+      "reason": "argumento comercial honesto",
+      "hook": "gancho breve",
+      "specs": "Capacidad: ..., Material: ..., Uso: ...",
+      "search_query": "consulta precisa para marketplace del pais",
+      "price_base": 0,
+      "price_sale": 0,
+      "currency": "moneda",
+      "image_verified": false,
+      "image_match_score": 0.0
+    }
+  ]
+}
+"""
+
+
+def _market_context(country, currency):
+    country = (country or "US").upper()
+    defaults = {
+        "US": ("USD", "Amazon US", "cart", "businesslike, direct and review-driven"),
+        "PE": ("PEN", "MercadoLibre Peru", "carrito", "practico, ahorro y confianza"),
+        "CO": ("COP", "MercadoLibre Colombia", "canasta", "cercano, claro y orientado a beneficio"),
+        "MX": ("MXN", "MercadoLibre Mexico", "carrito", "directo, comparativo y promocional"),
+        "CL": ("CLP", "MercadoLibre Chile", "carrito", "sobrio, tecnico y precio claro"),
+        "AR": ("ARS", "MercadoLibre Argentina", "carrito", "comparativo, precio y disponibilidad"),
+        "EC": ("USD", "MercadoLibre Ecuador", "carrito", "simple, confiable y practico"),
+        "BO": ("BOB", "marketplace Bolivia", "carrito", "practico y precio claro"),
+        "PY": ("PYG", "marketplace Paraguay", "carrito", "directo y orientado a utilidad"),
+        "UY": ("UYU", "MercadoLibre Uruguay", "carrito", "sobrio y confiable"),
+        "BR": ("BRL", "Mercado Livre Brasil", "carrinho", "portugues comercial claro"),
+        "VE": ("USD", "marketplace Venezuela", "carrito", "precio claro y disponibilidad"),
+    }
+    default_currency, marketplace, cart_word, tone = defaults.get(country, defaults["US"])
+    return {
+        "country": country,
+        "currency": currency or default_currency,
+        "marketplace": marketplace,
+        "cart_word": cart_word,
+        "tone": tone,
+    }
+
+
+def _smart_search_fallback(query, category, currency, margin):
     products = _load_trending_products()
+    query = (query or "").lower()
+    category = (category or "").lower()
     if query or category:
         products = [
             product
@@ -651,6 +726,23 @@ def smart_search():
             )
             and (not category or str(product.get("category", "")).lower() == category)
         ]
+    for product in products:
+        base = float(product.get("price_base") or product.get("base_price") or 10)
+        product["price_base"] = base
+        product["price_sale"] = round(base * (1 + margin / 100), 2)
+        product["currency"] = currency
+    return products
+
+
+@app.route("/api/smart-search", methods=["POST"])
+def smart_search():
+    data = request.get_json(silent=True) or {}
+    query = str(data.get("query") or "").strip().lower()
+    category = str(data.get("category") or "").strip().lower()
+    currency = str(data.get("currency") or "USD").upper()
+    margin = float(data.get("margin") or 20)
+
+    products = _smart_search_fallback(query, category, currency, margin)
 
     return jsonify(
         {
@@ -663,6 +755,103 @@ def smart_search():
             "products": products,
         }
     )
+
+
+@app.route("/api/smart-analyze-media", methods=["POST"])
+def smart_analyze_media():
+    file = (
+        request.files.get("media")
+        or request.files.get("image")
+        or request.files.get("audio")
+    )
+    if not file:
+        return jsonify({"error": "Sube una imagen o audio para analizar."}), 400
+
+    mime_type = file.mimetype or ""
+    if not (mime_type.startswith("image/") or mime_type.startswith("audio/")):
+        return jsonify({"error": "Formato no soportado. Usa imagen o audio."}), 400
+
+    media_bytes = file.read()
+    if len(media_bytes) > 15 * 1024 * 1024:
+        return jsonify({"error": "Archivo demasiado grande. Usa maximo 15 MB."}), 400
+
+    country = request.form.get("country", "US")
+    currency = request.form.get("currency", "")
+    margin = float(request.form.get("margin") or 30)
+    query = request.form.get("query", "")
+    category = request.form.get("category", "")
+    context = _market_context(country, currency)
+
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        products = _smart_search_fallback(query or file.filename, category, context["currency"], margin)
+        return jsonify(
+            {
+                "ok": True,
+                "analysis_mode": "local_fallback",
+                "blocked": False,
+                "country": context["country"],
+                "currency": context["currency"],
+                "marketplace_hint": context["marketplace"],
+                "evidence": {
+                    "summary": "Sin GEMINI_API_KEY: se uso el nombre del archivo como pista.",
+                    "detected_text": [],
+                    "visual_or_audio_clues": [file.filename],
+                    "uncertainties": ["Configura GEMINI_API_KEY para analisis real de imagen/audio."],
+                },
+                "products": products,
+            }
+        )
+
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=api_key)
+        media_part = types.Part.from_bytes(data=media_bytes, mime_type=mime_type)
+        instruction = (
+            f"{SMART_SEARCH_PROMPT}\nPais: {context['country']}.\n"
+            f"Moneda: {context['currency']}.\nMarketplace sugerido: {context['marketplace']}.\n"
+            f"Cultura/tono: {context['tone']}.\nMargen de ganancia: {margin}%.\n"
+            f"Consulta adicional del usuario: {query or 'sin texto'}.\n"
+            f"Categoria elegida: {category or 'todas'}."
+        )
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[media_part, instruction],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.25,
+            ),
+        )
+        payload = _extract_json(response.text)
+    except Exception as exc:
+        return jsonify({"error": "No se pudo analizar con IA.", "detail": str(exc)}), 500
+
+    if payload.get("blocked"):
+        return jsonify(payload), 200
+
+    products = payload.get("products") or []
+    for product in products:
+        base = float(product.get("price_base") or 10)
+        product["price_base"] = base
+        product["price_sale"] = round(float(product.get("price_sale") or base * (1 + margin / 100)), 2)
+        product["currency"] = product.get("currency") or context["currency"]
+        product["image_verified"] = bool(product.get("image_verified", False))
+        product["image_match_score"] = float(product.get("image_match_score") or 0)
+
+    payload.update(
+        {
+            "ok": True,
+            "country": payload.get("country") or context["country"],
+            "currency": payload.get("currency") or context["currency"],
+            "marketplace_hint": payload.get("marketplace_hint") or context["marketplace"],
+            "margin": margin,
+            "total_productos": len(products),
+            "products": products,
+        }
+    )
+    return jsonify(payload)
 
 
 @app.route("/api/diagnostico", methods=["POST", "GET"])

@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/product_ai_guard.js"></script>
 <style>
-:root{--sap-blue:#0a6ed1;--sap-ink:#1d2d3e;--sap-muted:#5b738b;--sap-line:#d9e4ee;--sap-bg:#f3f6f9;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c}
+:root{--sap-blue:#0a6ed1;--sap-ink:#1d2d3e;--sap-muted:#5b738b;--sap-line:#d9e4ee;--sap-bg:#f3f6f9;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff6a00;--ali-ink:#17233c}
 body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
 header{background:#0b1f33;padding:14px 22px;border-bottom:1px solid #244761}
 header h1{font-size:20px;margin:0 0 8px 0;letter-spacing:0}
@@ -23,7 +23,8 @@ main{max-width:none;padding:0}
 .topbar{background:#fff;border:1px solid var(--sap-line);border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:14px;box-shadow:0 1px 4px rgba(29,45,62,.08)}
 .querybar{display:grid;grid-template-columns:minmax(220px,1fr) 160px 150px;gap:10px}
 .querybar input,.querybar select{border:1px solid #b8c7d4;border-radius:4px;padding:10px;background:#fff}
-.btn-sap{border:1px solid #0854a0;background:var(--sap-blue);color:#fff;border-radius:4px;padding:10px 14px;font-weight:700;cursor:pointer}
+.btn-sap{border:1px solid #c94f00;background:linear-gradient(180deg,#ff7a1a,#f05a00);color:#fff;border-radius:4px;padding:10px 14px;font-weight:700;cursor:pointer}
+.btn-sap:disabled{opacity:.65;cursor:wait}
 .btn-ghost{border:1px solid #9eb4c8;background:#fff;color:#0a4f8f;border-radius:4px;padding:9px 12px;font-weight:700;cursor:pointer}
 .btn-lite{border:1px solid #d0dce7;background:#f7fafd;color:#1d5d90;border-radius:4px;padding:7px 10px;font-weight:700;cursor:pointer}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
@@ -56,6 +57,14 @@ main{max-width:none;padding:0}
 .dropzone{border:1px dashed #8aa8c4;background:#f7fbff;border-radius:5px;padding:12px;text-align:center}
 .dropzone input{margin-top:8px}
 .empty{color:#607d95;font-size:14px;padding:14px;border:1px dashed #d1dde8;border-radius:5px;background:#fbfdff}
+.intel-strip{background:#fff;border:1px solid var(--sap-line);border-radius:6px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;box-shadow:0 1px 4px rgba(29,45,62,.06)}
+.intel-cell{padding:10px 12px;border-right:1px solid var(--sap-line)}
+.intel-cell:last-child{border-right:0}
+.intel-cell span{display:block;font-size:11px;color:#607d95;text-transform:uppercase;font-weight:800}
+.intel-cell strong{display:block;margin-top:3px;color:#17233c}
+.market-thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #dfe8f0;background:#fff;margin-right:10px;vertical-align:middle}
+.product-cell{display:flex;align-items:center;gap:10px}
+.trade-badge{display:inline-block;background:#fff3e5;color:#a13b00;border:1px solid #ffd2a8;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:800;margin-top:4px}
 @media(max-width:1100px){.workbench{grid-template-columns:1fr}.side,.cart{border:0}.layout,.querybar,.kpis{grid-template-columns:1fr}.cart{position:static}}
 </style>
 </head>
@@ -65,12 +74,14 @@ main{max-width:none;padding:0}
 <div class="workbench">
   <aside class="side">
     <h2>Parámetros</h2>
-    <div class="group"><label for="margin">Margen interno</label><input id="margin" type="number" value="20" min="0" max="80"></div>
+    <div class="group"><label for="margin">Margen interno</label><input id="margin" type="number" value="30" min="0" max="80"></div>
+    <div class="group"><label for="country">País mercado</label><select id="country"><option value="US">Estados Unidos</option><option value="PE">Perú</option><option value="CO">Colombia</option><option value="MX">México</option><option value="CL">Chile</option><option value="AR">Argentina</option><option value="EC">Ecuador</option><option value="BO">Bolivia</option><option value="PY">Paraguay</option><option value="UY">Uruguay</option><option value="BR">Brasil</option><option value="VE">Venezuela</option></select></div>
     <div class="group"><label for="currency">Moneda</label><select id="currency"><option value="USD">USD</option><option value="PEN">PEN</option><option value="COP">COP</option><option value="MXN">MXN</option><option value="CLP">CLP</option><option value="ARS">ARS</option><option value="BOB">BOB</option><option value="PYG">PYG</option><option value="UYU">UYU</option><option value="BRL">BRL</option></select></div>
     <div class="group"><label for="sort">Orden</label><select id="sort"><option value="score">Confianza</option><option value="price_asc">Precio menor</option><option value="price_desc">Precio mayor</option><option value="category">Categoría</option></select></div>
     <div class="group dropzone">
-      <label for="imageInput">Imagen / OCR</label>
-      <input id="imageInput" type="file" accept="image/*">
+      <label for="imageInput">Imagen o audio / OCR</label>
+      <input id="imageInput" type="file" accept="image/*,audio/*">
+      <small id="mediaName" style="display:block;margin-top:6px;color:#607d95">Sube foto de producto o nota de voz.</small>
     </div>
     <button class="btn-ghost" id="schemaBtn" type="button">Ver esquema JSON</button>
   </aside>
@@ -85,10 +96,16 @@ main{max-width:none;padding:0}
       <button class="btn-ghost" id="clearBtn" type="button">Limpiar</button>
     </div>
 
+    <div class="intel-strip">
+      <div class="intel-cell"><span>Modo IA</span><strong id="aiMode">Catálogo listo</strong></div>
+      <div class="intel-cell"><span>Evidencia detectada</span><strong id="evidenceSummary">Texto, imagen o audio pendiente</strong></div>
+      <div class="intel-cell"><span>Marketplace</span><strong id="marketplaceHint">Según país seleccionado</strong></div>
+    </div>
+
     <div class="kpis">
       <div class="kpi"><span>Productos</span><strong id="kpiProducts">0</strong></div>
       <div class="kpi"><span>Categorías</span><strong id="kpiCategories">0</strong></div>
-      <div class="kpi"><span>Margen</span><strong id="kpiMargin">20%</strong></div>
+      <div class="kpi"><span>Margen</span><strong id="kpiMargin">30%</strong></div>
       <div class="kpi"><span>Carrito</span><strong id="kpiCart">0</strong></div>
     </div>
 
@@ -146,9 +163,11 @@ const basePrices = {
   "Protector Solar Facial SPF50": 12
 };
 const fx = {USD:1, PEN:3.75, COP:3900, MXN:17, CLP:930, ARS:1050, BOB:6.9, PYG:7300, UYU:39, BRL:5};
+const countryCurrency = {US:"USD", PE:"PEN", CO:"COP", MX:"MXN", CL:"CLP", AR:"ARS", EC:"USD", BO:"BOB", PY:"PYG", UY:"UYU", BR:"BRL", VE:"USD"};
 let products = [];
 let filtered = [];
 let selected = null;
+let lastAiPayload = null;
 let cart = JSON.parse(localStorage.getItem("smartCart") || "[]");
 
 const API_ORIGIN = window.location.hostname.includes("github.io")
@@ -198,13 +217,30 @@ async function postJson(path, body) {
   }
 }
 
+async function postForm(path, formData) {
+  const primary = `${API_ORIGIN}${path}`;
+  const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+  try {
+    const response = await fetch(primary, {method: "POST", body: formData});
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return await response.json();
+  } catch (err) {
+    if (fallback !== primary) {
+      const response = await fetch(fallback, {method: "POST", body: formData});
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return await response.json();
+    }
+    throw err;
+  }
+}
+
 function money(value) {
   const currency = document.getElementById("currency").value;
   return new Intl.NumberFormat("es", {style:"currency", currency}).format(value * fx[currency]);
 }
 
 function basePrice(product) {
-  return Number(product.price_base || product.base_price || basePrices[product.name] || 10);
+  return Number(product.price_base || product.base_price || product.price_base_usd || basePrices[product.name] || 10);
 }
 
 function salePrice(product) {
@@ -225,6 +261,7 @@ function normalize(product) {
   const flat = ProductAIGuard.flattenProduct(product);
   return Object.assign(flat, {
     price_base: Number(product.price_base || product.base_price || product.precio_numero || product.precio || flat.price_base || 10),
+    price_sale: Number(product.price_sale || 0),
     search_query: flat.search_query || [flat.name, flat.brand, flat.category].filter(Boolean).join(" "),
     confidence: Number(product.image_match_score || product.producto_principal?.nivel_confianza || 0.78),
     specs_list: specsArray(flat)
@@ -269,10 +306,33 @@ async function executeSearch() {
     query: document.getElementById("query").value.trim(),
     category: document.getElementById("categoryFilter").value,
     currency: document.getElementById("currency").value,
+    country: document.getElementById("country").value,
     margin: Number(document.getElementById("margin").value || 20)
   };
   try {
-    const response = await postJson("/api/smart-search", payload);
+    const media = document.getElementById("imageInput").files[0];
+    let response;
+    if (media) {
+      const formData = new FormData();
+      formData.append("media", media);
+      formData.append("query", payload.query);
+      formData.append("category", payload.category);
+      formData.append("currency", payload.currency);
+      formData.append("country", payload.country);
+      formData.append("margin", String(payload.margin));
+      response = await postForm("/api/smart-analyze-media", formData);
+    } else {
+      response = await postJson("/api/smart-search", payload);
+    }
+    lastAiPayload = response;
+    renderEvidence(response);
+    if (response.blocked) {
+      filtered = [];
+      renderResults();
+      setStatus("Bloqueado");
+      document.getElementById("detailPanel").innerHTML = `<div class="empty">${ProductAIGuard.escapeHtml(response.block_reason || "Contenido no permitido para búsqueda comercial.")}</div>`;
+      return;
+    }
     const apiProducts = ProductAIGuard.extractProducts(response).map(normalize);
     filtered = apiProducts;
     renderResults();
@@ -290,6 +350,13 @@ async function executeSearch() {
   }
 }
 
+function renderEvidence(payload) {
+  const evidence = payload?.evidence || {};
+  document.getElementById("aiMode").textContent = payload?.analysis_mode || payload?.mode || "Búsqueda";
+  document.getElementById("evidenceSummary").textContent = evidence.summary || payload?.query || "Resultados por catálogo";
+  document.getElementById("marketplaceHint").textContent = payload?.marketplace_hint || `${document.getElementById("currency").value} marketplace`;
+}
+
 function renderResults() {
   document.getElementById("resultCount").textContent = `${filtered.length} registros`;
   document.getElementById("kpiProducts").textContent = filtered.length;
@@ -304,10 +371,10 @@ function renderResults() {
   }
   body.innerHTML = filtered.map((p, index) => `
     <tr onclick="selectProduct(${index})">
-      <td><strong>${ProductAIGuard.escapeHtml(p.name)}</strong><br><span style="color:#607d95">${ProductAIGuard.escapeHtml(p.brand || "Marca por validar")}</span></td>
+      <td><div class="product-cell"><img class="market-thumb" src="${ProductAIGuard.escapeHtml(ProductAIGuard.productImage ? ProductAIGuard.productImage(p) : (p.image || 'assets/home.jpg'))}" alt=""><div><strong>${ProductAIGuard.escapeHtml(p.name)}</strong><br><span style="color:#607d95">${ProductAIGuard.escapeHtml(p.brand || "Marca por validar")}</span><br><span class="trade-badge">RFQ listo</span></div></div></td>
       <td><span class="pill">${ProductAIGuard.escapeHtml(p.category)}</span></td>
       <td>${ProductAIGuard.escapeHtml((p.specs_list[0]?.etiqueta || "Specs") + ": " + (p.specs_list[0]?.valor || "Por validar"))}</td>
-      <td><span class="money">${money(salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small></td>
+      <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small></td>
       <td><button class="btn-lite" onclick="event.stopPropagation(); addToCart(${index})" type="button">Agregar</button></td>
     </tr>
   `).join("");
@@ -324,7 +391,7 @@ function selectProduct(index) {
     <div class="spec-grid">
       ${selected.specs_list.map(s => `<div class="spec"><span>${ProductAIGuard.escapeHtml(s.etiqueta)}</span><strong>${ProductAIGuard.escapeHtml(s.valor)}</strong></div>`).join("")}
       <div class="spec"><span>Precio base</span><strong>${money(basePrice(selected))}</strong></div>
-      <div class="spec"><span>Precio venta</span><strong>${money(salePrice(selected))}</strong></div>
+      <div class="spec"><span>Precio venta</span><strong>${money(selected.price_sale || salePrice(selected))}</strong></div>
     </div>
     <h4>Argumento comercial</h4>
     <p>${ProductAIGuard.escapeHtml(selected.reason || "Producto pendiente de validación comercial.")}</p>
@@ -390,6 +457,12 @@ document.getElementById("categoryFilter").addEventListener("change", applyFilter
 document.getElementById("sort").addEventListener("change", applyFilters);
 document.getElementById("margin").addEventListener("input", () => { renderResults(); renderCart(); });
 document.getElementById("currency").addEventListener("change", () => { renderResults(); renderCart(); });
+document.getElementById("country").addEventListener("change", () => {
+  const country = document.getElementById("country").value;
+  document.getElementById("currency").value = countryCurrency[country] || "USD";
+  renderResults();
+  renderCart();
+});
 document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("query").value = ""; document.getElementById("categoryFilter").value = ""; applyFilters(); });
 document.getElementById("emptyCart").addEventListener("click", () => { cart = []; saveCart(); });
 document.getElementById("checkoutBtn").addEventListener("click", () => {
@@ -402,8 +475,9 @@ document.getElementById("schemaBtn").addEventListener("click", () => {
 document.getElementById("imageInput").addEventListener("change", event => {
   const file = event.target.files[0];
   if (!file) return;
+  document.getElementById("mediaName").textContent = `${file.type.startsWith("audio/") ? "Audio" : "Imagen"} cargada: ${file.name}`;
   document.getElementById("query").value = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-  applyFilters();
+  setStatus("Archivo listo");
 });
 
 async function loadProducts() {
