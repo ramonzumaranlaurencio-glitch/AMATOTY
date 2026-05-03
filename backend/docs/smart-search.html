@@ -233,20 +233,43 @@ async function loadJson(path) {
 async function postJson(path, body) {
   const primary = `${API_ORIGIN}${path}`;
   const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+
   const options = {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   };
+
+  async function doRequest(url) {
+    const response = await fetch(url, options);
+    const rawText = await response.text();
+
+    let data = null;
+    try {
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch (_) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const detail =
+        data?.error ||
+        data?.block_reason ||
+        data?.message ||
+        rawText ||
+        `${response.status} ${response.statusText}`;
+
+      throw new Error(detail);
+    }
+
+    return data;
+  }
+
   try {
-    const response = await fetch(primary, options);
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return await response.json();
+    return await doRequest(primary);
   } catch (err) {
     if (fallback !== primary) {
-      const response = await fetch(fallback, options);
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      return await response.json();
+      return await doRequest(fallback);
     }
     throw err;
   }
@@ -255,15 +278,37 @@ async function postJson(path, body) {
 async function postForm(path, formData) {
   const primary = `${API_ORIGIN}${path}`;
   const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+
+  async function doRequest(url) {
+    const response = await fetch(url, { method: "POST", body: formData });
+    const rawText = await response.text();
+
+    let data = null;
+    try {
+      data = rawText ? JSON.parse(rawText) : null;
+    } catch (_) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const detail =
+        data?.error ||
+        data?.block_reason ||
+        data?.message ||
+        rawText ||
+        `${response.status} ${response.statusText}`;
+
+      throw new Error(detail);
+    }
+
+    return data;
+  }
+
   try {
-    const response = await fetch(primary, {method: "POST", body: formData});
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    return await response.json();
+    return await doRequest(primary);
   } catch (err) {
     if (fallback !== primary) {
-      const response = await fetch(fallback, {method: "POST", body: formData});
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      return await response.json();
+      return await doRequest(fallback);
     }
     throw err;
   }
@@ -456,6 +501,7 @@ async function executeSearch() {
   button.disabled = true;
   button.textContent = "Ejecutando...";
   setStatus("Ejecutando...");
+
   const payload = {
     query: document.getElementById("query").value.trim(),
     category: document.getElementById("categoryFilter").value,
@@ -463,10 +509,15 @@ async function executeSearch() {
     country: document.getElementById("country").value,
     margin: Number(document.getElementById("margin").value || 20)
   };
+
   try {
     const media = document.getElementById("imageInput").files[0];
     let response;
+
+    console.log("Archivo cargado:", media ? media.name : "sin archivo");
+
     if (media) {
+      console.log("Usando endpoint: /api/smart-analyze-media");
       const formData = new FormData();
       formData.append("media", media);
       formData.append("query", payload.query);
@@ -476,71 +527,58 @@ async function executeSearch() {
       formData.append("margin", String(payload.margin));
       response = await postForm("/api/smart-analyze-media", formData);
     } else {
+      console.log("Usando endpoint: /api/smart-search");
       response = await postJson("/api/smart-search", payload);
     }
+
     lastAiPayload = response;
     renderEvidence(response);
+
     if (response.blocked) {
       filtered = [];
       renderResults();
       setStatus("Bloqueado");
-      document.getElementById("detailPanel").innerHTML = `<div class="empty">${ProductAIGuard.escapeHtml(response.block_reason || "Contenido no permitido para búsqueda comercial.")}</div>`;
+      document.getElementById("aiMode").textContent = response.analysis_mode || "blocked";
+      document.getElementById("evidenceSummary").textContent = response.error || response.block_reason || "Bloqueado";
+      document.getElementById("detailPanel").innerHTML = `
+        <div class="empty">
+          <strong>Error detectado:</strong><br>
+          ${ProductAIGuard.escapeHtml(response.error || response.block_reason || "Contenido no permitido o fallo del backend.")}
+        </div>
+      `;
       return;
     }
+
     const apiProducts = extractResultProducts(response).map(normalize);
     products = mergeProducts(products, apiProducts);
     loadCategories();
     loadAdvancedFilters();
     applyFilters();
+
     if (filtered.length) {
       setStatus(`${filtered.length} registros`);
     } else {
       setStatus("Sin resultados del asesor");
-      document.getElementById("detailPanel").innerHTML = `<div class="empty">El asesor no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
+      document.getElementById("detailPanel").innerHTML = `
+        <div class="empty">
+          El asesor no devolvió productos para esta evidencia.
+        </div>
+      `;
     }
+
   } catch (err) {
-    // Si la API falla, buscar en todos los catálogos internos disponibles
     const message = err.message || String(err);
-    let allProducts = [];
-    try {
-      // Intenta cargar productos de varios catálogos internos
-      const trending = await loadJson("/assets/trending_products.json");
-      const productsJson = await loadJson("/data/products.json");
-      allProducts = [
-        ...ProductAIGuard.extractProducts(trending),
-        ...ProductAIGuard.extractProducts(productsJson)
-      ].map(normalize);
-    } catch (e) {
-      // Si no se pueden cargar, usar los productos ya cargados
-      allProducts = products.length ? products.slice() : [];
-    }
-    const q = document.getElementById("query").value.trim();
-    const normalizeText = text => String(text || "")
-      .toLowerCase()
-      .replace(/[\/\-_]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    const words = normalizeText(q).split(" ").filter(Boolean);
-    filtered = allProducts.filter(p => {
-      const blob = normalizeText([
-        p.name,
-        p.brand,
-        p.category,
-        p.product_type,
-        p.problem,
-        p.target,
-        p.specs,
-        p.search_query,
-        p.image_alt,
-        p.image_must_show?.join(" ")
-      ].join(" "));
-      return !words.length || words.every(word => blob.includes(word));
-    });
+    filtered = [];
     renderResults();
-    setStatus("Error API, mostrando productos locales");
-    document.getElementById("aiMode").textContent = "Catálogo local";
-    document.getElementById("evidenceSummary").textContent = "Mostrando productos encontrados en catálogos internos";
-    document.getElementById("detailPanel").innerHTML = `<div class="empty">El backend no respondió correctamente: ${ProductAIGuard.escapeHtml(message)}.<br>Se muestran todos los productos encontrados en catálogos internos.</div>`;
+    setStatus("Error real de API");
+    document.getElementById("aiMode").textContent = "api_error";
+    document.getElementById("evidenceSummary").textContent = "La API fallo; se detuvo el fallback silencioso";
+    document.getElementById("detailPanel").innerHTML = `
+      <div class="empty">
+        <strong>Error real del backend:</strong><br>
+        ${ProductAIGuard.escapeHtml(message)}
+      </div>
+    `;
   } finally {
     button.disabled = false;
     button.textContent = "Buscar Pro";

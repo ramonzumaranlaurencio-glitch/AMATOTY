@@ -1759,37 +1759,18 @@ def smart_analyze_media():
 
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        seed_query = _clean_search_text(query or file.filename)
-        products = _smart_search_fallback(seed_query, category, context["currency"], margin)
-        if not products:
-            products = _generic_smart_products(seed_query, context, margin)
-        products = _merge_product_lists(
-            products,
-            _search_mercadolibre_products(seed_query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT),
-        )
-        products = _ensure_minimum_options(products, seed_query, context, margin)
-        products = _enrich_products_with_serpapi_images(products, seed_query)
         return jsonify(
             {
-                "ok": True,
-                "analysis_mode": "local_fallback",
-                "blocked": False,
+                "ok": False,
+                "error": "Falta GEMINI_API_KEY en el backend.",
+                "analysis_mode": "missing_gemini_key",
+                "blocked": True,
+                "block_reason": "No existe GEMINI_API_KEY o GOOGLE_API_KEY en el entorno.",
                 "country": context["country"],
                 "currency": context["currency"],
                 "marketplace_hint": context["marketplace"],
-                "evidence": {
-                    "summary": "Sin GEMINI_API_KEY: se uso el nombre del archivo como pista.",
-                    "detected_text": [],
-                    "visual_or_audio_clues": [file.filename],
-                    "uncertainties": [
-                        "Configura GEMINI_API_KEY para analisis real de imagen/audio.",
-                        "Mientras tanto se entregan minimo 10 opciones por texto/nombre de archivo.",
-                    ],
-                },
-                "total_productos": len(products),
-                "products": products,
             }
-        )
+        ), 500
 
     try:
         from google import genai
@@ -1818,30 +1799,27 @@ def smart_analyze_media():
         )
         payload["ai_provider"] = "gemini"
         payload["model"] = GEMINI_MODEL
+
     except Exception as exc:
-        seed_query = _clean_search_text(query or file.filename)
-        products = _generic_smart_products(seed_query, context, margin)
-        products = _ensure_minimum_options(products, seed_query, context, margin)
-        products = _enrich_products_with_serpapi_images(products, seed_query)
         return jsonify(
             {
-                "ok": True,
-                "analysis_mode": "generic_market_fallback",
-                "blocked": False,
+                "ok": False,
+                "error": "Fallo el analisis multimedia con Gemini.",
+                "analysis_mode": "gemini_error",
+                "blocked": True,
+                "block_reason": str(exc),
                 "country": context["country"],
                 "currency": context["currency"],
                 "marketplace_hint": context["marketplace"],
                 "margin": margin,
                 "evidence": {
-                    "summary": "La IA multimedia no respondio; se uso texto/nombre del archivo como pista comercial.",
+                    "summary": "Gemini fallo durante el analisis de imagen/audio.",
                     "detected_text": [query or file.filename],
                     "visual_or_audio_clues": [file.filename],
-                    "uncertainties": [f"Detalle tecnico del analisis: {str(exc)[:180]}"],
+                    "uncertainties": [str(exc)],
                 },
-                "total_productos": len(products),
-                "products": products,
             }
-        )
+        ), 500
 
     if payload.get("blocked"):
         return jsonify(payload), 200
@@ -1850,14 +1828,19 @@ def smart_analyze_media():
     if products:
         products = _normalize_smart_products(products, context["currency"], margin)
     else:
-        products = _generic_smart_products(query or file.filename, context, margin)
-        payload["analysis_mode"] = "generic_market_fallback"
-        payload["evidence"] = payload.get("evidence") or {
-            "summary": "La evidencia no devolvio productos exactos; se genero busqueda comercial por pista.",
-            "detected_text": [query or file.filename],
-            "visual_or_audio_clues": [file.filename],
-            "uncertainties": ["Valida marca, modelo y medidas contra la foto original."],
-        }
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Gemini respondio, pero no devolvio productos utilizables.",
+                "analysis_mode": "gemini_empty_products",
+                "blocked": True,
+                "block_reason": "La respuesta de Gemini no trajo products/productos validos.",
+                "raw_payload_preview": str(payload)[:800],
+                "country": context["country"],
+                "currency": context["currency"],
+                "marketplace_hint": context["marketplace"],
+            }
+        ), 422
 
     provider_query = query or (products[0].get("search_query") if products else "") or file.filename
     products = _merge_product_lists(
