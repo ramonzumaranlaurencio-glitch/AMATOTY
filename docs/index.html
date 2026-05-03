@@ -14,7 +14,8 @@
 .comparador .highlight{background:#fef9c3;font-weight:bold;}
 </style>
 <script src="assets/product_ai_guard.js"></script>
-</head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header><main>
+<script src="assets/platform_catalog.js"></script>
+</head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="product-platform.html">Panel productos</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header><main>
 <div class="hero">
   <h1>Probamos productos reales para que compres mejor</h1>
   <p>¿Cansado de reviews genéricos? Aquí solo encuentras análisis honestos, pruebas reales y recomendaciones con criterio. Nuestro objetivo: que compres solo lo que realmente te sirve.</p>
@@ -50,14 +51,7 @@
   <div id="pro-recommendation" class="producto-recomendado" style="max-width:420px;margin:auto;"></div>
 </section>
 <script>
-fetch('assets/trending_products.json')
-  .then(r => r.json())
-  .then(data => {
-    const products = data.products || [];
-    ProductAIGuard.renderProductGrid('top-picks-list', products);
-    ProductAIGuard.renderProRecommendation('pro-recommendation', products[0]);
-    ProductAIGuard.renderProductGrid('product-gallery', products);
-  });
+PlatformCatalog.hydrateHome({fallbackUrl: 'assets/trending_products.json', limit: 24});
 </script>
 <h2 class="section-title">Comparador rápido</h2>
 <table class="comparador">

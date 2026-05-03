@@ -14,8 +14,12 @@ from flask import Flask
 from flask_cors import CORS
 from PIL import Image
 
+from product_platform import init_platform_db, platform_bp
+
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(platform_bp)
+init_platform_db()
 
 IMAGE_MIN_SCORE = 0.82
 IMAGE_VALIDATION_PROMPT = (
@@ -2052,6 +2056,8 @@ def validar_imagen_producto():
 @app.route("/<path:filename>")
 def site_file(filename):
     normalized = filename.strip("/")
+    if normalized.startswith("docs/"):
+        normalized = normalized[5:]
     if normalized.startswith("api/"):
         return jsonify({"error": "Ruta API no encontrada."}), 404
     return _send_site_file(normalized)

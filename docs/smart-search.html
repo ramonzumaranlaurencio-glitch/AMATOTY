@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/product_ai_guard.js"></script>
+<script src="assets/platform_catalog.js"></script>
 <style>
 :root{--sap-blue:#b12704;--sap-ink:#131921;--sap-muted:#565959;--sap-line:#d5d9d9;--sap-bg:#eaeded;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff9900;--ali-ink:#131921}
 body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
@@ -77,7 +78,7 @@ main{max-width:none;padding:0}
 </style>
 </head>
 <body data-product="">
-<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
+<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="product-platform.html">Panel productos</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
 <main>
 <div class="workbench">
   <aside class="side">
@@ -871,7 +872,13 @@ async function loadProducts() {
   document.getElementById("runSearch").disabled = true;
   try {
     const trending = await loadJson("/assets/trending_products.json");
-    products = ProductAIGuard.extractProducts(trending).map(normalize);
+    const catalog = ProductAIGuard.extractProducts(trending);
+    const platformProducts = window.PlatformCatalog
+      ? await PlatformCatalog.fetchPlatformProducts({limit: 80}).catch(() => [])
+      : [];
+    products = window.PlatformCatalog
+      ? PlatformCatalog.mergeProducts(platformProducts, catalog).map(normalize)
+      : catalog.map(normalize);
     filtered = products.slice();
     loadCategories();
     loadAdvancedFilters();

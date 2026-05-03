@@ -84,6 +84,9 @@
     const category = escapeHtml(product.category);
     const cta = escapeHtml(product.cta || "Ver opciones");
     const query = encodeURIComponent(product.search_query || product.name || "");
+    const firstSource = Array.isArray(product.source_links) && product.source_links.length ? product.source_links[0].url : "";
+    const href = product.product_url || firstSource || `https://www.amazon.com/s?k=${query}`;
+    const target = /^https?:\/\//i.test(href) ? ' target="_blank" rel="nofollow noopener"' : "";
     const sourceNote = imageIsAllowed(product)
       ? (String(product.image_source || "").includes("marketplace") ? "Imagen de marketplace" : "Imagen verificada por IA")
       : "Imagen referencial: pendiente de verificacion IA";
@@ -99,7 +102,7 @@
           <li><b>Publico:</b> ${escapeHtml(product.target)}</li>
           <li><b>Specs:</b> ${escapeHtml(product.specs || "")}</li>
         </ul>
-        <a href="https://www.amazon.com/s?k=${query}" target="_blank" rel="nofollow noopener" style="display:inline-block;background:linear-gradient(180deg,#ffd814,#f7ca00);color:#111;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;border:1px solid #fcd200;box-shadow:0 2px 5px rgba(213,217,217,.5);">${cta}</a>
+        <a href="${escapeHtml(href)}"${target} style="display:inline-block;background:linear-gradient(180deg,#ffd814,#f7ca00);color:#111;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:bold;border:1px solid #fcd200;box-shadow:0 2px 5px rgba(213,217,217,.5);">${cta}</a>
         <div style="font-size:0.9em;color:#64748b;margin-top:8px;">${sourceNote}</div>
         <div style="font-size:0.93em;color:#0e7490;margin-top:6px;">${escapeHtml(product.reason)}</div>
         <div style="font-size:0.93em;color:#0369a1;margin-top:4px;">${escapeHtml(product.hook)}</div>

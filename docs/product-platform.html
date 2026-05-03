@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Panel productos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+main{max-width:720px}.notice{background:#fff;border:1px solid #d5d9d9;border-radius:8px;padding:24px;margin-top:28px;box-shadow:0 2px 8px rgba(15,17,17,.08)}
+</style>
+</head>
+<body>
+<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="smart-search.html">Busca inteligente</a></nav></header>
+<main>
+  <section class="notice">
+    <h2>Panel de productos</h2>
+    <p>El panel privado se ejecuta desde el backend para poder guardar usuarios, productos, imagenes, videos y promociones.</p>
+    <p><a id="panelLink" class="btn" href="http://127.0.0.1:5050/product-platform.html">Abrir panel</a></p>
+  </section>
+</main>
+<script>
+const target = location.protocol === "file:" || location.hostname === "127.0.0.1" || location.hostname === "localhost"
+  ? "http://127.0.0.1:5050/product-platform.html"
+  : "/product-platform.html";
+document.getElementById("panelLink").href = target;
+setTimeout(() => { location.href = target; }, 500);
+</script>
+</body>
+</html>
