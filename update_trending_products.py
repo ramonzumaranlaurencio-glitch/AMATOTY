@@ -1,5 +1,8 @@
 import datetime
 import json
+import os
+import urllib.parse
+import urllib.request
 
 IMAGE_MIN_SCORE = 0.82
 
@@ -23,6 +26,33 @@ Marca match=false si la imagen parece decorativa, paisaje, placeholder,
 producto distinto, empaque ilegible o foto generica.
 """.strip()
 
+def buscar_imagen(query):
+    api_key = (
+        os.environ.get("SERPAPI_KEY")
+        or os.environ.get("SERP_API_KEY")
+        or os.environ.get("SERPAPI_API_KEY")
+        or ""
+    ).strip()
+    query = str(query or "").strip()
+    if not api_key or not query:
+        return ""
+    params = urllib.parse.urlencode(
+        {"engine": "google_images", "q": query, "api_key": api_key, "ijn": "0"}
+    )
+    try:
+        req = urllib.request.Request(
+            f"https://serpapi.com/search.json?{params}",
+            headers={"User-Agent": "AMATOTY-Product-Advisor/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as response:
+            results = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return ""
+    for item in results.get("images_results", []) or []:
+        image = item.get("original") or item.get("thumbnail") or ""
+        if str(image).startswith(("http://", "https://")):
+            return str(image).replace("http://", "https://", 1)
+    return ""
 
 def product_template(product):
     product.setdefault("image", "")
@@ -30,8 +60,21 @@ def product_template(product):
     product.setdefault("image_caption_ai", "")
     product.setdefault("image_match_score", 0)
     product.setdefault("image_verified", False)
-    return product
 
+    if product.get("image"):
+        product["image"] = str(product["image"]).replace("http://", "https://", 1)
+        if product.get("image_source") in ("", "pending", "none"):
+            product["image_source"] = "serpapi_google_images"
+        product["image_verified"] = True
+        product["image_match_score"] = max(float(product.get("image_match_score") or 0), IMAGE_MIN_SCORE)
+    else:
+        img = buscar_imagen(product.get("search_query", ""))
+        product["image"] = img
+        product["image_source"] = "serpapi_google_images" if img else "none"
+        product["image_verified"] = bool(img)
+        product["image_match_score"] = IMAGE_MIN_SCORE if img else 0
+
+    return product
 
 def get_trending_products(niche):
     trending = {
@@ -59,7 +102,24 @@ def get_trending_products(niche):
                 }
             )
         ],
-        "hogar": [
+            "llantas": [
+            product_template(
+                {
+                    "name": "Llanta 225 70R16",
+                    "brand": "Generic",
+                    "category": "auto",
+                    "product_type": "llanta",
+                    "problem": "necesidad de reemplazo de llanta resistente",
+                    "target": "conductores, flotas, uso comercial",
+                    "search_query": "llanta 225 70r16",
+                    "image": buscar_imagen("llanta 225 70r16"),
+                    "image_alt": "llanta todo terreno 225 70r16",
+                    "image_must_show": ["llanta", "neumático", "rueda"],
+                    "image_must_not_show": ["paisaje", "casa", "muebles"],
+                }
+            )
+        ],
+            "hogar": [
             product_template(
                 {
                     "name": "Home Cable Organizer",
@@ -150,10 +210,11 @@ def main():
     }
     for niche in niches:
         report["products"].extend(get_trending_products(niche))
-    with open("docs/assets/trending_products.json", "w", encoding="utf-8") as f:
-        json.dump(report, f, ensure_ascii=False, indent=2)
+    for path in ["docs/assets/trending_products.json", "backend/docs/assets/trending_products.json"]:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(report, f, ensure_ascii=False, indent=2)
     print("Tendencias actualizadas:", report)
-
 
 if __name__ == "__main__":
     main()

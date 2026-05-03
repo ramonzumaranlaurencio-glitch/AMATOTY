@@ -1,5 +1,5 @@
 {
-  "date": "2026-05-01",
+  "date": "2026-05-02",
   "quality_gate": {
     "image_min_score": 0.82,
     "publish_rule": "Publicar image solo si image_verified=true y image_match_score>=0.82.",
@@ -36,8 +36,8 @@
         "maquillaje"
       ],
       "specs": "Capacidad: 300-500ml, Energia: recargable USB, Uso: smoothies y proteinas",
-      "image": "",
-      "image_source": "pending",
+      "image": "https://m.media-amazon.com/images/I/61+ITxVh58L._AC_UF894,1000_QL80_.jpg",
+      "image_source": "serpapi",
       "image_caption_ai": "",
       "image_match_score": 0,
       "image_verified": false
@@ -70,8 +70,8 @@
         "auto"
       ],
       "specs": "Uso: cables y cargadores, Instalacion: adhesiva o de escritorio",
-      "image": "",
-      "image_source": "pending",
+      "image": "https://m.media-amazon.com/images/I/81usawRm1xL.jpg",
+      "image_source": "serpapi",
       "image_caption_ai": "",
       "image_match_score": 0,
       "image_verified": false
@@ -104,8 +104,8 @@
         "cocina"
       ],
       "specs": "Uso: auto, Ubicacion: espacio entre asientos, Funcion: guardar objetos pequenos",
-      "image": "",
-      "image_source": "pending",
+      "image": "https://i5.walmartimages.com/seo/Car-Seat-Gap-Filler-Automotive-Seat-Leather-Storage-Box-Cup-Holder-Universal-Seat-Gap-Organizer-Adjustable-Car-Seat-Storage-Box-Phones-Glasses-Keys-C_8667f78b-156d-41de-9b80-883ca27898c0.6cb9298ff6aa119ea32f5840a108cc72.jpeg",
+      "image_source": "serpapi",
       "image_caption_ai": "",
       "image_match_score": 0,
       "image_verified": false
@@ -138,8 +138,8 @@
         "mueble"
       ],
       "specs": "SPF: 50, Uso: facial diario, Acabado: ligero",
-      "image": "",
-      "image_source": "pending",
+      "image": "https://incidecoder-content.storage.googleapis.com/19cda3df-2913-4670-9907-d8580b8b5a7e/products/sunpro-protector-solar-facial-spf-50-textura-ultraligera/sunpro-protector-solar-facial-spf-50-textura-ultraligera_front_photo_original.jpeg",
+      "image_source": "serpapi",
       "image_caption_ai": "",
       "image_match_score": 0,
       "image_verified": false

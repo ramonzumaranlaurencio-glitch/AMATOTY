@@ -68,7 +68,7 @@ CULTURA = {
     "OTRO": {"carrito": "carrito", "btn_agregar": "Agregar al carrito"},
 }
 
-SMART_MIN_OPTIONS = 10
+SMART_MIN_OPTIONS = 0
 SMART_LIVE_SEARCH_LIMIT = 12
 FX_TO_USD = {
     "USD": 1.0,
@@ -914,6 +914,108 @@ def _secure_image_url(url):
     return url
 
 
+def _is_web_image_url(url):
+    url = str(url or "").strip().lower()
+    return url.startswith("https://") or url.startswith("http://")
+
+
+def _serpapi_key():
+    return (
+        os.environ.get("SERPAPI_KEY")
+        or os.environ.get("SERP_API_KEY")
+        or os.environ.get("SERPAPI_API_KEY")
+        or ""
+    ).strip()
+
+
+def _serpapi_image_lookup_limit():
+    try:
+        return max(0, int(os.environ.get("SERPAPI_IMAGE_LOOKUPS", "10")))
+    except (TypeError, ValueError):
+        return 10
+
+
+def _serpapi_image_for_query(query):
+    api_key = _serpapi_key()
+    query = _clean_search_text(query)
+    if not api_key or not query:
+        return ""
+    params = urllib.parse.urlencode(
+        {
+            "engine": "google_images",
+            "q": query,
+            "api_key": api_key,
+            "ijn": "0",
+        }
+    )
+    url = f"https://serpapi.com/search.json?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "AMATOTY-Product-Advisor/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return ""
+
+    blocked = ("placeholder", "source.unsplash.com", "picsum.photos")
+    for result in payload.get("images_results", []) or []:
+        for field in ("original", "thumbnail"):
+            image_url = _secure_image_url(result.get(field) or "")
+            lowered = image_url.lower()
+            if _is_web_image_url(image_url) and not any(item in lowered for item in blocked):
+                return image_url
+    return ""
+
+
+def _product_image_query(product, fallback_query=""):
+    for value in [
+        product.get("link_query"),
+        product.get("search_query"),
+        " ".join([str(product.get("brand", "")), str(product.get("name", ""))]),
+        product.get("name"),
+        product.get("product_type"),
+        fallback_query,
+    ]:
+        clean = _clean_search_text(value)
+        if clean:
+            return clean
+    return ""
+
+
+def _enrich_products_with_serpapi_images(products, fallback_query=""):
+        if not products:
+            return products
+        max_lookups = _serpapi_image_lookup_limit()
+        cache = {}
+        lookups = 0
+        enriched = []
+        for product in products:
+            item = dict(product)
+            current_image = _secure_image_url(item.get("image") or "")
+            if _is_web_image_url(current_image):
+                item["image"] = current_image
+                item["image_source"] = item.get("image_source") or "web"
+                enriched.append(item)
+                continue
+            query = _product_image_query(item, fallback_query)
+            image_url = ""
+            # Solo SerpApi
+            if _serpapi_key() and query and lookups < max_lookups:
+                if query not in cache:
+                    cache[query] = _serpapi_image_for_query(query)
+                    lookups += 1
+                image_url = cache.get(query) or ""
+                if image_url:
+                    item["image"] = image_url
+                    item["image_source"] = "serpapi_google_images"
+                    item["image_verified"] = True
+                    try:
+                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.82)
+                    except (TypeError, ValueError):
+                        item["image_match_score"] = 0.82
+            enriched.append(item)
+        return enriched
+
+
 def _ml_attribute(result, *keys):
     wanted = {_plain_text(key) for key in keys}
     for attr in result.get("attributes") or []:
@@ -1101,7 +1203,8 @@ def _candidate_queries(query, products):
 
 def _ensure_minimum_options(products, query, context, margin, min_count=SMART_MIN_OPTIONS):
     merged = _merge_product_lists(products)
-    if not query or len(merged) >= min_count:
+    # Si min_count es 0, no forzar mínimo ni agregar plantillas
+    if not query or min_count == 0 or len(merged) >= min_count:
         return _sort_smart_products(merged)
 
     for candidate in _candidate_queries(query, merged):
@@ -1115,7 +1218,7 @@ def _ensure_minimum_options(products, query, context, margin, min_count=SMART_MI
         )
         merged = _merge_product_lists(merged, live)
 
-    if len(merged) < min_count:
+    if min_count > 0 and len(merged) < min_count:
         templates = _catalog_template_products(query, context, margin, count=min_count)
         merged = _merge_product_lists(merged, templates)
 
@@ -1599,6 +1702,7 @@ def smart_search():
     products = _merge_product_lists(products, live_products)
     if query_raw:
         products = _ensure_minimum_options(products, query_raw, context, margin)
+        products = _enrich_products_with_serpapi_images(products, query_raw)
         if live_products and analysis_mode == "smart_search_catalog":
             analysis_mode = "smart_search_marketplace"
             evidence["summary"] = f"Opciones de compra para: {query_raw}"
@@ -1664,6 +1768,7 @@ def smart_analyze_media():
             _search_mercadolibre_products(seed_query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT),
         )
         products = _ensure_minimum_options(products, seed_query, context, margin)
+        products = _enrich_products_with_serpapi_images(products, seed_query)
         return jsonify(
             {
                 "ok": True,
@@ -1717,6 +1822,7 @@ def smart_analyze_media():
         seed_query = _clean_search_text(query or file.filename)
         products = _generic_smart_products(seed_query, context, margin)
         products = _ensure_minimum_options(products, seed_query, context, margin)
+        products = _enrich_products_with_serpapi_images(products, seed_query)
         return jsonify(
             {
                 "ok": True,
@@ -1759,6 +1865,7 @@ def smart_analyze_media():
         _search_mercadolibre_products(provider_query, context, margin, limit=SMART_LIVE_SEARCH_LIMIT),
     )
     products = _ensure_minimum_options(products, provider_query, context, margin)
+    products = _enrich_products_with_serpapi_images(products, provider_query)
     evidence = payload.get("evidence") or {}
     evidence["uncertainties"] = list(
         dict.fromkeys(

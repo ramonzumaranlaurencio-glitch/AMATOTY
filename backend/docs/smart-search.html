@@ -63,6 +63,7 @@ main{max-width:none;padding:0}
 .intel-cell span{display:block;font-size:11px;color:#565959;text-transform:uppercase;font-weight:800}
 .intel-cell strong{display:block;margin-top:3px;color:#131921}
 .market-thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #d5d9d9;background:#fff;margin-right:10px;vertical-align:middle}
+.empty-thumb{display:inline-block;background:#f3f3f3}
 .product-cell{display:flex;align-items:center;gap:10px}
 .trade-badge{display:inline-block;background:#fff3e5;color:#a13b00;border:1px solid #ffd2a8;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:800;margin-top:4px}
 .filter-grid{display:grid;grid-template-columns:1fr;gap:9px}
@@ -199,9 +200,14 @@ let lastAiPayload = null;
 let cart = JSON.parse(localStorage.getItem("smartCart") || "[]");
 let compareItems = [];
 
+const LOCAL_API_ORIGIN = "http://127.0.0.1:5050";
+const currentHost = window.location.hostname;
+const isLocalStaticServer = ["localhost", "127.0.0.1", "::1"].includes(currentHost)
+  && window.location.port
+  && window.location.port !== "5050";
 const API_ORIGIN = window.location.hostname.includes("github.io")
   ? "https://amatoty.onrender.com"
-  : "";
+  : (isLocalStaticServer ? LOCAL_API_ORIGIN : "");
 
 function setStatus(message) {
   document.getElementById("resultCount").textContent = message;
@@ -508,10 +514,27 @@ async function executeSearch() {
       // Si no se pueden cargar, usar los productos ya cargados
       allProducts = products.length ? products.slice() : [];
     }
-    const q = document.getElementById("query").value.trim().toLowerCase();
+    const q = document.getElementById("query").value.trim();
+    const normalizeText = text => String(text || "")
+      .toLowerCase()
+      .replace(/[\/\-_]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const words = normalizeText(q).split(" ").filter(Boolean);
     filtered = allProducts.filter(p => {
-      const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query].join(" ").toLowerCase();
-      return !q || blob.includes(q);
+      const blob = normalizeText([
+        p.name,
+        p.brand,
+        p.category,
+        p.product_type,
+        p.problem,
+        p.target,
+        p.specs,
+        p.search_query,
+        p.image_alt,
+        p.image_must_show?.join(" ")
+      ].join(" "));
+      return !words.length || words.every(word => blob.includes(word));
     });
     renderResults();
     setStatus("Error API, mostrando productos locales");
@@ -541,6 +564,13 @@ function renderEvidence(payload) {
   document.getElementById("marketplaceHint").textContent = payload?.marketplace_hint || `${document.getElementById("currency").value} marketplace`;
 }
 
+function webImageUrl(product) {
+  const url = String(product?.image || "").trim();
+  if (!/^https?:\/\//i.test(url)) return "";
+  if (/placeholder|source\.unsplash\.com|picsum\.photos/i.test(url)) return "";
+  return ProductAIGuard.escapeHtml(url);
+}
+
 function renderResults() {
   document.getElementById("resultCount").textContent = `${filtered.length} registros`;
   document.getElementById("kpiProducts").textContent = filtered.length;
@@ -564,9 +594,13 @@ function renderResults() {
       return !["search_query","nivel_confianza","producto_principal","rfq listo","id","codigo","internal","interno"].some(w => key.includes(w));
     });
     const specText = visibleSpecs.length ? `${ProductAIGuard.escapeHtml(visibleSpecs[0].etiqueta)}: ${ProductAIGuard.escapeHtml(visibleSpecs[0].valor)}` : "Por validar";
+    const image = webImageUrl(p);
+    const imageHtml = image
+      ? `<img class="market-thumb" src="${image}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
+      : `<span class="market-thumb empty-thumb" aria-hidden="true"></span>`;
     return `
-    <tr onclick="selectProduct(${index})">
-      <td><div class="product-cell"><img class="market-thumb" src="${ProductAIGuard.escapeHtml(ProductAIGuard.productImage ? ProductAIGuard.productImage(p) : (p.image || 'assets/home.jpg'))}" alt=""><div><strong>${name}</strong><br><span style="color:#565959">${brand || "Marca por validar"}</span></div></div></td>
+      <tr onclick="selectProduct(${index})">
+      <td><div class="product-cell">${imageHtml}<div><strong>${name}</strong><br><span style="color:#565959">${brand || "Marca por validar"}</span></div></div></td>
       <td><span class="pill">${category}</span><br><small>${ProductAIGuard.escapeHtml(p.sector || p.product_type || "")}</small></td>
       <td>${specText}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small><div class="provider-links">${providerLinks(p)}</div></td>
       <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small><br><small>Rating ${Number(p.rating || 4.2).toFixed(1)}/5</small></td>
