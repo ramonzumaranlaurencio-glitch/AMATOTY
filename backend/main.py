@@ -323,7 +323,8 @@ def _send_site_file(filename):
     normalized = filename.strip("/") or "index.html"
     if normalized == "oye-bonita":
         normalized = "oye-bonita.html"
-    for site_dir in [SITE_DIR, LOCAL_SITE_DIR]:
+    site_dirs = [LOCAL_SITE_DIR, SITE_DIR] if normalized == "product-platform.html" else [SITE_DIR, LOCAL_SITE_DIR]
+    for site_dir in site_dirs:
         path = os.path.abspath(os.path.join(site_dir, normalized))
         if path.startswith(os.path.abspath(site_dir)) and os.path.exists(path):
             return send_from_directory(site_dir, normalized)

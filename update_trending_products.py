@@ -1,8 +1,6 @@
+from serpapi import GoogleSearch
 import datetime
 import json
-import os
-import urllib.parse
-import urllib.request
 
 IMAGE_MIN_SCORE = 0.82
 
@@ -26,32 +24,21 @@ Marca match=false si la imagen parece decorativa, paisaje, placeholder,
 producto distinto, empaque ilegible o foto generica.
 """.strip()
 
+from serpapi import GoogleSearch
+
 def buscar_imagen(query):
-    api_key = (
-        os.environ.get("SERPAPI_KEY")
-        or os.environ.get("SERP_API_KEY")
-        or os.environ.get("SERPAPI_API_KEY")
-        or ""
-    ).strip()
-    query = str(query or "").strip()
-    if not api_key or not query:
-        return ""
-    params = urllib.parse.urlencode(
-        {"engine": "google_images", "q": query, "api_key": api_key, "ijn": "0"}
-    )
-    try:
-        req = urllib.request.Request(
-            f"https://serpapi.com/search.json?{params}",
-            headers={"User-Agent": "AMATOTY-Product-Advisor/1.0"},
-        )
-        with urllib.request.urlopen(req, timeout=8) as response:
-            results = json.loads(response.read().decode("utf-8"))
-    except Exception:
-        return ""
-    for item in results.get("images_results", []) or []:
-        image = item.get("original") or item.get("thumbnail") or ""
-        if str(image).startswith(("http://", "https://")):
-            return str(image).replace("http://", "https://", 1)
+    params = {
+        "engine": "google_images",
+        "q": query,
+        "api_key": "3cedd66c5897ae1197d88edf71277345f27f80634e1de7f12c72e465a6e1f8b9"
+    }
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+
+    if "images_results" in results:
+        return results["images_results"][0]["original"]
+
     return ""
 
 def product_template(product):
@@ -61,48 +48,35 @@ def product_template(product):
     product.setdefault("image_match_score", 0)
     product.setdefault("image_verified", False)
 
-    if product.get("image"):
-        product["image"] = str(product["image"]).replace("http://", "https://", 1)
-        if product.get("image_source") in ("", "pending", "none"):
-            product["image_source"] = "serpapi_google_images"
-        product["image_verified"] = True
-        product["image_match_score"] = max(float(product.get("image_match_score") or 0), IMAGE_MIN_SCORE)
-    else:
+    if product.get("image") == "":
         img = buscar_imagen(product.get("search_query", ""))
         product["image"] = img
-        product["image_source"] = "serpapi_google_images" if img else "none"
-        product["image_verified"] = bool(img)
-        product["image_match_score"] = IMAGE_MIN_SCORE if img else 0
+        product["image_source"] = "serpapi" if img else "none"
 
     return product
 
 def get_trending_products(niche):
     trending = {
-        "cocina": [
-            product_template(
-                {
-                    "name": "Portable Mini Blender",
-                    "brand": "BlendJet",
-                    "category": "cocina",
-                    "product_type": "licuadora portatil recargable",
-                    "problem": "Preparar batidos rapidos y saludables fuera de casa",
-                    "target": "Personas activas, fitness, estudiantes",
-                    "seo_title": "Portable Mini Blender: Batidos en segundos donde sea | Review 2026",
-                    "short_desc": "Licuadora compacta para smoothies, proteinas y jugos rapidos fuera de casa.",
-                    "article": "Una alternativa practica para preparar bebidas simples sin depender de una licuadora grande.",
-                    "hook": "Batido fresco en menos de un minuto.",
-                    "cta": "Ver opciones",
-                    "reason": "Producto con problema claro, busqueda comercial y utilidad cotidiana.",
-                    "decision": "mantener",
-                    "search_query": "portable mini blender rechargeable",
-                    "image_alt": "Licuadora portatil compacta con vaso transparente",
-                    "image_must_show": ["licuadora portatil", "vaso transparente", "base recargable"],
-                    "image_must_not_show": ["paisaje", "montanas", "lago", "ropa", "maquillaje"],
-                    "specs": "Capacidad: 300-500ml, Energia: recargable USB, Uso: smoothies y proteinas",
-                }
-            )
-        ],
+        
+                "seguridad": [
+            product_template({
+                "name": "Extintor portátil ABC",
+                "brand": "Generic",
+                "category": "seguridad",
+                "product_type": "extintor",
+                "problem": "riesgo de incendio",
+                "target": "hogar, autos, oficinas",
+                "search_query": "extintor contra incendios ABC",
+                "image": "",
+                "image_alt": "extintor rojo",
+                "image_must_show": ["extintor", "rojo", "cilindro"],
+                "image_must_not_show": ["paisaje", "muebles"]
+            })
+        ],   
+
+
             "llantas": [
+                        
             product_template(
                 {
                     "name": "Llanta 225 70R16",
@@ -210,11 +184,10 @@ def main():
     }
     for niche in niches:
         report["products"].extend(get_trending_products(niche))
-    for path in ["docs/assets/trending_products.json", "backend/docs/assets/trending_products.json"]:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(report, f, ensure_ascii=False, indent=2)
+    with open("docs/assets/trending_products.json", "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
     print("Tendencias actualizadas:", report)
 
 if __name__ == "__main__":
     main()
+

@@ -151,6 +151,7 @@ tr:last-child td{border-bottom:0}
         <label for="registerType">Tipo</label>
         <select id="registerType">
           <option value="company">Empresa</option>
+          <option value="small_business">Pequeno negocio</option>
           <option value="personal">Persona natural</option>
           <option value="admin">Administrador inicial</option>
         </select>
@@ -328,7 +329,14 @@ tr:last-child td{border-bottom:0}
 <div id="toast" class="toast hidden"></div>
 
 <script>
-const API_ORIGIN = location.protocol === "file:" ? "http://127.0.0.1:5050" : "";
+const LOCAL_API_ORIGIN = "http://127.0.0.1:5050";
+const currentHost = window.location.hostname;
+const isLocalStaticServer = ["localhost", "127.0.0.1", "::1"].includes(currentHost)
+  && window.location.port
+  && window.location.port !== "5050";
+const API_ORIGIN = currentHost.includes("github.io")
+  ? "https://amatoty.onrender.com"
+  : (location.protocol === "file:" || isLocalStaticServer ? LOCAL_API_ORIGIN : "");
 const state = {
   token: localStorage.getItem("platformToken") || "",
   user: null,

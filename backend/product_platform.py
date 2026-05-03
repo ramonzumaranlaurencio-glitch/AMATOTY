@@ -577,7 +577,7 @@ def register():
         return jsonify({"error": "Correo invalido."}), 400
     if len(password) < 8:
         return jsonify({"error": "La contrasena debe tener minimo 8 caracteres."}), 400
-    if account_type not in {"personal", "company", "admin"}:
+    if account_type not in {"personal", "company", "small_business", "admin"}:
         return jsonify({"error": "Tipo de cuenta invalido."}), 400
 
     conn = get_db()
@@ -615,7 +615,15 @@ def register():
             (id, owner_user_id, name, slug, org_type, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (org_id, user_id, organization_name, org_slug, "company" if account_type == "company" else "personal", timestamp, timestamp),
+            (
+                org_id,
+                user_id,
+                organization_name,
+                org_slug,
+                "company" if account_type in {"company", "small_business"} else "personal",
+                timestamp,
+                timestamp,
+            ),
         )
         conn.execute(
             """

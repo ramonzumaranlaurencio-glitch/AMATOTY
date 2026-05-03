@@ -2,28 +2,834 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Panel productos</title>
+<title>LCA Product OS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-main{max-width:720px}.notice{background:#fff;border:1px solid #d5d9d9;border-radius:8px;padding:24px;margin-top:28px;box-shadow:0 2px 8px rgba(15,17,17,.08)}
+:root{
+  --bg:#f4f6f8;
+  --ink:#17202a;
+  --muted:#667085;
+  --line:#d9e0e8;
+  --panel:#fff;
+  --nav:#162238;
+  --nav-ink:#edf3fb;
+  --green:#0f7b4f;
+  --blue:#1d5fd7;
+  --amber:#b76e00;
+  --red:#b42318;
+  --violet:#6846b7;
+  --shadow:0 10px 24px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.auth-screen{min-height:100vh;display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);background:#eef2f7}
+.auth-panel{background:var(--panel);padding:34px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:38px;height:38px;border-radius:8px;background:#162238;color:white;display:grid;place-items:center;font-weight:900}
+.brand h1{margin:0;font-size:22px;letter-spacing:0}
+.brand span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.tab-btn,.ghost-btn,.primary-btn,.danger-btn,.plain-btn{border-radius:6px;border:1px solid var(--line);background:white;color:var(--ink);padding:10px 12px;font-weight:800}
+.tab-btn.active{background:#162238;color:white;border-color:#162238}
+.primary-btn{background:#1d5fd7;color:white;border-color:#1d5fd7}
+.danger-btn{background:white;color:var(--red);border-color:#f4b7b2}
+.ghost-btn{background:#eef4ff;color:#1d5fd7;border-color:#bfd3ff}
+.plain-btn{background:#fff}
+.form{display:grid;gap:12px}
+.field label{display:block;font-size:12px;font-weight:800;color:#4b5563;margin-bottom:5px;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;padding:10px 11px;color:var(--ink)}
+.field textarea{min-height:92px;resize:vertical}
+.auth-aside{padding:42px;display:flex;align-items:center}
+.phase-board{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.phase-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:var(--shadow)}
+.phase-card span{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}
+.phase-card strong{display:block;margin-top:8px;font-size:18px}
+.app-shell{min-height:100vh;display:grid;grid-template-columns:238px minmax(0,1fr)}
+.sidebar{background:var(--nav);color:var(--nav-ink);padding:18px;display:flex;flex-direction:column;gap:18px}
+.side-brand{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.16)}
+.side-brand .brand-mark{background:#2a75dd}
+.side-brand strong{font-size:16px}
+.side-nav{display:grid;gap:8px}
+.side-nav button{display:flex;align-items:center;gap:10px;border:0;border-radius:6px;background:transparent;color:#c9d6e8;padding:10px 12px;text-align:left;font-weight:800}
+.side-nav button.active,.side-nav button:hover{background:rgba(255,255,255,.12);color:white}
+.side-footer{margin-top:auto;color:#b9c7da;font-size:12px}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{height:70px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 22px}
+.topbar h2{margin:0;font-size:20px;letter-spacing:0}
+.top-actions{display:flex;align-items:center;gap:10px;min-width:0}
+.org-select{min-width:210px;border:1px solid var(--line);border-radius:6px;padding:9px;background:white}
+.workspace{padding:18px 22px 28px;display:grid;gap:16px}
+.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.metric{background:white;border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:0 4px 14px rgba(16,24,40,.04)}
+.metric span{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}
+.metric strong{display:block;margin-top:7px;font-size:26px}
+.metric.green strong{color:var(--green)}.metric.blue strong{color:var(--blue)}.metric.amber strong{color:var(--amber)}.metric.red strong{color:var(--red)}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:14px}
+.panel{background:white;border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 14px rgba(16,24,40,.04);min-width:0}
+.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head h3{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:0;color:#344054}
+.panel-body{padding:14px}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 150px 150px auto;gap:10px;margin-bottom:12px}
+.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:6px;padding:9px;background:white}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;background:white;font-size:14px}
+th{background:#f7f9fc;color:#344054;text-transform:uppercase;font-size:11px;text-align:left}
+th,td{padding:10px;border-bottom:1px solid #edf1f5;vertical-align:top}
+tr:last-child td{border-bottom:0}
+.row-actions{display:flex;flex-wrap:wrap;gap:6px}
+.status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}
+.status.draft{background:#f3f4f6;color:#344054}.status.published{background:#dcfce7;color:#166534}.status.archived{background:#fee2e2;color:#991b1b}.status.approved{background:#dbeafe;color:#1d4ed8}
+.media-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.media-tile{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#f6f8fb;aspect-ratio:1}
+.media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
+.media-tile button{position:absolute;right:5px;top:5px;border:0;border-radius:5px;background:rgba(23,32,42,.8);color:white;padding:4px 7px}
+.detail-list{display:grid;gap:8px}
+.detail-item{border:1px solid var(--line);border-radius:8px;padding:10px;background:#fbfcfe}
+.detail-item span{display:block;font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.detail-item strong{display:block;margin-top:4px}
+.promo-list{display:grid;gap:10px}
+.promo-item{border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
+.promo-item h4{margin:0 0 6px;font-size:15px}
+.promo-item p{margin:6px 0;color:#344054}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-block;background:#eef4ff;color:#1d5fd7;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}
+.toast{position:fixed;right:16px;bottom:16px;background:#17202a;color:white;padding:12px 14px;border-radius:8px;box-shadow:var(--shadow);max-width:360px;z-index:20}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--muted);background:#fbfcfe;text-align:center}
+.split-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.recovery{margin-top:4px;color:#1d5fd7;background:transparent;border:0;padding:0;font-weight:800;text-align:left}
+@media(max-width:1100px){
+  .auth-screen,.app-shell,.grid-2{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toolbar{grid-template-columns:1fr}
+  .phase-board{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .auth-panel,.auth-aside,.workspace{padding:16px}
+  .topbar{height:auto;align-items:flex-start;flex-direction:column;padding:14px 16px}
+  .top-actions{width:100%;flex-wrap:wrap}
+  .org-select{width:100%;min-width:0}
+  .metrics{grid-template-columns:1fr}
+  .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style>
 </head>
 <body>
-<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="smart-search.html">Busca inteligente</a></nav></header>
-<main>
-  <section class="notice">
-    <h2>Panel de productos</h2>
-    <p>El panel privado se ejecuta desde el backend para poder guardar usuarios, productos, imagenes, videos y promociones.</p>
-    <p><a id="panelLink" class="btn" href="http://127.0.0.1:5050/product-platform.html">Abrir panel</a></p>
-  </section>
-</main>
+<section id="authView" class="auth-screen">
+  <div class="auth-panel">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <h1>LCA Product OS</h1>
+        <span>Gestion comercial multiusuario</span>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button id="loginTab" class="tab-btn active" type="button">Ingresar</button>
+      <button id="registerTab" class="tab-btn" type="button">Crear cuenta</button>
+    </div>
+
+    <form id="loginForm" class="form">
+      <div class="field">
+        <label for="loginEmail">Correo</label>
+        <input id="loginEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contrasena</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="primary-btn" type="submit">Entrar</button>
+      <button id="recoveryBtn" class="recovery" type="button">Recuperar contrasena</button>
+    </form>
+
+    <form id="registerForm" class="form hidden">
+      <div class="field">
+        <label for="registerType">Tipo</label>
+        <select id="registerType">
+          <option value="company">Empresa</option>
+          <option value="small_business">Pequeno negocio</option>
+          <option value="personal">Persona natural</option>
+          <option value="admin">Administrador inicial</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="registerName">Nombre</label>
+        <input id="registerName" type="text" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="registerOrg">Empresa o perfil</label>
+        <input id="registerOrg" type="text" required>
+      </div>
+      <div class="field">
+        <label for="registerEmail">Correo</label>
+        <input id="registerEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="registerPassword">Contrasena</label>
+        <input id="registerPassword" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <button class="primary-btn" type="submit">Registrar</button>
+    </form>
+  </div>
+  <aside class="auth-aside">
+    <div class="phase-board">
+      <div class="phase-card"><span>Usuarios</span><strong>Persona, empresa y administrador</strong></div>
+      <div class="phase-card"><span>Productos</span><strong>CRUD, stock, precio y medios</strong></div>
+      <div class="phase-card"><span>Promocion</span><strong>Copys diarios y aprobacion</strong></div>
+      <div class="phase-card"><span>Panel</span><strong>Metricas, filtros e historial</strong></div>
+    </div>
+  </aside>
+</section>
+
+<section id="appView" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <div class="brand-mark">L</div>
+      <strong>Product OS</strong>
+    </div>
+    <nav class="side-nav">
+      <button class="active" data-view="dashboardView" type="button">Dashboard</button>
+      <button data-view="productsView" type="button">Productos</button>
+      <button data-view="promotionsView" type="button">Promociones</button>
+      <button data-view="companyView" type="button">Empresa</button>
+    </nav>
+    <div class="side-footer">
+      <div id="roleBadge">Rol: -</div>
+      <div id="userBadge">Usuario: -</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h2 id="viewTitle">Dashboard</h2>
+      <div class="top-actions">
+        <select id="organizationSelect" class="org-select"></select>
+        <button id="refreshBtn" class="plain-btn" type="button">Actualizar</button>
+        <button id="logoutBtn" class="danger-btn" type="button">Salir</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <section id="dashboardView" class="view">
+        <div id="metrics" class="metrics"></div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-head"><h3>Productos recientes</h3></div>
+            <div class="panel-body" id="recentProducts"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Promociones recientes</h3></div>
+            <div class="panel-body" id="recentPromotions"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="productsView" class="view hidden">
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Inventario</h3>
+              <button id="newProductBtn" class="ghost-btn" type="button">Nuevo</button>
+            </div>
+            <div class="panel-body">
+              <div class="toolbar">
+                <input id="productSearch" type="search" placeholder="Buscar">
+                <select id="statusFilter">
+                  <option value="">Estados</option>
+                  <option value="draft">Borrador</option>
+                  <option value="published">Publicado</option>
+                  <option value="archived">Archivado</option>
+                </select>
+                <input id="categoryFilter" type="search" placeholder="Categoria">
+                <button id="filterProductsBtn" class="plain-btn" type="button">Filtrar</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Producto</th><th>Categoria</th><th>Precio</th><th>Stock</th><th>Estado</th><th></th></tr>
+                  </thead>
+                  <tbody id="productsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head"><h3 id="productFormTitle">Producto</h3></div>
+            <div class="panel-body">
+              <form id="productForm" class="form">
+                <input id="productId" type="hidden">
+                <div class="field"><label for="productName">Nombre</label><input id="productName" required></div>
+                <div class="field"><label for="productDescription">Descripcion</label><textarea id="productDescription"></textarea></div>
+                <div class="field"><label for="productSpecs">Ficha tecnica</label><textarea id="productSpecs" placeholder="Material: acero&#10;Medida: 30 cm&#10;Garantia: 12 meses"></textarea></div>
+                <div class="field"><label for="productCategory">Categoria</label><input id="productCategory"></div>
+                <div class="grid-2" style="grid-template-columns:1fr 1fr">
+                  <div class="field"><label for="productPrice">Precio</label><input id="productPrice" type="number" min="0" step="0.01"></div>
+                  <div class="field"><label for="productCurrency">Moneda</label><input id="productCurrency" value="USD" maxlength="6"></div>
+                </div>
+                <div class="grid-2" style="grid-template-columns:1fr 1fr">
+                  <div class="field"><label for="productStock">Stock</label><input id="productStock" type="number" min="0" value="0"></div>
+                  <div class="field"><label for="productPriority">Prioridad</label><select id="productPriority"><option value="1">Alta</option><option value="2">Media alta</option><option value="3" selected>Media</option><option value="4">Baja</option><option value="5">Muy baja</option></select></div>
+                </div>
+                <div class="field"><label for="productStatus">Estado</label><select id="productStatus"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
+                <div class="field"><label for="productSku">SKU</label><input id="productSku"></div>
+                <div class="field"><label for="productUrl">Enlace</label><input id="productUrl" type="url"></div>
+                <div class="field"><label for="productMedia">Imagenes y videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple></div>
+                <div class="split-actions">
+                  <button class="primary-btn" type="submit">Guardar</button>
+                  <button id="generateFromFormBtn" class="ghost-btn" type="button">Generar promo</button>
+                </div>
+              </form>
+              <div style="height:14px"></div>
+              <div id="mediaGrid" class="media-grid"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="promotionsView" class="view hidden">
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Sugerencias</h3>
+              <button id="loadSuggestionsBtn" class="plain-btn" type="button">Recalcular</button>
+            </div>
+            <div class="panel-body" id="suggestionsList"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Historial</h3></div>
+            <div class="panel-body" id="promotionsList"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="companyView" class="view hidden">
+        <section class="panel">
+          <div class="panel-head"><h3>Perfil</h3></div>
+          <div class="panel-body">
+            <form id="companyForm" class="form">
+              <div class="field"><label for="companyName">Nombre</label><input id="companyName" required></div>
+              <div class="field"><label for="companyTax">Identificacion</label><input id="companyTax"></div>
+              <div class="field"><label for="companyDescription">Descripcion</label><textarea id="companyDescription"></textarea></div>
+              <div class="field"><label for="companyWebsite">Sitio web</label><input id="companyWebsite" type="url"></div>
+              <div class="field"><label for="companyWhatsapp">WhatsApp</label><input id="companyWhatsapp"></div>
+              <button class="primary-btn" type="submit">Guardar empresa</button>
+            </form>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+
 <script>
-const target = location.protocol === "file:" || location.hostname === "127.0.0.1" || location.hostname === "localhost"
-  ? "http://127.0.0.1:5050/product-platform.html"
-  : "/product-platform.html";
-document.getElementById("panelLink").href = target;
-setTimeout(() => { location.href = target; }, 500);
+const LOCAL_API_ORIGIN = "http://127.0.0.1:5050";
+const currentHost = window.location.hostname;
+const isLocalStaticServer = ["localhost", "127.0.0.1", "::1"].includes(currentHost)
+  && window.location.port
+  && window.location.port !== "5050";
+const API_ORIGIN = currentHost.includes("github.io")
+  ? "https://amatoty.onrender.com"
+  : (location.protocol === "file:" || isLocalStaticServer ? LOCAL_API_ORIGIN : "");
+const state = {
+  token: localStorage.getItem("platformToken") || "",
+  user: null,
+  organizations: [],
+  organizationId: localStorage.getItem("platformOrganizationId") || "",
+  products: [],
+  promotions: [],
+  selectedProduct: null
+};
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => Array.from(document.querySelectorAll(selector));
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  })[ch]);
+}
+
+function money(value, currency) {
+  const amount = Number(value || 0);
+  return `${escapeHtml(currency || "USD")} ${amount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+}
+
+function toast(message) {
+  const node = $("#toast");
+  node.textContent = message;
+  node.classList.remove("hidden");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => node.classList.add("hidden"), 3200);
+}
+
+async function api(path, options = {}) {
+  const headers = Object.assign({"Content-Type": "application/json"}, options.headers || {});
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  if (state.organizationId) headers["X-Organization-Id"] = state.organizationId;
+  const response = await fetch(`${API_ORIGIN}/api/platform${path}`, Object.assign({}, options, {headers}));
+  const text = await response.text();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {error: text}; }
+  if (!response.ok) throw new Error(data.error || data.message || `${response.status} ${response.statusText}`);
+  return data;
+}
+
+async function uploadApi(path, formData) {
+  const headers = {};
+  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+  if (state.organizationId) headers["X-Organization-Id"] = state.organizationId;
+  const response = await fetch(`${API_ORIGIN}/api/platform${path}`, {method:"POST", headers, body:formData});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "No se pudo subir el archivo.");
+  return data;
+}
+
+function setAuthMode(mode) {
+  const login = mode === "login";
+  $("#loginTab").classList.toggle("active", login);
+  $("#registerTab").classList.toggle("active", !login);
+  $("#loginForm").classList.toggle("hidden", !login);
+  $("#registerForm").classList.toggle("hidden", login);
+}
+
+function setSession(data) {
+  state.token = data.token;
+  localStorage.setItem("platformToken", state.token);
+  return loadMe();
+}
+
+async function loadMe() {
+  const data = await api("/me");
+  state.user = data.user;
+  state.organizations = data.organizations || [];
+  if (!state.organizationId && state.organizations.length) {
+    state.organizationId = state.organizations[0].organization_id;
+  }
+  localStorage.setItem("platformOrganizationId", state.organizationId || "");
+  renderShell();
+  await loadAll();
+}
+
+function renderShell() {
+  $("#authView").classList.add("hidden");
+  $("#appView").classList.remove("hidden");
+  $("#userBadge").textContent = `Usuario: ${state.user?.email || "-"}`;
+  const select = $("#organizationSelect");
+  select.innerHTML = state.organizations.map(org => (
+    `<option value="${escapeHtml(org.organization_id)}">${escapeHtml(org.organization_name)}</option>`
+  )).join("");
+  select.value = state.organizationId;
+  const membership = currentMembership();
+  $("#roleBadge").textContent = `Rol: ${membership?.role || "-"}`;
+  fillCompanyForm();
+}
+
+function currentMembership() {
+  return state.organizations.find(org => org.organization_id === state.organizationId) || state.organizations[0] || null;
+}
+
+function fillCompanyForm() {
+  const org = currentMembership();
+  if (!org) return;
+  $("#companyName").value = org.organization_name || "";
+  $("#companyTax").value = org.tax_id || "";
+  $("#companyDescription").value = org.description || "";
+  $("#companyWebsite").value = org.website || "";
+  $("#companyWhatsapp").value = org.whatsapp || "";
+}
+
+async function loadAll() {
+  await Promise.all([loadDashboard(), loadProducts(), loadPromotions(), loadSuggestions()]);
+}
+
+async function loadDashboard() {
+  const data = await api(`/dashboard?organization_id=${encodeURIComponent(state.organizationId)}`);
+  renderDashboard(data);
+}
+
+function metric(label, value, cls = "") {
+  return `<div class="metric ${cls}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value ?? 0)}</strong></div>`;
+}
+
+function renderDashboard(data) {
+  const summary = data.summary || {};
+  const promos = data.promotions || {};
+  $("#metrics").innerHTML = [
+    metric("Productos", summary.total_products || 0, "blue"),
+    metric("Publicados", summary.published_products || 0, "green"),
+    metric("Borradores", summary.draft_products || 0, "amber"),
+    metric("Bajo stock", summary.low_stock_products || 0, "red"),
+    metric("Promos", promos.total_promotions || 0, "blue")
+  ].join("");
+  $("#recentProducts").innerHTML = tableMini(data.recent_products || [], "product");
+  $("#recentPromotions").innerHTML = promoMini(data.recent_promotions || []);
+}
+
+function tableMini(items, type) {
+  if (!items.length) return `<div class="empty">Sin registros</div>`;
+  return `<div class="detail-list">${items.map(item => `
+    <div class="detail-item">
+      <span>${escapeHtml(type === "product" ? item.status : item.status)}</span>
+      <strong>${escapeHtml(item.name || item.title)}</strong>
+      <div>${escapeHtml(item.category || item.product_name || "")}</div>
+    </div>
+  `).join("")}</div>`;
+}
+
+function promoMini(items) {
+  if (!items.length) return `<div class="empty">Sin promociones</div>`;
+  return `<div class="promo-list">${items.map(promo => `
+    <article class="promo-item">
+      <h4>${escapeHtml(promo.title)}</h4>
+      <span class="status ${escapeHtml(promo.status)}">${escapeHtml(promo.status)}</span>
+      <p>${escapeHtml(promo.product_name || "")}</p>
+    </article>
+  `).join("")}</div>`;
+}
+
+async function loadProducts() {
+  const params = new URLSearchParams({organization_id: state.organizationId});
+  const q = $("#productSearch").value.trim();
+  const status = $("#statusFilter").value;
+  const category = $("#categoryFilter").value.trim();
+  if (q) params.set("q", q);
+  if (status) params.set("status", status);
+  if (category) params.set("category", category);
+  const data = await api(`/products?${params.toString()}`);
+  state.products = data.products || [];
+  renderProducts();
+}
+
+function renderProducts() {
+  const rows = state.products.map(product => `
+    <tr>
+      <td><strong>${escapeHtml(product.name)}</strong><div>${escapeHtml(product.sku || product.slug || "")}</div></td>
+      <td>${escapeHtml(product.category || "-")}</td>
+      <td>${money(product.price, product.currency)}</td>
+      <td>${escapeHtml(product.stock)}</td>
+      <td><span class="status ${escapeHtml(product.status)}">${escapeHtml(product.status)}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="plain-btn" data-action="edit" data-id="${escapeHtml(product.id)}" type="button">Editar</button>
+          <button class="ghost-btn" data-action="publish" data-id="${escapeHtml(product.id)}" type="button">Publicar</button>
+          <button class="plain-btn" data-action="promote" data-id="${escapeHtml(product.id)}" type="button">Promo</button>
+          <button class="danger-btn" data-action="archive" data-id="${escapeHtml(product.id)}" type="button">Archivar</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+  $("#productsTable").innerHTML = rows || `<tr><td colspan="6"><div class="empty">Sin productos</div></td></tr>`;
+}
+
+function productPayload() {
+  return {
+    organization_id: state.organizationId,
+    name: $("#productName").value.trim(),
+    description: $("#productDescription").value.trim(),
+    metadata: {
+      technical_sheet: parseTechnicalSheet($("#productSpecs").value),
+      reason: "Ficha cargada desde el panel privado.",
+      hook: "Producto disponible con imagen, descripcion y ficha tecnica."
+    },
+    category: $("#productCategory").value.trim(),
+    price: Number($("#productPrice").value || 0),
+    currency: $("#productCurrency").value.trim() || "USD",
+    stock: Number($("#productStock").value || 0),
+    priority: Number($("#productPriority").value || 3),
+    status: $("#productStatus").value,
+    sku: $("#productSku").value.trim(),
+    product_url: $("#productUrl").value.trim()
+  };
+}
+
+function parseTechnicalSheet(value) {
+  return String(value || "")
+    .split(/\n+/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const parts = line.split(":");
+      return {
+        etiqueta: (parts.shift() || "Dato").trim(),
+        valor: (parts.join(":") || line).trim()
+      };
+    });
+}
+
+function technicalSheetText(product) {
+  const specs = product?.metadata?.technical_sheet || product?.metadata?.ficha_tecnica || [];
+  if (Array.isArray(specs)) {
+    return specs.map(item => `${item.etiqueta || item.label || item.name || "Dato"}: ${item.valor || item.value || ""}`).join("\n");
+  }
+  if (specs && typeof specs === "object") {
+    return Object.entries(specs).map(([key, value]) => `${key}: ${value}`).join("\n");
+  }
+  return "";
+}
+
+function resetProductForm() {
+  state.selectedProduct = null;
+  $("#productForm").reset();
+  $("#productId").value = "";
+  $("#productSpecs").value = "";
+  $("#productCurrency").value = "USD";
+  $("#productStock").value = "0";
+  $("#productPriority").value = "3";
+  $("#productStatus").value = "draft";
+  $("#productFormTitle").textContent = "Producto";
+  $("#mediaGrid").innerHTML = "";
+}
+
+function selectProduct(product) {
+  state.selectedProduct = product;
+  $("#productId").value = product.id;
+  $("#productName").value = product.name || "";
+  $("#productDescription").value = product.description || "";
+  $("#productSpecs").value = technicalSheetText(product);
+  $("#productCategory").value = product.category || "";
+  $("#productPrice").value = product.price || 0;
+  $("#productCurrency").value = product.currency || "USD";
+  $("#productStock").value = product.stock || 0;
+  $("#productPriority").value = product.priority || 3;
+  $("#productStatus").value = product.status || "draft";
+  $("#productSku").value = product.sku || "";
+  $("#productUrl").value = product.product_url || "";
+  $("#productFormTitle").textContent = product.name || "Producto";
+  renderMedia(product.media || []);
+}
+
+function renderMedia(media) {
+  $("#mediaGrid").innerHTML = media.map(item => `
+    <div class="media-tile">
+      ${item.media_type === "video"
+        ? `<video src="${escapeHtml(item.url)}" muted controls></video>`
+        : `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.filename)}">`}
+      <button data-action="delete-media" data-id="${escapeHtml(item.id)}" type="button">x</button>
+    </div>
+  `).join("");
+}
+
+async function saveProduct(event) {
+  event.preventDefault();
+  const id = $("#productId").value;
+  const body = JSON.stringify(productPayload());
+  const data = id
+    ? await api(`/products/${encodeURIComponent(id)}`, {method:"PUT", body})
+    : await api("/products", {method:"POST", body});
+  const files = $("#productMedia").files;
+  if (files.length) {
+    const form = new FormData();
+    Array.from(files).forEach(file => form.append("files", file));
+    await uploadApi(`/products/${encodeURIComponent(data.product.id)}/media`, form);
+    $("#productMedia").value = "";
+  }
+  toast("Producto guardado.");
+  await loadProducts();
+  const fresh = state.products.find(product => product.id === data.product.id);
+  if (fresh) selectProduct(fresh);
+  await loadDashboard();
+}
+
+async function productAction(action, id) {
+  const product = state.products.find(item => item.id === id);
+  if (!product) return;
+  if (action === "edit") {
+    selectProduct(product);
+    return;
+  }
+  if (action === "publish") {
+    await api(`/products/${encodeURIComponent(id)}`, {method:"PUT", body:JSON.stringify(Object.assign({}, product, {status:"published"}))});
+    toast("Producto publicado.");
+  }
+  if (action === "archive") {
+    await api(`/products/${encodeURIComponent(id)}`, {method:"DELETE"});
+    toast("Producto archivado.");
+  }
+  if (action === "promote") {
+    await generatePromotion(id);
+  }
+  await loadProducts();
+  await loadDashboard();
+}
+
+async function deleteMedia(id) {
+  await api(`/media/${encodeURIComponent(id)}`, {method:"DELETE"});
+  toast("Archivo eliminado.");
+  await loadProducts();
+  const current = state.products.find(product => product.id === $("#productId").value);
+  if (current) selectProduct(current);
+}
+
+async function loadPromotions() {
+  const data = await api(`/promotions?organization_id=${encodeURIComponent(state.organizationId)}`);
+  state.promotions = data.promotions || [];
+  renderPromotions();
+}
+
+function renderPromotions() {
+  const html = state.promotions.map(promo => `
+    <article class="promo-item">
+      <div class="split-actions" style="justify-content:space-between">
+        <h4>${escapeHtml(promo.title)}</h4>
+        <span class="status ${escapeHtml(promo.status)}">${escapeHtml(promo.status)}</span>
+      </div>
+      <p>${escapeHtml(promo.promo_text)}</p>
+      <p><strong>WhatsApp:</strong> ${escapeHtml(promo.whatsapp_message)}</p>
+      <div class="chips">${(promo.hashtags || []).map(tag => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}</div>
+      <div class="split-actions" style="margin-top:10px">
+        <button class="ghost-btn" data-action="approve-promo" data-id="${escapeHtml(promo.id)}" type="button">Aprobar</button>
+      </div>
+    </article>
+  `).join("");
+  $("#promotionsList").innerHTML = html || `<div class="empty">Sin promociones</div>`;
+}
+
+async function loadSuggestions() {
+  const data = await api(`/promotions/next-suggestions?organization_id=${encodeURIComponent(state.organizationId)}`);
+  const suggestions = data.suggestions || [];
+  $("#suggestionsList").innerHTML = suggestions.map(product => `
+    <article class="promo-item">
+      <h4>${escapeHtml(product.name)}</h4>
+      <p>${escapeHtml(product.category || "-")} · Stock ${escapeHtml(product.stock)} · Prioridad ${escapeHtml(product.priority)}</p>
+      <button class="primary-btn" data-action="suggest-promo" data-id="${escapeHtml(product.id)}" type="button">Generar</button>
+    </article>
+  `).join("") || `<div class="empty">Sin sugerencias</div>`;
+}
+
+async function generatePromotion(productId) {
+  const id = productId || $("#productId").value;
+  if (!id) {
+    toast("Selecciona un producto.");
+    return;
+  }
+  await api("/promotions/generate", {method:"POST", body:JSON.stringify({product_id:id, channel:"multi"})});
+  toast("Promocion generada.");
+  await loadPromotions();
+  await loadDashboard();
+  showView("promotionsView");
+}
+
+async function approvePromotion(id) {
+  await api(`/promotions/${encodeURIComponent(id)}/approve`, {method:"POST", body:"{}"});
+  toast("Promocion aprobada.");
+  await loadPromotions();
+  await loadDashboard();
+}
+
+async function saveCompany(event) {
+  event.preventDefault();
+  const body = {
+    name: $("#companyName").value.trim(),
+    tax_id: $("#companyTax").value.trim(),
+    description: $("#companyDescription").value.trim(),
+    website: $("#companyWebsite").value.trim(),
+    whatsapp: $("#companyWhatsapp").value.trim()
+  };
+  await api(`/organizations/${encodeURIComponent(state.organizationId)}`, {method:"PUT", body:JSON.stringify(body)});
+  toast("Empresa guardada.");
+  await loadMe();
+}
+
+function showView(id) {
+  $$(".view").forEach(view => view.classList.toggle("hidden", view.id !== id));
+  $$(".side-nav button").forEach(btn => btn.classList.toggle("active", btn.dataset.view === id));
+  const labels = {dashboardView:"Dashboard", productsView:"Productos", promotionsView:"Promociones", companyView:"Empresa"};
+  $("#viewTitle").textContent = labels[id] || "Panel";
+}
+
+$("#loginTab").addEventListener("click", () => setAuthMode("login"));
+$("#registerTab").addEventListener("click", () => setAuthMode("register"));
+$("#loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  try {
+    const data = await api("/auth/login", {
+      method:"POST",
+      body:JSON.stringify({email:$("#loginEmail").value, password:$("#loginPassword").value})
+    });
+    await setSession(data);
+    toast("Sesion iniciada.");
+  } catch (err) { toast(err.message); }
+});
+$("#registerForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  try {
+    const data = await api("/auth/register", {
+      method:"POST",
+      body:JSON.stringify({
+        account_type:$("#registerType").value,
+        full_name:$("#registerName").value,
+        organization_name:$("#registerOrg").value,
+        email:$("#registerEmail").value,
+        password:$("#registerPassword").value
+      })
+    });
+    await setSession(data);
+    toast("Cuenta creada.");
+  } catch (err) { toast(err.message); }
+});
+$("#recoveryBtn").addEventListener("click", async () => {
+  const email = $("#loginEmail").value.trim();
+  if (!email) return toast("Escribe tu correo.");
+  try {
+    const data = await api("/auth/request-password-reset", {method:"POST", body:JSON.stringify({email})});
+    toast(data.dev_reset_token ? `Token local: ${data.dev_reset_token}` : data.message);
+  } catch (err) { toast(err.message); }
+});
+$("#organizationSelect").addEventListener("change", async event => {
+  state.organizationId = event.target.value;
+  localStorage.setItem("platformOrganizationId", state.organizationId);
+  renderShell();
+  await loadAll();
+});
+$("#refreshBtn").addEventListener("click", () => loadAll().then(() => toast("Actualizado.")).catch(err => toast(err.message)));
+$("#logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("platformToken");
+  localStorage.removeItem("platformOrganizationId");
+  location.reload();
+});
+$$(".side-nav button").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.view)));
+$("#filterProductsBtn").addEventListener("click", () => loadProducts().catch(err => toast(err.message)));
+$("#productSearch").addEventListener("search", () => loadProducts().catch(err => toast(err.message)));
+$("#newProductBtn").addEventListener("click", resetProductForm);
+$("#productForm").addEventListener("submit", event => saveProduct(event).catch(err => toast(err.message)));
+$("#generateFromFormBtn").addEventListener("click", () => generatePromotion().catch(err => toast(err.message)));
+$("#productsTable").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  productAction(button.dataset.action, button.dataset.id).catch(err => toast(err.message));
+});
+$("#mediaGrid").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action='delete-media']");
+  if (!button) return;
+  deleteMedia(button.dataset.id).catch(err => toast(err.message));
+});
+$("#loadSuggestionsBtn").addEventListener("click", () => loadSuggestions().catch(err => toast(err.message)));
+$("#suggestionsList").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action='suggest-promo']");
+  if (!button) return;
+  generatePromotion(button.dataset.id).catch(err => toast(err.message));
+});
+$("#promotionsList").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action='approve-promo']");
+  if (!button) return;
+  approvePromotion(button.dataset.id).catch(err => toast(err.message));
+});
+$("#companyForm").addEventListener("submit", event => saveCompany(event).catch(err => toast(err.message)));
+
+if (state.token) {
+  loadMe().catch(err => {
+    localStorage.removeItem("platformToken");
+    state.token = "";
+    toast(err.message);
+  });
+}
 </script>
 </body>
 </html>
