@@ -1,33 +1,53 @@
 {
   "products": [
     {
-      "sku": "banner-001",
-      "titulo": "Productos peruanos listos para vender",
-      "descripcion_corta": "Alimentos, bebidas y superalimentos seleccionados para tu catalogo digital.",
-      "imagen": "assets/kitchen.jpg",
-      "enlace_boton": "smart-search.html",
-      "texto_boton": "Ver catalogo",
-      "categoria": "Peruana",
+      "sku": "ob-banner-001",
+      "titulo": "Base Mate Control Brillo",
+      "descripcion_corta": "Cobertura media con acabado mate para piel con brillo en zona T.",
+      "imagen": "assets/products/base-mate.png",
+      "enlace_boton": "oye-bonita.html",
+      "texto_boton": "Ver rutina",
+      "categoria": "Base",
       "mostrar_en_banner": true
     },
     {
-      "sku": "banner-002",
-      "titulo": "Oye Bonita: rutina de belleza personalizada",
-      "descripcion_corta": "Sube tu foto, recibe diagnostico facial y encuentra productos recomendados para tu piel.",
+      "sku": "ob-banner-002",
+      "titulo": "Polvo Compacto Mate",
+      "descripcion_corta": "Sella el maquillaje y ayuda a controlar el brillo durante el dia.",
+      "imagen": "assets/products/polvo-mate.png",
+      "enlace_boton": "oye-bonita.html",
+      "texto_boton": "Ver rutina",
+      "categoria": "Sellado",
+      "mostrar_en_banner": true
+    },
+    {
+      "sku": "ob-banner-003",
+      "titulo": "Serum Vitamina C Luminosidad",
+      "descripcion_corta": "Aporta luminosidad y ayuda a uniformar visualmente el tono.",
+      "imagen": "assets/products/serum-vitamina-c.png",
+      "enlace_boton": "oye-bonita.html",
+      "texto_boton": "Ver rutina",
+      "categoria": "Tratamiento",
+      "mostrar_en_banner": true
+    },
+    {
+      "sku": "ob-banner-004",
+      "titulo": "Protector Solar Facial SPF 50",
+      "descripcion_corta": "Proteccion diaria para acompanar rutinas antimanchas y de luminosidad.",
       "imagen": "assets/products/protector-spf50.png",
       "enlace_boton": "oye-bonita.html",
-      "texto_boton": "Probar ahora",
-      "categoria": "Belleza",
+      "texto_boton": "Ver rutina",
+      "categoria": "Proteccion solar",
       "mostrar_en_banner": true
     },
     {
-      "sku": "banner-003",
-      "titulo": "Superalimentos andinos para tu tienda",
-      "descripcion_corta": "Quinua, maca, algarrobina y opciones saludables con stock editable desde inventario.",
-      "imagen": "assets/home.jpg",
-      "enlace_boton": "product-platform.html",
-      "texto_boton": "Gestionar inventario",
-      "categoria": "Inventario",
+      "sku": "ob-banner-005",
+      "titulo": "Serum Acido Hialuronico",
+      "descripcion_corta": "Hidratacion ligera para piel con apariencia fresca y flexible.",
+      "imagen": "assets/products/serum-hialuronico.png",
+      "enlace_boton": "oye-bonita.html",
+      "texto_boton": "Ver rutina",
+      "categoria": "Hidratacion",
       "mostrar_en_banner": true
     }
   ]

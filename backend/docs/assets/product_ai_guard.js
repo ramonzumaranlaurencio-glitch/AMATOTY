@@ -1,6 +1,16 @@
 (function () {
   const CATEGORY_FALLBACKS = {
-    belleza: "assets/home.jpg",
+    belleza: "assets/products/protector-spf50.png",
+    beauty: "assets/products/protector-spf50.png",
+    base: "assets/products/base-mate.png",
+    sellado: "assets/products/polvo-mate.png",
+    tratamiento: "assets/products/serum-vitamina-c.png",
+    proteccion: "assets/products/protector-spf50.png",
+    "proteccion solar": "assets/products/protector-spf50.png",
+    hidratacion: "assets/products/serum-hialuronico.png",
+    hidratante: "assets/products/crema-calma.png",
+    rubor: "assets/products/rubor-rosa.png",
+    labial: "assets/products/labial-nude.png",
     cocina: "assets/kitchen.jpg",
     kitchen: "assets/kitchen.jpg",
     hogar: "assets/home.jpg",
@@ -32,7 +42,10 @@
     "mercadolibre",
     "amazon",
     "aliexpress",
-    "official"
+    "official",
+    "oye_bonita_assets",
+    "platform_upload",
+    "local_verified"
   ];
 
   function escapeHtml(value) {
@@ -66,6 +79,8 @@
     const source = String(product.image_source || product.source || "").toLowerCase();
     const trustedSource = TRUSTED_IMAGE_SOURCES.some((item) => source.includes(item));
     const trustedUrl = TRUSTED_IMAGE_PATTERNS.some((item) => urlLower.includes(item));
+    const localAsset = /^(?:\.\/)?assets\/(?:products|platform_uploads)\//.test(urlLower);
+    if (localAsset && (trustedSource || product.image_verified === true)) return true;
     if (product.image_verified === true && (trustedSource || trustedUrl) && score >= 0.72) return true;
     return product.image_verified === true && score >= 0.82;
   }
@@ -115,6 +130,8 @@
     const sales = product.panel_de_ventas || {};
     const publish = product.publicacion || {};
     const specs = product.especificaciones_dinamicas || [];
+    const image = product.image || product.imagen || product.imagen_ref || publish.image || "";
+    const localCuratedImage = /^(?:\.\/)?assets\/products\//i.test(String(image || ""));
     return Object.assign({}, product, {
       name: product.name || principal.nombre_generico || publish.titulo_seo || "Producto detectado",
       brand: product.brand || principal.marca || "",
@@ -127,8 +144,10 @@
       reason: product.reason || sales.mejor_opcion_argumento || "",
       hook: product.hook || sales.recomendacion_cross_selling || "",
       search_query: product.search_query || publish.search_query || principal.nombre_generico || "",
-      image_verified: product.image_verified ?? publish.image_verified,
-      image_match_score: product.image_match_score ?? publish.image_match_score
+      image,
+      image_source: product.image_source || product.source || (localCuratedImage ? "oye_bonita_assets" : ""),
+      image_verified: product.image_verified ?? publish.image_verified ?? localCuratedImage,
+      image_match_score: product.image_match_score ?? publish.image_match_score ?? (localCuratedImage ? 0.96 : 0)
     });
   }
 
@@ -164,6 +183,7 @@
     imageIsAllowed,
     extractProducts,
     flattenProduct,
+    fallbackFor,
     productCard,
     productImage,
     renderProductGrid,

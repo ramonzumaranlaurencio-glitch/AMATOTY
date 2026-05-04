@@ -10,11 +10,15 @@
 <script src="assets/banner_carousel.js" defer></script>
 <style>
 :root{--sap-blue:#b12704;--sap-ink:#131921;--sap-muted:#565959;--sap-line:#d5d9d9;--sap-bg:#eaeded;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff9900;--ali-ink:#131921}
-body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
+html{box-sizing:border-box}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--sap-bg);color:var(--sap-ink);line-height:1.45;overflow-x:hidden}
 header{background:#ffd814;color:#131921;padding:14px 22px;border-bottom:4px solid #febd69}
 header h1{font-size:20px;margin:0 0 8px 0;letter-spacing:0}
-nav a{color:#131921;font-size:14px;margin-right:16px}
+nav{display:flex;flex-wrap:wrap;gap:8px 16px}
+nav a{color:#131921;font-size:14px}
 main{max-width:none;padding:0}
+.banner-shell{padding:16px 18px 0}
 .workbench{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;min-height:calc(100vh - 95px)}
 .side{background:#fff;border-right:1px solid var(--sap-line);padding:16px}
 .side h2,.panel h2{font-size:14px;text-transform:uppercase;color:#232f3e;margin:0 0 12px 0}
@@ -75,13 +79,64 @@ main{max-width:none;padding:0}
 .hidden-commerce{display:none!important}
 .provider-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .provider-link{display:inline-block;border:1px solid #d5d9d9;background:#fff;color:#b12704;border-radius:4px;padding:6px 8px;text-decoration:none;font-size:12px;font-weight:700}
-@media(max-width:1100px){.workbench{grid-template-columns:1fr}.side,.cart{border:0}.layout,.querybar,.kpis{grid-template-columns:1fr}.cart{position:static}}
+@media(max-width:1100px){
+  .workbench{display:flex;flex-direction:column;min-height:auto}
+  .content{order:1}
+  .side{order:2}
+  .cart{order:3}
+  .side,.cart{border:0;border-top:1px solid var(--sap-line)}
+  .layout,.querybar{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cart{position:static}
+}
+@media(max-width:760px){
+  header{padding:12px 14px}
+  header h1{font-size:18px;margin-bottom:10px}
+  nav{flex-wrap:nowrap;overflow-x:auto;gap:12px;padding-bottom:2px}
+  nav a{flex:0 0 auto;font-size:13px}
+  .banner-shell{padding:10px 10px 0}
+  .content,.side,.cart{padding:12px}
+  .topbar{display:block;padding:10px;margin-bottom:10px}
+  .topbar > .btn-ghost{width:100%;margin-top:10px}
+  .querybar{gap:8px}
+  .querybar input,.querybar select,.querybar button,.btn-sap,.btn-ghost,.btn-lite{min-height:42px}
+  .querybar button{width:100%;margin-left:0!important}
+  .intel-strip{grid-template-columns:1fr;margin-bottom:10px}
+  .intel-cell{border-right:0;border-bottom:1px solid var(--sap-line)}
+  .intel-cell:last-child{border-bottom:0}
+  .kpis{gap:8px;margin-bottom:10px}
+  .kpi{padding:10px}
+  .kpi strong{font-size:20px}
+  .layout{grid-template-columns:1fr;gap:10px}
+  .panel-head{align-items:flex-start;flex-direction:column}
+  .panel-body{padding:10px}
+  .data-table,.data-table tbody,.data-table tr,.data-table td{display:block;width:100%}
+  .data-table thead{display:none}
+  .data-table tr{border:1px solid var(--sap-line);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
+  .data-table td{border-bottom:1px solid #edf2f6;padding:9px 10px}
+  .data-table td:last-child{border-bottom:0}
+  .data-table td:before{display:block;margin-bottom:4px;color:#565959;font-size:11px;font-weight:800;text-transform:uppercase}
+  .data-table td:nth-child(1):before{content:"Producto"}
+  .data-table td:nth-child(2):before{content:"Categoria"}
+  .data-table td:nth-child(3):before{content:"Especificaciones"}
+  .data-table td:nth-child(4):before{content:"Precio"}
+  .data-table td:nth-child(5):before{content:"Accion"}
+  .product-cell{align-items:flex-start}
+  .market-thumb{flex:0 0 58px;width:58px;height:58px}
+  .action-row button{flex:1 1 140px}
+  .spec-grid{grid-template-columns:1fr}
+  .summary{margin-top:0}
+}
+@media(max-width:420px){
+  .kpis{grid-template-columns:1fr}
+  .action-row button{flex-basis:100%}
+}
 </style>
 </head>
 <body data-product="">
 <header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="product-platform.html">Panel productos</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
 <main>
-<div style="padding:16px 18px 0"><div id="catalogSearchBannerCarousel" data-banner-carousel data-banner-fallback="assets/productos.json" data-banner-max="8"></div></div>
+<div class="banner-shell"><div id="catalogSearchBannerCarousel" data-banner-carousel data-banner-fallback="assets/productos.json" data-banner-max="8"></div></div>
 <div class="workbench">
   <aside class="side">
     <h2>Parámetros</h2>
@@ -217,8 +272,12 @@ function setStatus(message) {
 }
 
 async function loadJson(path) {
-  const primary = `${API_ORIGIN}${path}`;
-  const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
+  const rawPath = String(path || "");
+  const localPath = rawPath.replace(/^\/+/, "");
+  const apiPath = rawPath.startsWith("/") ? rawPath : `/${localPath}`;
+  const isAbsolute = /^https?:\/\//i.test(rawPath);
+  const primary = isAbsolute ? rawPath : (API_ORIGIN ? `${API_ORIGIN}${apiPath}` : localPath);
+  const fallback = API_ORIGIN ? localPath : `https://amatoty.onrender.com/${localPath}`;
   try {
     const response = await fetch(primary, {cache: "no-store"});
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
@@ -603,10 +662,14 @@ function renderEvidence(payload) {
 }
 
 function webImageUrl(product) {
-  const url = String(product?.image || "").trim();
-  if (window.ProductAIGuard && !ProductAIGuard.imageIsAllowed(product || {})) return "";
-  if (!/^https?:\/\//i.test(url)) return "";
+  const candidate = window.ProductAIGuard && typeof ProductAIGuard.productImage === "function"
+    ? ProductAIGuard.productImage(product || {})
+    : (product?.image || product?.imagen || product?.imagen_ref || "");
+  const url = String(candidate || "").trim();
+  if (!url) return "";
   if (/placeholder|source\.unsplash\.com|picsum\.photos/i.test(url)) return "";
+  if (/^(?:\.\/)?assets\//i.test(url)) return ProductAIGuard.escapeHtml(url);
+  if (!/^https?:\/\//i.test(url)) return "";
   return ProductAIGuard.escapeHtml(url);
 }
 
@@ -875,7 +938,7 @@ async function loadProducts() {
   setStatus("Cargando...");
   document.getElementById("runSearch").disabled = true;
   try {
-    const trending = await loadJson("/assets/trending_products.json");
+    const trending = await loadJson("assets/trending_products.json");
     const catalog = ProductAIGuard.extractProducts(trending);
     const platformProducts = window.PlatformCatalog
       ? await PlatformCatalog.fetchPlatformProducts({limit: 80}).catch(() => [])

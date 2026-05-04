@@ -1,5 +1,5 @@
 {
-  "date": "2026-05-01",
+  "date": "2026-05-02",
   "quality_gate": {
     "image_min_score": 0.82,
     "publish_rule": "Publicar image solo si image_verified=true y image_match_score>=0.82.",
