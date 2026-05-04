@@ -367,20 +367,15 @@ function normalize(product) {
     pros: Array.isArray(flat.pros) ? flat.pros : buildPros(flat),
     cons: Array.isArray(flat.cons) ? flat.cons : buildCons(flat),
     similar_products: Array.isArray(flat.similar_products) ? flat.similar_products : [],
-    source_links: Array.isArray(flat.source_links) ? flat.source_links : buildSourceLinks(flat)
+    source_links: Array.isArray(flat.source_links) ? flat.source_links : []
   });
 }
 
 function buildSourceLinks(product) {
-  const query = encodeURIComponent(cleanLinkQuery(product));
+  const links = Array.isArray(product.source_links) ? product.source_links : [];
   const brand = String(product.brand || "").toLowerCase();
-  const links = [
-    {name: "Amazon", url: `https://www.amazon.com/s?k=${query}`},
-    {name: "AliExpress", url: `https://www.aliexpress.com/wholesale?SearchText=${query}`},
-    {name: "Mercado Libre", url: `https://listado.mercadolibre.com/${query}`}
-  ];
   const official = officialBrandLink(brand, product);
-  if (official) links.push(official);
+  if (official && product.official_verified) links.push(official);
   return links;
 }
 
@@ -404,7 +399,9 @@ function officialBrandLink(brand, product) {
 }
 
 function providerLinks(product) {
-  return (product.source_links || buildSourceLinks(product)).map(link =>
+  const links = Array.isArray(product.source_links) ? product.source_links : [];
+  if (!links.length) return '<span class="provider-link">Proveedor no verificado</span>';
+  return links.map(link =>
     `<a class="provider-link" href="${ProductAIGuard.escapeHtml(link.url)}" target="_blank" rel="nofollow noopener">${ProductAIGuard.escapeHtml(link.name)}</a>`
   ).join("");
 }
@@ -607,6 +604,7 @@ function renderEvidence(payload) {
 
 function webImageUrl(product) {
   const url = String(product?.image || "").trim();
+  if (window.ProductAIGuard && !ProductAIGuard.imageIsAllowed(product || {})) return "";
   if (!/^https?:\/\//i.test(url)) return "";
   if (/placeholder|source\.unsplash\.com|picsum\.photos/i.test(url)) return "";
   return ProductAIGuard.escapeHtml(url);
@@ -784,7 +782,11 @@ function viewTechSheet(index) {
 function consultAvailability(index) {
   const item = filtered[index];
   if (!item) return;
-  const links = item.source_links || buildSourceLinks(item);
+  const links = Array.isArray(item.source_links) ? item.source_links : [];
+  if (!links.length) {
+    alert("Este producto no tiene proveedor o pagina Amazon verificada. Agrega un enlace real en el inventario para mostrarlo.");
+    return;
+  }
   window.open(links[0].url, "_blank", "noopener,noreferrer");
 }
 

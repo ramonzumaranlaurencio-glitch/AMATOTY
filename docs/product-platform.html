@@ -283,6 +283,15 @@ tr:last-child td{border-bottom:0}
                 <div class="field"><label for="productSku">SKU</label><input id="productSku"></div>
                 <div class="field"><label for="productUrl">Enlace</label><input id="productUrl" type="url"></div>
                 <fieldset class="form-section">
+                  <legend>Imagen publica</legend>
+                  <div class="field"><label for="productImageUrl">URL imagen</label><input id="productImageUrl" type="url" placeholder="https://... o assets/..."></div>
+                  <div class="grid-2" style="grid-template-columns:1fr 1fr">
+                    <div class="field"><label for="productImageSource">Fuente</label><select id="productImageSource"><option value="">Sin fuente</option><option value="oye_bonita_assets">Oye Bonita</option><option value="amazon_verified">Amazon verificado</option><option value="amazon_candidate">Amazon por verificar</option><option value="official">Oficial</option><option value="local_verified">Local verificado</option></select></div>
+                    <div class="field"><label for="productImageScore">Coincidencia</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
+                  </div>
+                  <label class="check-field" for="productImageVerified"><input id="productImageVerified" type="checkbox"> La imagen coincide con el producto</label>
+                </fieldset>
+                <fieldset class="form-section">
                   <legend>Banner principal</legend>
                   <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Mostrar en carrusel</label>
                   <div class="field"><label for="bannerTitle">Titulo</label><input id="bannerTitle" placeholder="Usa el nombre si lo dejas vacio"></div>
@@ -559,10 +568,19 @@ function productPayload() {
   const bannerLink = $("#bannerLink").value.trim();
   const bannerButtonText = $("#bannerButtonText").value.trim();
   const bannerCategory = $("#bannerCategory").value.trim();
+  const imageUrl = $("#productImageUrl").value.trim();
+  const imageSource = $("#productImageSource").value;
+  const imageScore = Number($("#productImageScore").value || 0);
+  const imageVerified = $("#productImageVerified").checked;
   const metadata = Object.assign({}, existingMetadata, {
     technical_sheet: parseTechnicalSheet($("#productSpecs").value),
     reason: existingMetadata.reason || "Ficha cargada desde el panel privado.",
     hook: existingMetadata.hook || "Producto disponible con imagen, descripcion y ficha tecnica.",
+    image: imageUrl,
+    imagen: imageUrl,
+    image_source: imageSource,
+    image_verified: imageVerified,
+    image_match_score: imageVerified ? Math.max(imageScore, 0.82) : imageScore,
     mostrar_en_banner: showBanner,
     show_in_banner: showBanner,
     banner_title: bannerTitle,
@@ -622,6 +640,10 @@ function resetProductForm() {
   $("#productStock").value = "0";
   $("#productPriority").value = "3";
   $("#productStatus").value = "draft";
+  $("#productImageUrl").value = "";
+  $("#productImageSource").value = "";
+  $("#productImageScore").value = "";
+  $("#productImageVerified").checked = false;
   $("#bannerShow").checked = false;
   $("#bannerTitle").value = "";
   $("#bannerDescription").value = "";
@@ -648,6 +670,10 @@ function selectProduct(product) {
   $("#productSku").value = product.sku || "";
   $("#productUrl").value = product.product_url || "";
   const metadata = product.metadata || {};
+  $("#productImageUrl").value = metadata.image || metadata.imagen || metadata.imagen_ref || "";
+  $("#productImageSource").value = metadata.image_source || "";
+  $("#productImageScore").value = metadata.image_match_score || "";
+  $("#productImageVerified").checked = asBool(metadata.image_verified);
   $("#bannerShow").checked = asBool(metadata.mostrar_en_banner ?? metadata.show_in_banner);
   $("#bannerTitle").value = metadata.banner_title || metadata.title || "";
   $("#bannerDescription").value = metadata.banner_description || metadata.descripcion_corta || metadata.short_desc || "";

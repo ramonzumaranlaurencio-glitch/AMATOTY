@@ -85,7 +85,7 @@
     const cta = escapeHtml(product.cta || "Ver opciones");
     const query = encodeURIComponent(product.search_query || product.name || "");
     const firstSource = Array.isArray(product.source_links) && product.source_links.length ? product.source_links[0].url : "";
-    const href = product.product_url || firstSource || `https://www.amazon.com/s?k=${query}`;
+    const href = product.product_url || firstSource || "smart-search.html";
     const target = /^https?:\/\//i.test(href) ? ' target="_blank" rel="nofollow noopener"' : "";
     const sourceNote = imageIsAllowed(product)
       ? (String(product.image_source || "").includes("marketplace") ? "Imagen de marketplace" : "Imagen verificada por IA")

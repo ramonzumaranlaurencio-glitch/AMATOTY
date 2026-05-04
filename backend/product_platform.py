@@ -91,6 +91,75 @@ def json_bool(value):
     return str(value or "").strip().lower() in {"1", "true", "yes", "si", "sí", "on"}
 
 
+def normalize_tokens(value):
+    value = str(value or "").lower()
+    value = re.sub(r"[^a-z0-9áéíóúñü]+", " ", value)
+    stopwords = {
+        "para", "con", "sin", "por", "los", "las", "del", "una", "uno",
+        "the", "and", "for", "your", "producto", "product", "ver",
+    }
+    return {
+        token
+        for token in value.split()
+        if len(token) >= 3 and token not in stopwords
+    }
+
+
+def amazon_url_allowed(url, product, metadata):
+    url = str(url or "").strip()
+    if not re.search(r"(^|//)(www\.)?amazon\.", url, re.I):
+        return True
+    lowered = url.lower()
+    if "/s?" in lowered or "/s/" in lowered or "/gp/search" in lowered:
+        return False
+    if not re.search(r"/(dp|gp/product)/[A-Z0-9]{10}", url, re.I):
+        return False
+    if (
+        json_bool(metadata.get("amazon_verified") or metadata.get("marketplace_verified"))
+        or str(metadata.get("image_source") or "").lower() == "amazon_verified"
+    ):
+        return True
+    product_tokens = normalize_tokens(
+        " ".join(
+            item
+            for item in [product.get("name"), product.get("category"), product.get("sku")]
+            if item
+        )
+    )
+    url_tokens = normalize_tokens(url.replace("-", " ").replace("+", " "))
+    return bool(product_tokens and product_tokens.intersection(url_tokens))
+
+
+def safe_source_link(link, product, metadata):
+    if not isinstance(link, dict):
+        return None
+    url = str(link.get("url") or "").strip()
+    if not url:
+        return None
+    if not amazon_url_allowed(url, product, metadata):
+        return None
+    return {
+        "name": str(link.get("name") or link.get("label") or "Ver producto").strip(),
+        "label": str(link.get("label") or link.get("name") or "Ver producto").strip(),
+        "url": url,
+        "type": str(link.get("type") or "").strip(),
+    }
+
+
+def image_publishable(metadata, has_uploaded_image=False):
+    if has_uploaded_image:
+        return True, 0.96
+    source = str(metadata.get("image_source") or "").lower()
+    score = float(metadata.get("image_match_score") or 0)
+    curated = source in {"oye_bonita_assets", "platform_upload", "local_verified", "official"}
+    verified = json_bool(metadata.get("image_verified"))
+    if curated and verified:
+        return True, max(score, 0.96)
+    if verified and score >= 0.82:
+        return True, score
+    return False, score
+
+
 def init_platform_db():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     conn = get_db()
@@ -457,9 +526,27 @@ def public_product_payload(product_row, media_rows, organization_row):
         for item in media
     ]
     description = product.get("description") or f"{product.get('name')} disponible en {organization.get('name', 'la plataforma')}."
+    metadata_image_raw = (
+        metadata.get("image")
+        or metadata.get("imagen")
+        or metadata.get("imagen_ref")
+        or ""
+    )
+    uploaded_image_url = public_media_url(image.get("url")) if image else ""
+    metadata_image_ok, metadata_image_score = image_publishable(metadata, False)
+    public_image = uploaded_image_url or (public_media_url(metadata_image_raw) if metadata_image_raw and metadata_image_ok else "")
+    public_image_source = "platform_upload" if image else str(metadata.get("image_source") or "")
+    public_image_score = 0.96 if image else metadata_image_score
+    product_url_public = product.get("product_url") if amazon_url_allowed(product.get("product_url"), product, metadata) else ""
     source_links = []
-    if product.get("product_url"):
-        source_links.append({"label": "Ver producto", "url": product.get("product_url")})
+    raw_source_links = metadata.get("source_links") if isinstance(metadata.get("source_links"), list) else []
+    for link in raw_source_links:
+        clean_link = safe_source_link(link, product, metadata)
+        if clean_link:
+            source_links.append(clean_link)
+    if product_url_public:
+        label = "Ver en Amazon" if "amazon." in product_url_public.lower() else "Ver producto"
+        source_links.insert(0, {"name": label, "label": label, "url": product_url_public, "type": "marketplace" if "amazon." in product_url_public.lower() else ""})
     show_in_banner = json_bool(metadata.get("mostrar_en_banner", metadata.get("show_in_banner")))
     banner_image_raw = (
         metadata.get("banner_image")
@@ -467,7 +554,11 @@ def public_product_payload(product_row, media_rows, organization_row):
         or metadata.get("image")
         or ""
     )
-    banner_image = public_media_url(banner_image_raw) if banner_image_raw else (public_media_url(image.get("url")) if image else "")
+    banner_image = (
+        public_media_url(banner_image_raw)
+        if banner_image_raw and (metadata_image_ok or not re.match(r"^https?://", str(banner_image_raw), re.I))
+        else public_image
+    )
     banner_title = metadata.get("banner_title") or metadata.get("title") or product.get("name")
     banner_description = (
         metadata.get("banner_description")
@@ -475,7 +566,7 @@ def public_product_payload(product_row, media_rows, organization_row):
         or metadata.get("short_desc")
         or description[:180]
     )
-    banner_link = metadata.get("banner_link") or metadata.get("button_link") or product.get("product_url") or ""
+    banner_link = metadata.get("banner_link") or metadata.get("button_link") or product_url_public or ""
     banner_button_text = metadata.get("banner_button_text") or metadata.get("button_text") or metadata.get("cta") or "Ver producto"
     banner_category = metadata.get("banner_category") or product.get("category") or ""
     return {
@@ -498,16 +589,16 @@ def public_product_payload(product_row, media_rows, organization_row):
         "sku": product.get("sku") or "",
         "status": product.get("status"),
         "priority": int(product.get("priority") or 3),
-        "product_url": product.get("product_url") or "",
+        "product_url": product_url_public or "",
         "cta": "Ver ficha",
         "reason": metadata.get("reason") or f"Producto publicado por {organization.get('name', 'la empresa')} con ficha comercial disponible.",
         "hook": metadata.get("hook") or "Consulta disponibilidad, ficha tecnica y opciones de compra.",
-        "image": public_media_url(image.get("url")) if image else "",
+        "image": public_image,
         "video": public_media_url(video.get("url")) if video else "",
         "media": media_payload,
-        "image_verified": bool(image),
-        "image_match_score": 0.96 if image else 0,
-        "image_source": "platform_upload",
+        "image_verified": bool(public_image),
+        "image_match_score": public_image_score if public_image else 0,
+        "image_source": public_image_source,
         "source_links": source_links,
         "mostrar_en_banner": show_in_banner,
         "show_in_banner": show_in_banner,
