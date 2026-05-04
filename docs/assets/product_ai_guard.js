@@ -1,16 +1,16 @@
 (function () {
   const CATEGORY_FALLBACKS = {
-    belleza: "assets/products/protector-spf50.png",
-    beauty: "assets/products/protector-spf50.png",
-    base: "assets/products/base-mate.png",
-    sellado: "assets/products/polvo-mate.png",
-    tratamiento: "assets/products/serum-vitamina-c.png",
-    proteccion: "assets/products/protector-spf50.png",
-    "proteccion solar": "assets/products/protector-spf50.png",
-    hidratacion: "assets/products/serum-hialuronico.png",
-    hidratante: "assets/products/crema-calma.png",
-    rubor: "assets/products/rubor-rosa.png",
-    labial: "assets/products/labial-nude.png",
+    belleza: "../Productos/protector-spf50.png",
+    beauty: "../Productos/protector-spf50.png",
+    base: "../Productos/base-mate.png",
+    sellado: "../Productos/polvo-mate.png",
+    tratamiento: "../Productos/serum-vitamina-c.png",
+    proteccion: "../Productos/protector-spf50.png",
+    "proteccion solar": "../Productos/protector-spf50.png",
+    hidratacion: "../Productos/serum-hialuronico.png",
+    hidratante: "../Productos/crema-calma.png",
+    rubor: "../Productos/rubor-rosa.png",
+    labial: "../Productos/labial-nude.png",
     cocina: "assets/kitchen.jpg",
     kitchen: "assets/kitchen.jpg",
     hogar: "assets/home.jpg",
@@ -67,7 +67,8 @@
   function fallbackFor(product, prefix) {
     const key = normalizeCategory(product.category);
     const file = CATEGORY_FALLBACKS[key] || CATEGORY_FALLBACKS.default;
-    return prefix ? file.replace("assets/", prefix + "assets/") : file;
+    if (!prefix || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) return file;
+    return prefix + file;
   }
 
   function imageIsAllowed(product) {
@@ -79,7 +80,7 @@
     const source = String(product.image_source || product.source || "").toLowerCase();
     const trustedSource = TRUSTED_IMAGE_SOURCES.some((item) => source.includes(item));
     const trustedUrl = TRUSTED_IMAGE_PATTERNS.some((item) => urlLower.includes(item));
-    const localAsset = /^(?:\.\/)?assets\/(?:products|platform_uploads)\//.test(urlLower);
+    const localAsset = /^(?:(?:\.\.?\/)+)?(?:assets\/(?:products|platform_uploads)|productos)\//.test(urlLower);
     if (localAsset && (trustedSource || product.image_verified === true)) return true;
     if (product.image_verified === true && (trustedSource || trustedUrl) && score >= 0.72) return true;
     return product.image_verified === true && score >= 0.82;
@@ -131,7 +132,7 @@
     const publish = product.publicacion || {};
     const specs = product.especificaciones_dinamicas || [];
     const image = product.image || product.imagen || product.imagen_ref || publish.image || "";
-    const localCuratedImage = /^(?:\.\/)?assets\/products\//i.test(String(image || ""));
+    const localCuratedImage = /^(?:(?:\.\.?\/)+)?(?:assets\/products|productos)\//i.test(String(image || ""));
     return Object.assign({}, product, {
       name: product.name || principal.nombre_generico || publish.titulo_seo || "Producto detectado",
       brand: product.brand || principal.marca || "",

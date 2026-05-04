@@ -20,8 +20,8 @@ platform_bp = Blueprint("product_platform", __name__, url_prefix="/api/platform"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "data" / "lca_pro_final.db"
-UPLOAD_DIR = Path(__file__).resolve().parent / "docs" / "assets" / "platform_uploads"
-PUBLIC_UPLOAD_PREFIX = "assets/platform_uploads"
+UPLOAD_DIR = BASE_DIR / "Productos"
+PUBLIC_UPLOAD_PREFIX = "Productos"
 
 TOKEN_TTL_DAYS = 14
 RESET_TTL_MINUTES = 45
@@ -1310,7 +1310,7 @@ def upload_product_media(user, product_id):
                     row["organization_id"],
                     media_type,
                     public_url,
-                    str(target.relative_to(Path(__file__).resolve().parent / "docs")),
+                    str(target.relative_to(BASE_DIR)),
                     original,
                     mime_type,
                     size,
@@ -1346,7 +1346,7 @@ def delete_media(user, media_id):
         _org_id, membership = resolve_org(conn, user, media["organization_id"])
         if not require_role(membership, WRITE_ROLES):
             return jsonify({"error": "Permiso insuficiente."}), 403
-        storage_path = Path(__file__).resolve().parent / "docs" / media["storage_key"]
+        storage_path = BASE_DIR / media["storage_key"]
         if storage_path.exists() and storage_path.is_file():
             storage_path.unlink()
         conn.execute("DELETE FROM platform_product_media WHERE id = ?", (media_id,))

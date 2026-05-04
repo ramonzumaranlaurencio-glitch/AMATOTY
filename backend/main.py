@@ -323,6 +323,12 @@ def _send_site_file(filename):
     normalized = filename.strip("/") or "index.html"
     if normalized == "oye-bonita":
         normalized = "oye-bonita.html"
+    if normalized.lower().startswith("productos/"):
+        products_dir = _data_path("Productos")
+        product_file = normalized.split("/", 1)[1]
+        product_path = os.path.abspath(os.path.join(products_dir, product_file))
+        if product_path.startswith(os.path.abspath(products_dir)) and os.path.exists(product_path):
+            return send_from_directory(products_dir, product_file)
     site_dirs = [LOCAL_SITE_DIR, SITE_DIR] if normalized == "product-platform.html" else [SITE_DIR, LOCAL_SITE_DIR]
     for site_dir in site_dirs:
         path = os.path.abspath(os.path.join(site_dir, normalized))
