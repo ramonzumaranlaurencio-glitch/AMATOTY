@@ -1,0 +1,34 @@
+{
+  "products": [
+    {
+      "sku": "banner-001",
+      "titulo": "Productos peruanos listos para vender",
+      "descripcion_corta": "Alimentos, bebidas y superalimentos seleccionados para tu catalogo digital.",
+      "imagen": "assets/kitchen.jpg",
+      "enlace_boton": "smart-search.html",
+      "texto_boton": "Ver catalogo",
+      "categoria": "Peruana",
+      "mostrar_en_banner": true
+    },
+    {
+      "sku": "banner-002",
+      "titulo": "Oye Bonita: rutina de belleza personalizada",
+      "descripcion_corta": "Sube tu foto, recibe diagnostico facial y encuentra productos recomendados para tu piel.",
+      "imagen": "assets/products/protector-spf50.png",
+      "enlace_boton": "oye-bonita.html",
+      "texto_boton": "Probar ahora",
+      "categoria": "Belleza",
+      "mostrar_en_banner": true
+    },
+    {
+      "sku": "banner-003",
+      "titulo": "Superalimentos andinos para tu tienda",
+      "descripcion_corta": "Quinua, maca, algarrobina y opciones saludables con stock editable desde inventario.",
+      "imagen": "assets/home.jpg",
+      "enlace_boton": "product-platform.html",
+      "texto_boton": "Gestionar inventario",
+      "categoria": "Inventario",
+      "mostrar_en_banner": true
+    }
+  ]
+}

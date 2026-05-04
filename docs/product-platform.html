@@ -43,6 +43,10 @@ button{cursor:pointer}
 .field label{display:block;font-size:12px;font-weight:800;color:#4b5563;margin-bottom:5px;text-transform:uppercase}
 .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;padding:10px 11px;color:var(--ink)}
 .field textarea{min-height:92px;resize:vertical}
+.check-field{display:flex;align-items:center;gap:9px;color:#344054;font-weight:800}
+.check-field input{width:auto}
+.form-section{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:10px}
+.form-section legend{padding:0 6px;color:#344054;font-size:12px;font-weight:900;text-transform:uppercase}
 .auth-aside{padding:42px;display:flex;align-items:center}
 .phase-board{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .phase-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:var(--shadow)}
@@ -278,6 +282,18 @@ tr:last-child td{border-bottom:0}
                 <div class="field"><label for="productStatus">Estado</label><select id="productStatus"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
                 <div class="field"><label for="productSku">SKU</label><input id="productSku"></div>
                 <div class="field"><label for="productUrl">Enlace</label><input id="productUrl" type="url"></div>
+                <fieldset class="form-section">
+                  <legend>Banner principal</legend>
+                  <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Mostrar en carrusel</label>
+                  <div class="field"><label for="bannerTitle">Titulo</label><input id="bannerTitle" placeholder="Usa el nombre si lo dejas vacio"></div>
+                  <div class="field"><label for="bannerDescription">Descripcion corta</label><textarea id="bannerDescription" placeholder="Texto breve para el banner"></textarea></div>
+                  <div class="field"><label for="bannerImage">Imagen</label><input id="bannerImage" type="url" placeholder="https://... o assets/..."></div>
+                  <div class="grid-2" style="grid-template-columns:1fr 1fr">
+                    <div class="field"><label for="bannerButtonText">Texto boton</label><input id="bannerButtonText" placeholder="Ver producto"></div>
+                    <div class="field"><label for="bannerCategory">Categoria</label><input id="bannerCategory" placeholder="Usa la categoria si lo dejas vacio"></div>
+                  </div>
+                  <div class="field"><label for="bannerLink">Enlace boton</label><input id="bannerLink" type="url" placeholder="Usa el enlace del producto si lo dejas vacio"></div>
+                </fieldset>
                 <div class="field"><label for="productMedia">Imagenes y videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple></div>
                 <div class="split-actions">
                   <button class="primary-btn" type="submit">Guardar</button>
@@ -528,16 +544,39 @@ function renderProducts() {
   $("#productsTable").innerHTML = rows || `<tr><td colspan="6"><div class="empty">Sin productos</div></td></tr>`;
 }
 
+function asBool(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  return ["1", "true", "yes", "si", "on"].includes(String(value || "").trim().toLowerCase());
+}
+
 function productPayload() {
+  const existingMetadata = state.selectedProduct?.metadata || {};
+  const showBanner = $("#bannerShow").checked;
+  const bannerTitle = $("#bannerTitle").value.trim();
+  const bannerDescription = $("#bannerDescription").value.trim();
+  const bannerImage = $("#bannerImage").value.trim();
+  const bannerLink = $("#bannerLink").value.trim();
+  const bannerButtonText = $("#bannerButtonText").value.trim();
+  const bannerCategory = $("#bannerCategory").value.trim();
+  const metadata = Object.assign({}, existingMetadata, {
+    technical_sheet: parseTechnicalSheet($("#productSpecs").value),
+    reason: existingMetadata.reason || "Ficha cargada desde el panel privado.",
+    hook: existingMetadata.hook || "Producto disponible con imagen, descripcion y ficha tecnica.",
+    mostrar_en_banner: showBanner,
+    show_in_banner: showBanner,
+    banner_title: bannerTitle,
+    banner_description: bannerDescription,
+    banner_image: bannerImage,
+    banner_link: bannerLink,
+    banner_button_text: bannerButtonText,
+    banner_category: bannerCategory
+  });
   return {
     organization_id: state.organizationId,
     name: $("#productName").value.trim(),
     description: $("#productDescription").value.trim(),
-    metadata: {
-      technical_sheet: parseTechnicalSheet($("#productSpecs").value),
-      reason: "Ficha cargada desde el panel privado.",
-      hook: "Producto disponible con imagen, descripcion y ficha tecnica."
-    },
+    metadata,
     category: $("#productCategory").value.trim(),
     price: Number($("#productPrice").value || 0),
     currency: $("#productCurrency").value.trim() || "USD",
@@ -583,6 +622,13 @@ function resetProductForm() {
   $("#productStock").value = "0";
   $("#productPriority").value = "3";
   $("#productStatus").value = "draft";
+  $("#bannerShow").checked = false;
+  $("#bannerTitle").value = "";
+  $("#bannerDescription").value = "";
+  $("#bannerImage").value = "";
+  $("#bannerLink").value = "";
+  $("#bannerButtonText").value = "";
+  $("#bannerCategory").value = "";
   $("#productFormTitle").textContent = "Producto";
   $("#mediaGrid").innerHTML = "";
 }
@@ -601,6 +647,14 @@ function selectProduct(product) {
   $("#productStatus").value = product.status || "draft";
   $("#productSku").value = product.sku || "";
   $("#productUrl").value = product.product_url || "";
+  const metadata = product.metadata || {};
+  $("#bannerShow").checked = asBool(metadata.mostrar_en_banner ?? metadata.show_in_banner);
+  $("#bannerTitle").value = metadata.banner_title || metadata.title || "";
+  $("#bannerDescription").value = metadata.banner_description || metadata.descripcion_corta || metadata.short_desc || "";
+  $("#bannerImage").value = metadata.banner_image || metadata.imagen || metadata.image || "";
+  $("#bannerLink").value = metadata.banner_link || metadata.button_link || "";
+  $("#bannerButtonText").value = metadata.banner_button_text || metadata.button_text || metadata.cta || "";
+  $("#bannerCategory").value = metadata.banner_category || "";
   $("#productFormTitle").textContent = product.name || "Producto";
   renderMedia(product.media || []);
 }

@@ -83,6 +83,14 @@ def json_loads(value, fallback):
         return fallback
 
 
+def json_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    return str(value or "").strip().lower() in {"1", "true", "yes", "si", "sí", "on"}
+
+
 def init_platform_db():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     conn = get_db()
@@ -452,6 +460,24 @@ def public_product_payload(product_row, media_rows, organization_row):
     source_links = []
     if product.get("product_url"):
         source_links.append({"label": "Ver producto", "url": product.get("product_url")})
+    show_in_banner = json_bool(metadata.get("mostrar_en_banner", metadata.get("show_in_banner")))
+    banner_image_raw = (
+        metadata.get("banner_image")
+        or metadata.get("imagen")
+        or metadata.get("image")
+        or ""
+    )
+    banner_image = public_media_url(banner_image_raw) if banner_image_raw else (public_media_url(image.get("url")) if image else "")
+    banner_title = metadata.get("banner_title") or metadata.get("title") or product.get("name")
+    banner_description = (
+        metadata.get("banner_description")
+        or metadata.get("descripcion_corta")
+        or metadata.get("short_desc")
+        or description[:180]
+    )
+    banner_link = metadata.get("banner_link") or metadata.get("button_link") or product.get("product_url") or ""
+    banner_button_text = metadata.get("banner_button_text") or metadata.get("button_text") or metadata.get("cta") or "Ver producto"
+    banner_category = metadata.get("banner_category") or product.get("category") or ""
     return {
         "id": product.get("id"),
         "organization_id": product.get("organization_id"),
@@ -483,6 +509,23 @@ def public_product_payload(product_row, media_rows, organization_row):
         "image_match_score": 0.96 if image else 0,
         "image_source": "platform_upload",
         "source_links": source_links,
+        "mostrar_en_banner": show_in_banner,
+        "show_in_banner": show_in_banner,
+        "banner_title": banner_title,
+        "banner_description": banner_description,
+        "banner_image": banner_image,
+        "banner_link": banner_link,
+        "banner_button_text": banner_button_text,
+        "banner_category": banner_category,
+        "banner": {
+            "show": show_in_banner,
+            "title": banner_title,
+            "description": banner_description,
+            "image": banner_image,
+            "link": banner_link,
+            "button_text": banner_button_text,
+            "category": banner_category,
+        },
         "search_query": " ".join(
             item for item in [product.get("name"), product.get("category"), organization.get("name"), product.get("sku")] if item
         ),
