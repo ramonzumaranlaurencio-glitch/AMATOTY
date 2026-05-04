@@ -6,19 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/product_ai_guard.js"></script>
-<script src="assets/platform_catalog.js"></script>
-<script src="assets/banner_carousel.js" defer></script>
 <style>
 :root{--sap-blue:#b12704;--sap-ink:#131921;--sap-muted:#565959;--sap-line:#d5d9d9;--sap-bg:#eaeded;--sap-panel:#fff;--sap-good:#107e3e;--sap-warn:#df6e0c;--ali-orange:#ff9900;--ali-ink:#131921}
-html{box-sizing:border-box}
-*,*:before,*:after{box-sizing:inherit}
-body{margin:0;background:var(--sap-bg);color:var(--sap-ink);line-height:1.45;overflow-x:hidden}
+body{background:var(--sap-bg);color:var(--sap-ink);line-height:1.45}
 header{background:#ffd814;color:#131921;padding:14px 22px;border-bottom:4px solid #febd69}
 header h1{font-size:20px;margin:0 0 8px 0;letter-spacing:0}
-nav{display:flex;flex-wrap:wrap;gap:8px 16px}
-nav a{color:#131921;font-size:14px}
+nav a{color:#131921;font-size:14px;margin-right:16px}
 main{max-width:none;padding:0}
-.banner-shell{padding:16px 18px 0}
 .workbench{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;min-height:calc(100vh - 95px)}
 .side{background:#fff;border-right:1px solid var(--sap-line);padding:16px}
 .side h2,.panel h2{font-size:14px;text-transform:uppercase;color:#232f3e;margin:0 0 12px 0}
@@ -69,7 +63,6 @@ main{max-width:none;padding:0}
 .intel-cell span{display:block;font-size:11px;color:#565959;text-transform:uppercase;font-weight:800}
 .intel-cell strong{display:block;margin-top:3px;color:#131921}
 .market-thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #d5d9d9;background:#fff;margin-right:10px;vertical-align:middle}
-.empty-thumb{display:inline-block;background:#f3f3f3}
 .product-cell{display:flex;align-items:center;gap:10px}
 .trade-badge{display:inline-block;background:#fff3e5;color:#a13b00;border:1px solid #ffd2a8;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:800;margin-top:4px}
 .filter-grid{display:grid;grid-template-columns:1fr;gap:9px}
@@ -79,64 +72,12 @@ main{max-width:none;padding:0}
 .hidden-commerce{display:none!important}
 .provider-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .provider-link{display:inline-block;border:1px solid #d5d9d9;background:#fff;color:#b12704;border-radius:4px;padding:6px 8px;text-decoration:none;font-size:12px;font-weight:700}
-@media(max-width:1100px){
-  .workbench{display:flex;flex-direction:column;min-height:auto}
-  .content{order:1}
-  .side{order:2}
-  .cart{order:3}
-  .side,.cart{border:0;border-top:1px solid var(--sap-line)}
-  .layout,.querybar{grid-template-columns:1fr}
-  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cart{position:static}
-}
-@media(max-width:760px){
-  header{padding:12px 14px}
-  header h1{font-size:18px;margin-bottom:10px}
-  nav{flex-wrap:nowrap;overflow-x:auto;gap:12px;padding-bottom:2px}
-  nav a{flex:0 0 auto;font-size:13px}
-  .banner-shell{padding:10px 10px 0}
-  .content,.side,.cart{padding:12px}
-  .topbar{display:block;padding:10px;margin-bottom:10px}
-  .topbar > .btn-ghost{width:100%;margin-top:10px}
-  .querybar{gap:8px}
-  .querybar input,.querybar select,.querybar button,.btn-sap,.btn-ghost,.btn-lite{min-height:42px}
-  .querybar button{width:100%;margin-left:0!important}
-  .intel-strip{grid-template-columns:1fr;margin-bottom:10px}
-  .intel-cell{border-right:0;border-bottom:1px solid var(--sap-line)}
-  .intel-cell:last-child{border-bottom:0}
-  .kpis{gap:8px;margin-bottom:10px}
-  .kpi{padding:10px}
-  .kpi strong{font-size:20px}
-  .layout{grid-template-columns:1fr;gap:10px}
-  .panel-head{align-items:flex-start;flex-direction:column}
-  .panel-body{padding:10px}
-  .data-table,.data-table tbody,.data-table tr,.data-table td{display:block;width:100%}
-  .data-table thead{display:none}
-  .data-table tr{border:1px solid var(--sap-line);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
-  .data-table td{border-bottom:1px solid #edf2f6;padding:9px 10px}
-  .data-table td:last-child{border-bottom:0}
-  .data-table td:before{display:block;margin-bottom:4px;color:#565959;font-size:11px;font-weight:800;text-transform:uppercase}
-  .data-table td:nth-child(1):before{content:"Producto"}
-  .data-table td:nth-child(2):before{content:"Categoria"}
-  .data-table td:nth-child(3):before{content:"Especificaciones"}
-  .data-table td:nth-child(4):before{content:"Precio"}
-  .data-table td:nth-child(5):before{content:"Accion"}
-  .product-cell{align-items:flex-start}
-  .market-thumb{flex:0 0 58px;width:58px;height:58px}
-  .action-row button{flex:1 1 140px}
-  .spec-grid{grid-template-columns:1fr}
-  .summary{margin-top:0}
-}
-@media(max-width:420px){
-  .kpis{grid-template-columns:1fr}
-  .action-row button{flex-basis:100%}
-}
+@media(max-width:1100px){.workbench{grid-template-columns:1fr}.side,.cart{border:0}.layout,.querybar,.kpis{grid-template-columns:1fr}.cart{position:static}}
 </style>
 </head>
 <body data-product="">
-<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="product-platform.html">Panel productos</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
+<header><h1>Smart Finds Review</h1><nav><a href="index.html">Inicio</a><a href="category/index.html">Categorías</a><a href="smart-search.html">Busca inteligente</a><a href="blog/index.html">Blog</a><a href="about.html">Sobre</a><a href="affiliate-disclosure.html">Divulgación</a><a href="contact.html">Contacto</a><a href="editorial-policy.html">Editorial</a></nav></header>
 <main>
-<div class="banner-shell"><div id="catalogSearchBannerCarousel" data-banner-carousel data-banner-fallback="assets/productos.json" data-banner-max="8"></div></div>
 <div class="workbench">
   <aside class="side">
     <h2>Parámetros</h2>
@@ -258,26 +199,17 @@ let lastAiPayload = null;
 let cart = JSON.parse(localStorage.getItem("smartCart") || "[]");
 let compareItems = [];
 
-const LOCAL_API_ORIGIN = "http://127.0.0.1:5050";
-const currentHost = window.location.hostname;
-const isLocalStaticServer = ["localhost", "127.0.0.1", "::1"].includes(currentHost)
-  && window.location.port
-  && window.location.port !== "5050";
 const API_ORIGIN = window.location.hostname.includes("github.io")
   ? "https://amatoty.onrender.com"
-  : (isLocalStaticServer ? LOCAL_API_ORIGIN : "");
+  : "";
 
 function setStatus(message) {
   document.getElementById("resultCount").textContent = message;
 }
 
 async function loadJson(path) {
-  const rawPath = String(path || "");
-  const localPath = rawPath.replace(/^\/+/, "");
-  const apiPath = rawPath.startsWith("/") ? rawPath : `/${localPath}`;
-  const isAbsolute = /^https?:\/\//i.test(rawPath);
-  const primary = isAbsolute ? rawPath : (API_ORIGIN ? `${API_ORIGIN}${apiPath}` : localPath);
-  const fallback = API_ORIGIN ? localPath : `https://amatoty.onrender.com/${localPath}`;
+  const primary = `${API_ORIGIN}${path}`;
+  const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
   try {
     const response = await fetch(primary, {cache: "no-store"});
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
@@ -295,43 +227,20 @@ async function loadJson(path) {
 async function postJson(path, body) {
   const primary = `${API_ORIGIN}${path}`;
   const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
-
   const options = {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify(body)
   };
-
-  async function doRequest(url) {
-    const response = await fetch(url, options);
-    const rawText = await response.text();
-
-    let data = null;
-    try {
-      data = rawText ? JSON.parse(rawText) : null;
-    } catch (_) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      const detail =
-        data?.error ||
-        data?.block_reason ||
-        data?.message ||
-        rawText ||
-        `${response.status} ${response.statusText}`;
-
-      throw new Error(detail);
-    }
-
-    return data;
-  }
-
   try {
-    return await doRequest(primary);
+    const response = await fetch(primary, options);
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return await response.json();
   } catch (err) {
     if (fallback !== primary) {
-      return await doRequest(fallback);
+      const response = await fetch(fallback, options);
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return await response.json();
     }
     throw err;
   }
@@ -340,37 +249,15 @@ async function postJson(path, body) {
 async function postForm(path, formData) {
   const primary = `${API_ORIGIN}${path}`;
   const fallback = API_ORIGIN ? path : `https://amatoty.onrender.com${path}`;
-
-  async function doRequest(url) {
-    const response = await fetch(url, { method: "POST", body: formData });
-    const rawText = await response.text();
-
-    let data = null;
-    try {
-      data = rawText ? JSON.parse(rawText) : null;
-    } catch (_) {
-      data = null;
-    }
-
-    if (!response.ok) {
-      const detail =
-        data?.error ||
-        data?.block_reason ||
-        data?.message ||
-        rawText ||
-        `${response.status} ${response.statusText}`;
-
-      throw new Error(detail);
-    }
-
-    return data;
-  }
-
   try {
-    return await doRequest(primary);
+    const response = await fetch(primary, {method: "POST", body: formData});
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    return await response.json();
   } catch (err) {
     if (fallback !== primary) {
-      return await doRequest(fallback);
+      const response = await fetch(fallback, {method: "POST", body: formData});
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return await response.json();
     }
     throw err;
   }
@@ -426,15 +313,20 @@ function normalize(product) {
     pros: Array.isArray(flat.pros) ? flat.pros : buildPros(flat),
     cons: Array.isArray(flat.cons) ? flat.cons : buildCons(flat),
     similar_products: Array.isArray(flat.similar_products) ? flat.similar_products : [],
-    source_links: Array.isArray(flat.source_links) ? flat.source_links : []
+    source_links: Array.isArray(flat.source_links) ? flat.source_links : buildSourceLinks(flat)
   });
 }
 
 function buildSourceLinks(product) {
-  const links = Array.isArray(product.source_links) ? product.source_links : [];
+  const query = encodeURIComponent(cleanLinkQuery(product));
   const brand = String(product.brand || "").toLowerCase();
+  const links = [
+    {name: "Amazon", url: `https://www.amazon.com/s?k=${query}`},
+    {name: "AliExpress", url: `https://www.aliexpress.com/wholesale?SearchText=${query}`},
+    {name: "Mercado Libre", url: `https://listado.mercadolibre.com/${query}`}
+  ];
   const official = officialBrandLink(brand, product);
-  if (official && product.official_verified) links.push(official);
+  if (official) links.push(official);
   return links;
 }
 
@@ -458,9 +350,7 @@ function officialBrandLink(brand, product) {
 }
 
 function providerLinks(product) {
-  const links = Array.isArray(product.source_links) ? product.source_links : [];
-  if (!links.length) return '<span class="provider-link">Proveedor no verificado</span>';
-  return links.map(link =>
+  return (product.source_links || buildSourceLinks(product)).map(link =>
     `<a class="provider-link" href="${ProductAIGuard.escapeHtml(link.url)}" target="_blank" rel="nofollow noopener">${ProductAIGuard.escapeHtml(link.name)}</a>`
   ).join("");
 }
@@ -560,7 +450,6 @@ async function executeSearch() {
   button.disabled = true;
   button.textContent = "Ejecutando...";
   setStatus("Ejecutando...");
-
   const payload = {
     query: document.getElementById("query").value.trim(),
     category: document.getElementById("categoryFilter").value,
@@ -568,15 +457,10 @@ async function executeSearch() {
     country: document.getElementById("country").value,
     margin: Number(document.getElementById("margin").value || 20)
   };
-
   try {
     const media = document.getElementById("imageInput").files[0];
     let response;
-
-    console.log("Archivo cargado:", media ? media.name : "sin archivo");
-
     if (media) {
-      console.log("Usando endpoint: /api/smart-analyze-media");
       const formData = new FormData();
       formData.append("media", media);
       formData.append("query", payload.query);
@@ -586,62 +470,85 @@ async function executeSearch() {
       formData.append("margin", String(payload.margin));
       response = await postForm("/api/smart-analyze-media", formData);
     } else {
-      console.log("Usando endpoint: /api/smart-search");
-      response = await postJson("/api/smart-search", payload);
+      // response = await postJson("/api/smart-search", payload);
+      // FORZAR modo local
+      response = null;
     }
-
+      // response = await postJson("/api/smart-search", payload);
+    response = await postJson("/api/smart-search", payload);
+    }
     lastAiPayload = response;
     renderEvidence(response);
-
     if (response.blocked) {
       filtered = [];
       renderResults();
       setStatus("Bloqueado");
-      document.getElementById("aiMode").textContent = response.analysis_mode || "blocked";
-      document.getElementById("evidenceSummary").textContent = response.error || response.block_reason || "Bloqueado";
-      document.getElementById("detailPanel").innerHTML = `
-        <div class="empty">
-          <strong>Error detectado:</strong><br>
-          ${ProductAIGuard.escapeHtml(response.error || response.block_reason || "Contenido no permitido o fallo del backend.")}
-        </div>
-      `;
+      document.getElementById("detailPanel").innerHTML = `<div class="empty">${ProductAIGuard.escapeHtml(response.block_reason || "Contenido no permitido para búsqueda comercial.")}</div>`;
       return;
     }
-
     const apiProducts = extractResultProducts(response).map(normalize);
     products = mergeProducts(products, apiProducts);
     loadCategories();
     loadAdvancedFilters();
     applyFilters();
-
     if (filtered.length) {
       setStatus(`${filtered.length} registros`);
     } else {
       setStatus("Sin resultados del asesor");
-      document.getElementById("detailPanel").innerHTML = `
-        <div class="empty">
-          El asesor no devolvió productos para esta evidencia.
-        </div>
-      `;
+      document.getElementById("detailPanel").innerHTML = `<div class="empty">El asesor no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
     }
-
   } catch (err) {
+    // Si la API falla, buscar en todos los catálogos internos disponibles
     const message = err.message || String(err);
-    filtered = [];
+    let allProducts = [];
+    try {
+      // Intenta cargar productos de varios catálogos internos
+      const trending = await loadJson("/assets/trending_products.json");
+      const productsJson = await loadJson("/data/products.json");
+      allProducts = [
+        ...ProductAIGuard.extractProducts(trending),
+        ...ProductAIGuard.extractProducts(productsJson)
+      ].map(normalize);
+    } catch (e) {
+      // Si no se pueden cargar, usar los productos ya cargados
+      allProducts = products.length ? products.slice() : [];
+    }
+    const q = document.getElementById("query").value.trim().toLowerCase();
+  function normalizeText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[\/\-_]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+filtered = allProducts.filter(p => {
+  const blob = normalizeText([
+    p.name,
+    p.brand,
+    p.category,
+    p.product_type,
+    p.problem,
+    p.target,
+    p.specs,
+    p.search_query,
+    p.image_alt,
+    p.image_must_show?.join(" ")
+  ].join(" "));
+
+  const words = normalizeText(q).split(" ").filter(Boolean);
+
+  return !words.length || words.every(word => blob.includes(word));
+});
     renderResults();
-    setStatus("Error real de API");
-    document.getElementById("aiMode").textContent = "api_error";
-    document.getElementById("evidenceSummary").textContent = "La API fallo; se detuvo el fallback silencioso";
-    document.getElementById("detailPanel").innerHTML = `
-      <div class="empty">
-        <strong>Error real del backend:</strong><br>
-        ${ProductAIGuard.escapeHtml(message)}
-      </div>
-    `;
+    setStatus("Error API, mostrando productos locales");
+    document.getElementById("aiMode").textContent = "Catálogo local";
+    document.getElementById("evidenceSummary").textContent = "Mostrando productos encontrados en catálogos internos";
+    document.getElementById("detailPanel").innerHTML = `<div class="empty">El backend no respondió correctamente: ${ProductAIGuard.escapeHtml(message)}.<br>Se muestran todos los productos encontrados en catálogos internos.</div>`;
   } finally {
     button.disabled = false;
     button.textContent = "Buscar Pro";
-  }
+  
 }
 
 function mergeProducts(current, incoming) {
@@ -659,18 +566,6 @@ function renderEvidence(payload) {
   document.getElementById("aiMode").textContent = payload?.analysis_mode || payload?.mode || "Búsqueda";
   document.getElementById("evidenceSummary").textContent = evidence.summary || payload?.query || "Resultados por catálogo";
   document.getElementById("marketplaceHint").textContent = payload?.marketplace_hint || `${document.getElementById("currency").value} marketplace`;
-}
-
-function webImageUrl(product) {
-  const candidate = window.ProductAIGuard && typeof ProductAIGuard.productImage === "function"
-    ? ProductAIGuard.productImage(product || {})
-    : (product?.image || product?.imagen || product?.imagen_ref || "");
-  const url = String(candidate || "").trim();
-  if (!url) return "";
-  if (/placeholder|source\.unsplash\.com|picsum\.photos/i.test(url)) return "";
-  if (/^(?:\.\/)?assets\//i.test(url)) return ProductAIGuard.escapeHtml(url);
-  if (!/^https?:\/\//i.test(url)) return "";
-  return ProductAIGuard.escapeHtml(url);
 }
 
 function renderResults() {
@@ -696,14 +591,11 @@ function renderResults() {
       return !["search_query","nivel_confianza","producto_principal","rfq listo","id","codigo","internal","interno"].some(w => key.includes(w));
     });
     const specText = visibleSpecs.length ? `${ProductAIGuard.escapeHtml(visibleSpecs[0].etiqueta)}: ${ProductAIGuard.escapeHtml(visibleSpecs[0].valor)}` : "Por validar";
-    const image = webImageUrl(p);
-    const imageHtml = image
-      ? `<img class="market-thumb" src="${image}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
-      : `<span class="market-thumb empty-thumb" aria-hidden="true"></span>`;
     return `
-    <tr onclick="selectProduct(${index})">
-      <td><div class="product-cell">${imageHtml}<div><strong>${name}</strong><br><span style="color:#565959">${brand || "Marca por validar"}</span></div></div></td>
-      <td><span class="pill">${category}</span><br><small>${ProductAIGuard.escapeHtml(p.sector || p.product_type || "")}</small></td>
+   <tr onclick="selectProduct(${index})">
+  <td><div class="product-cell">
+    <img class="market-thumb" src="${p.image || 'assets/placeholder.png'}" alt="${p.name}">
+  </div></td> 
       <td>${specText}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small><div class="provider-links">${providerLinks(p)}</div></td>
       <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small><br><small>Rating ${Number(p.rating || 4.2).toFixed(1)}/5</small></td>
       <td><div class="action-row">
@@ -845,11 +737,7 @@ function viewTechSheet(index) {
 function consultAvailability(index) {
   const item = filtered[index];
   if (!item) return;
-  const links = Array.isArray(item.source_links) ? item.source_links : [];
-  if (!links.length) {
-    alert("Este producto no tiene proveedor o pagina Amazon verificada. Agrega un enlace real en el inventario para mostrarlo.");
-    return;
-  }
+  const links = item.source_links || buildSourceLinks(item);
   window.open(links[0].url, "_blank", "noopener,noreferrer");
 }
 
@@ -938,14 +826,8 @@ async function loadProducts() {
   setStatus("Cargando...");
   document.getElementById("runSearch").disabled = true;
   try {
-    const trending = await loadJson("assets/trending_products.json");
-    const catalog = ProductAIGuard.extractProducts(trending);
-    const platformProducts = window.PlatformCatalog
-      ? await PlatformCatalog.fetchPlatformProducts({limit: 80}).catch(() => [])
-      : [];
-    products = window.PlatformCatalog
-      ? PlatformCatalog.mergeProducts(platformProducts, catalog).map(normalize)
-      : catalog.map(normalize);
+    const trending = await loadJson("/assets/trending_products.json");
+    products = ProductAIGuard.extractProducts(trending).map(normalize);
     filtered = products.slice();
     loadCategories();
     loadAdvancedFilters();
