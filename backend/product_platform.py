@@ -922,7 +922,11 @@ def list_products(user):
             f"""
             SELECT * FROM platform_products
             WHERE {' AND '.join(clauses)}
-            ORDER BY updated_at DESC
+            ORDER BY priority ASC,
+              CASE WHEN sku GLOB '[0-9]*' AND sku != '' THEN 0 ELSE 1 END ASC,
+              CAST(sku AS INTEGER) ASC,
+              sku ASC,
+              updated_at DESC
             LIMIT 200
             """,
             params,
@@ -956,7 +960,11 @@ def public_products():
             FROM platform_products p
             JOIN platform_organizations o ON o.id = p.organization_id
             WHERE {' AND '.join(clauses)}
-            ORDER BY p.priority ASC, p.updated_at DESC
+            ORDER BY p.priority ASC,
+              CASE WHEN p.sku GLOB '[0-9]*' AND p.sku != '' THEN 0 ELSE 1 END ASC,
+              CAST(p.sku AS INTEGER) ASC,
+              p.sku ASC,
+              p.updated_at DESC
             LIMIT ?
             """,
             params + [limit],
