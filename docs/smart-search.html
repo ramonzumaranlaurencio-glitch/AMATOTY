@@ -474,7 +474,7 @@ function fieldValue(id) {
 
 function applyFilters() {
   setStatus("Buscando...");
-  const q = document.getElementById("query").value.trim().toLowerCase();
+  const q = normalizeText(document.getElementById("query").value.trim());
   const cat = document.getElementById("categoryFilter").value;
   const sort = document.getElementById("sort").value;
   const brand = fieldValue("brandFilter");
@@ -487,9 +487,11 @@ function applyFilters() {
   const minPrice = Number(document.getElementById("minPrice")?.value || 0);
   const maxPrice = Number(document.getElementById("maxPrice")?.value || 0);
   filtered = products.filter(p => {
-    const blob = [p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query,p.compatibility,p.material,p.provider,p.supplier,p.sector,p.quality].join(" ").toLowerCase();
+    const blob = normalizeText([p.name,p.brand,p.category,p.product_type,p.problem,p.target,p.specs,p.search_query,p.compatibility,p.material,p.provider,p.supplier,p.sector,p.quality].join(" "));
     const price = salePrice(p);
-    return (!q || blob.includes(q))
+    // Búsqueda por palabras: todas las palabras del query deben aparecer en el blob
+    const words = q.split(" ").filter(Boolean);
+    return (!words.length || words.every(w => blob.includes(w)))
       && (!cat || p.category === cat)
       && (!brand || String(p.brand || "").toLowerCase() === brand)
       && (!sector || String(p.sector || p.category || "").toLowerCase() === sector)
@@ -514,7 +516,11 @@ function applyFilters() {
 
 function normalizeText(text) {
   return String(text || "")
+    .normalize("NFD")               // descomponer acentos
+    .replace(/[\u0300-\u036f]/g, "") // eliminar diacríticos
     .toLowerCase()
+    .replace(/qu/g, "c")            // fonética española: qu→c
+    .replace(/k/g, "c")             // fonética española/quechua: k→c (inka→inca)
     .replace(/[/\-_]/g, " ")
     .replace(/\s+/g, " ")
     .trim();

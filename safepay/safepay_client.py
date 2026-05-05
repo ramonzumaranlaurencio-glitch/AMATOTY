@@ -30,6 +30,7 @@ Uso:
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 try:
@@ -39,7 +40,7 @@ except ImportError:
 
 logger = logging.getLogger("safepay_client")
 
-SAFEPAY_BASE_URL = "http://127.0.0.1:5001"
+SAFEPAY_BASE_URL = os.getenv("SAFEPAY_API_URL") or os.getenv("SAFEPAY_URL") or "http://127.0.0.1:5001"
 TIMEOUT          = 5  # segundos
 
 

@@ -1352,6 +1352,18 @@ def _merge_product_lists(*lists):
     return _sort_smart_products(merged)
 
 
+def _normalize_search_query(q):
+    """Normaliza una query de búsqueda: elimina acentos y aplica equivalencias
+    fonéticas español/quechua (inka→inca, kola→cola, etc.)."""
+    import unicodedata
+    q = str(q or "").strip()
+    q = unicodedata.normalize("NFD", q)
+    q = "".join(c for c in q if unicodedata.category(c) != "Mn")  # eliminar diacríticos
+    q = q.lower()
+    q = q.replace("qu", "c").replace("k", "c")  # inka→inca, queso→ceso
+    return q
+
+
 def _load_platform_products(query="", category=""):
     """Lee los productos publicados de la BD del platform y los convierte al
     formato estándar que usa smart-search."""
@@ -1362,9 +1374,17 @@ def _load_platform_products(query="", category=""):
             clauses = ["p.status = 'published'", "o.status = 'active'"]
             params = []
             if query:
-                q = f"%{query.lower()}%"
-                clauses.append("(LOWER(p.name) LIKE ? OR LOWER(p.description) LIKE ? OR LOWER(p.category) LIKE ?)")
-                params.extend([q, q, q])
+                # Normalizar query: eliminar acentos, k→c (inka→inca)
+                q_norm = _normalize_search_query(query)
+                q_like = f"%{q_norm}%"
+                q_orig = f"%{query.lower()}%"
+                # Buscar tanto con el query original como con el normalizado
+                clauses.append("""(
+                    LOWER(p.name) LIKE ? OR LOWER(p.name) LIKE ?
+                    OR LOWER(p.description) LIKE ? OR LOWER(p.description) LIKE ?
+                    OR LOWER(p.category) LIKE ? OR LOWER(p.category) LIKE ?
+                )""")
+                params.extend([q_orig, q_like, q_orig, q_like, q_orig, q_like])
             if category:
                 clauses.append("LOWER(p.category) = ?")
                 params.append(category.lower())
@@ -1391,10 +1411,10 @@ def _load_platform_products(query="", category=""):
                 price = float(row["price"] or 10)
                 result.append({
                     "name":        row["name"],
-                    "brand":       (payload.get("metadata") or {}).get("brand") or row["organization_name"] or "",
+                    "brand":       payload.get("brand") or row["organization_name"] or "",
                     "category":    row["category"] or "",
                     "description": row["description"] or "",
-                    "short_desc":  row["description"][:120] if row["description"] else "",
+                    "short_desc":  (row["description"] or "")[:120],
                     "price_base":  price,
                     "price_sale":  price,
                     "currency":    row["currency"] or "USD",
@@ -1421,30 +1441,27 @@ def _smart_search_fallback(query, category, currency, margin):
     platform = _load_platform_products(query=query, category=category)
     # 2. Catálogo base (trending_products.json)
     trending = _load_trending_products()
-    query_l   = (query or "").lower()
+    query_l   = _normalize_search_query(query)   # normalizado: acentos + k→c
+    query_raw = (query or "").lower()
     category_l = (category or "").lower()
     if query_l or category_l:
-        trending = [
-            product
-            for product in trending
-            if (
-                not query_l
-                or query_l
-                in " ".join(
-                    [
-                        str(product.get("name", "")),
-                        str(product.get("brand", "")),
-                        str(product.get("category", "")),
-                        str(product.get("product_type", "")),
-                        str(product.get("problem", "")),
-                        str(product.get("target", "")),
-                        str(product.get("specs", "")),
-                        str(product.get("search_query", "")),
-                    ]
-                ).lower()
-            )
-            and (not category_l or str(product.get("category", "")).lower() == category_l)
-        ]
+        def _matches_trending(product):
+            blob = " ".join([
+                str(product.get("name", "")),
+                str(product.get("brand", "")),
+                str(product.get("category", "")),
+                str(product.get("product_type", "")),
+                str(product.get("problem", "")),
+                str(product.get("target", "")),
+                str(product.get("specs", "")),
+                str(product.get("search_query", "")),
+            ])
+            blob_norm = _normalize_search_query(blob)
+            blob_raw  = blob.lower()
+            cat_ok    = not category_l or str(product.get("category", "")).lower() == category_l
+            q_ok      = not query_l or (query_l in blob_norm) or (query_raw in blob_raw)
+            return cat_ok and q_ok
+        trending = [p for p in trending if _matches_trending(p)]
     # Unir: primero los de BD (tienen prioridad), luego el catálogo base
     seen = set()
     products = []
