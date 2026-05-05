@@ -265,15 +265,10 @@ const API_ORIGIN = window.location.hostname.includes("github.io")
   ? "https://amatoty.onrender.com"
   : "";
 
-// URL de SafePay — mismo origen si lo sirve el mismo servidor,
-// o la URL externa de Render cuando el sitio corre en otro lugar.
-const SAFEPAY_BASE = (function() {
-  const host = window.location.hostname;
-  // En Render el propio servidor es SafePay
-  if (host.endsWith(".onrender.com")) return window.location.origin;
-  // Local: SafePay corre en el puerto 5001
-  return "http://127.0.0.1:5001";
-})();
+// Proxy SafePay: siempre en el mismo origen (evita CORS).
+// El backend principal reenvía la llamada a SafePay internamente.
+const SAFEPAY_PROXY = API_ORIGIN + "/api/safepay/checkout";
+const SAFEPAY_BASE  = API_ORIGIN || window.location.origin;
 
 function setStatus(message) {
   document.getElementById("resultCount").textContent = message;
@@ -739,22 +734,21 @@ async function pagarProducto(index) {
   const amount = parseFloat((item.price_sale || salePrice(item) || 1).toFixed(2));
   _showPayStatus("⏳ Conectando con SafePay...", "info");
   try {
-    const resp = await fetch(`${SAFEPAY_BASE}/api/payments/create`, {
+    const resp = await fetch(SAFEPAY_PROXY, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        product_name: item.name,
         amount: amount,
         currency: currency,
-        method: "Online",
-        description: item.name,
         customer: "",
         customer_email: "",
       }),
     });
     const data = await resp.json();
-    if (!resp.ok || data.error) throw new Error(data.error || "Error al crear pago");
+    if (!resp.ok || !data.ok) throw new Error(data.error || "Error al crear pago");
     _showPayStatus("", "");
-    window.location.href = `${SAFEPAY_BASE}/payment/${data.id}`;
+    window.location.href = data.pay_url;
   } catch (err) {
     _showPayStatus("❌ SafePay no disponible: " + err.message, "error");
   }
@@ -912,22 +906,21 @@ document.getElementById("checkoutBtn").addEventListener("click", async () => {
   const names = cart.map(item => item.name).join(", ");
   _showPayStatus("⏳ Conectando con SafePay...", "info");
   try {
-    const resp = await fetch(`${SAFEPAY_BASE}/api/payments/create`, {
+    const resp = await fetch(SAFEPAY_PROXY, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        product_name: names.length > 120 ? names.slice(0, 117) + "..." : names,
         amount: parseFloat(total.toFixed(2)),
         currency: currency,
-        method: "Online",
-        description: names.length > 120 ? names.slice(0, 117) + "..." : names,
         customer: "",
         customer_email: "",
       }),
     });
     const data = await resp.json();
-    if (!resp.ok || data.error) throw new Error(data.error || "Error SafePay");
+    if (!resp.ok || !data.ok) throw new Error(data.error || "Error SafePay");
     _showPayStatus("", "");
-    window.location.href = `${SAFEPAY_BASE}/payment/${data.id}`;
+    window.location.href = data.pay_url;
   } catch (err) {
     _showPayStatus("❌ No se pudo conectar con SafePay: " + err.message, "error");
     btn.disabled = false;
