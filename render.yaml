@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  render.yaml — Debe estar en la RAÍZ del repositorio para que Render lo lea.
+#  SafePay vive en la subcarpeta safepay/ → rootDir apunta ahí.
+#  Documentación: https://render.com/docs/render-yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  - type: web
+    name: trujillo-safepay-pro
+    runtime: python
+    rootDir: safepay                        # Render trabaja desde safepay/
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --bind 0.0.0.0:$PORT --timeout 120
+    plan: free
+    healthCheckPath: /health
+
+    envVars:
+      # PostgreSQL — Render inyecta DATABASE_URL automáticamente desde la BD
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safepay-db
+          property: connectionString
+
+      # Pasarela de pago
+      - key: PAYMENT_PROVIDER
+        value: manual              # Cambia a "stripe" cuando tengas las claves
+
+      # Secrets — configúralos en Render → Environment (NO los pongas aquí)
+      - key: PAYMENT_SECRET_KEY
+        sync: false
+
+      - key: PAYMENT_PUBLIC_KEY
+        sync: false
+
+      - key: WEBHOOK_SECRET
+        sync: false
+
+      # BASE_URL: app.py lee RENDER_EXTERNAL_URL que Render inyecta solo.
+      # No es necesario configurarla aquí.
+
+      # Clave secreta Flask (Render la genera automáticamente)
+      - key: SECRET_KEY
+        generateValue: true
+
+      # CORS: URL de LCA PRO (actualiza cuando lo despliegues en Render)
+      - key: ALLOWED_ORIGINS
+        value: "http://127.0.0.1:5050,http://localhost:5050"
+
+databases:
+  - name: safepay-db
+    databaseName: safepay
+    user: safepay_user
+    plan: free
+    region: oregon
