@@ -9,11 +9,44 @@ import uuid
 from urllib.parse import urljoin
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from io import BytesIO
 from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+
+try:
+    import cloudinary
+    import cloudinary.uploader
+    _CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
+    if _CLOUDINARY_URL:
+        cloudinary.config(cloudinary_url=_CLOUDINARY_URL)
+        _USE_CLOUDINARY = True
+    else:
+        _USE_CLOUDINARY = False
+except ImportError:
+    _USE_CLOUDINARY = False
+
+
+def _cloudinary_upload(raw: bytes, public_id: str, resource_type: str = "image") -> str:
+    """Sube bytes a Cloudinary y devuelve la URL segura."""
+    result = cloudinary.uploader.upload(
+        BytesIO(raw),
+        public_id=public_id,
+        resource_type=resource_type,
+        overwrite=True,
+        use_filename=False,
+    )
+    return result["secure_url"]
+
+
+def _cloudinary_delete(public_id: str, resource_type: str = "image") -> None:
+    """Elimina un recurso de Cloudinary sin lanzar excepcion si no existe."""
+    try:
+        cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+    except Exception:
+        pass
 
 
 platform_bp = Blueprint("product_platform", __name__, url_prefix="/api/platform")
@@ -1293,10 +1326,24 @@ def upload_product_media(user, product_id):
             original = secure_filename(file.filename or f"media-{index}")
             ext = Path(original).suffix or mimetypes.guess_extension(mime_type) or ".bin"
             storage_name = f"{product_id}-{uuid.uuid4().hex}{ext}"
-            target = UPLOAD_DIR / storage_name
-            target.write_bytes(raw)
             media_id = make_id("med")
-            public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
+            cld_resource_type = "video" if media_type == "video" else "image"
+            if _USE_CLOUDINARY:
+                cld_public_id = f"amatoty/productos/{storage_name}"
+                public_url = _cloudinary_upload(raw, cld_public_id, cld_resource_type)
+                # storage_key guarda el public_id para poder borrarlo después
+                storage_key_val = f"cloudinary:{cld_resource_type}:{cld_public_id}"
+                # también guardamos en disco local como caché (ignorar si falla)
+                try:
+                    target = UPLOAD_DIR / storage_name
+                    target.write_bytes(raw)
+                except Exception:
+                    pass
+            else:
+                target = UPLOAD_DIR / storage_name
+                target.write_bytes(raw)
+                public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
+                storage_key_val = str(target.relative_to(BASE_DIR))
             conn.execute(
                 """
                 INSERT INTO platform_product_media
@@ -1310,7 +1357,7 @@ def upload_product_media(user, product_id):
                     row["organization_id"],
                     media_type,
                     public_url,
-                    str(target.relative_to(BASE_DIR)),
+                    storage_key_val,
                     original,
                     mime_type,
                     size,
@@ -1346,9 +1393,18 @@ def delete_media(user, media_id):
         _org_id, membership = resolve_org(conn, user, media["organization_id"])
         if not require_role(membership, WRITE_ROLES):
             return jsonify({"error": "Permiso insuficiente."}), 403
-        storage_path = BASE_DIR / media["storage_key"]
-        if storage_path.exists() and storage_path.is_file():
-            storage_path.unlink()
+        storage_key = media["storage_key"] or ""
+        if storage_key.startswith("cloudinary:"):
+            # formato: "cloudinary:<resource_type>:<public_id>"
+            parts = storage_key.split(":", 2)
+            cld_resource_type = parts[1] if len(parts) > 1 else "image"
+            cld_public_id = parts[2] if len(parts) > 2 else ""
+            if cld_public_id:
+                _cloudinary_delete(cld_public_id, cld_resource_type)
+        else:
+            storage_path = BASE_DIR / storage_key
+            if storage_path.is_file():
+                storage_path.unlink(missing_ok=True)
         conn.execute("DELETE FROM platform_product_media WHERE id = ?", (media_id,))
         audit(conn, user["id"], media["organization_id"], "media", media_id, "delete")
         conn.commit()

@@ -440,6 +440,11 @@ async function loadMe() {
   localStorage.setItem("platformOrganizationId", state.organizationId || "");
   renderShell();
   await loadAll();
+  const savedProductId = localStorage.getItem("platformSelectedProductId");
+  if (savedProductId) {
+    const saved = state.products.find(p => p.id === savedProductId);
+    if (saved) selectProduct(saved);
+  }
 }
 
 function renderShell() {
@@ -633,6 +638,7 @@ function technicalSheetText(product) {
 
 function resetProductForm() {
   state.selectedProduct = null;
+  localStorage.removeItem("platformSelectedProductId");
   $("#productForm").reset();
   $("#productId").value = "";
   $("#productSpecs").value = "";
@@ -657,6 +663,7 @@ function resetProductForm() {
 
 function selectProduct(product) {
   state.selectedProduct = product;
+  localStorage.setItem("platformSelectedProductId", product.id);
   $("#productId").value = product.id;
   $("#productName").value = product.name || "";
   $("#productDescription").value = product.description || "";
@@ -685,12 +692,18 @@ function selectProduct(product) {
   renderMedia(product.media || []);
 }
 
+function mediaAbsUrl(url) {
+  if (!url) return "";
+  if (/^https?:\/\//.test(url) || url.startsWith("/")) return url;
+  return `${API_ORIGIN}/${url}`;
+}
+
 function renderMedia(media) {
   $("#mediaGrid").innerHTML = media.map(item => `
     <div class="media-tile">
       ${item.media_type === "video"
-        ? `<video src="${escapeHtml(item.url)}" muted controls></video>`
-        : `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.filename)}">`}
+        ? `<video src="${escapeHtml(mediaAbsUrl(item.url))}" muted controls></video>`
+        : `<img src="${escapeHtml(mediaAbsUrl(item.url))}" alt="${escapeHtml(item.filename)}">`}
       <button data-action="delete-media" data-id="${escapeHtml(item.id)}" type="button">x</button>
     </div>
   `).join("");
