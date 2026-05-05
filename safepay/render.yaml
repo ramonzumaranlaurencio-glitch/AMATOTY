@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  render.yaml — Configuración de despliegue en Render.com
+#
+#  OPCIÓN A: SafePay como repositorio independiente
+#    → Coloca este render.yaml en la raíz del repo de safepay
+#    → El repo solo contiene el contenido de la carpeta safepay/
+#
+#  OPCIÓN B: SafePay como subcarpeta en el repo principal
+#    → Coloca este render.yaml en la RAÍZ del repo LCA_PRO_FINAL_UNICA
+#    → Render lee rootDir: safepay para encontrar el código
+#
+#  Documentación: https://render.com/docs/render-yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  - type: web
+    name: trujillo-safepay-pro
+    runtime: python
+    # Si SafePay está en subcarpeta del repo principal, descomenta:
+    # rootDir: safepay
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --bind 0.0.0.0:$PORT --timeout 120
+    plan: free                    # Cambia a "starter" para producción real
+    healthCheckPath: /health
+
+    envVars:
+      # Base de datos PostgreSQL (inyectada automáticamente por Render)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safepay-db
+          property: connectionString
+
+      # Pasarela de pago
+      - key: PAYMENT_PROVIDER
+        value: stripe              # Cambia a "manual" si aún no tienes Stripe
+
+      # Secrets — configúralos en el dashboard de Render (NO los pongas aquí)
+      - key: PAYMENT_SECRET_KEY
+        sync: false                # Configura en Render → Environment
+
+      - key: PAYMENT_PUBLIC_KEY
+        sync: false
+
+      - key: WEBHOOK_SECRET
+        sync: false
+
+      # URL pública de SafePay en Render (se asigna automáticamente)
+      - key: BASE_URL
+        fromService:
+          name: trujillo-safepay-pro
+          type: web
+          property: host
+          envVarKey: RENDER_EXTERNAL_URL
+
+      # Clave secreta Flask (Render genera una automáticamente)
+      - key: SECRET_KEY
+        generateValue: true
+
+      # CORS: URL de tu instancia LCA PRO en Render (o localhost para dev)
+      - key: ALLOWED_ORIGINS
+        value: "http://127.0.0.1:5050"  # Actualiza con la URL real de LCA PRO
+
+databases:
+  - name: safepay-db
+    databaseName: safepay
+    user: safepay_user
+    plan: free                    # PostgreSQL gratuito en Render (90 días)
+    region: oregon                # Cambia según tu ubicación preferida

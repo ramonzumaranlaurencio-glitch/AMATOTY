@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · SafePay PRO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📊 Dashboard de Pagos</h1>
+  <p>Vista general del sistema SafePay</p>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-label">Total Pagos</div>
+    <div class="kpi-value">{{ stats.total or 0 }}</div>
+  </div>
+  <div class="kpi-card kpi-green">
+    <div class="kpi-label">Monto Cobrado</div>
+    <div class="kpi-value">S/ {{ "%.2f"|format(stats.total_amount or 0) }}</div>
+    <div class="kpi-sub">USD {{ "%.2f"|format(stats.total_usd or 0) }}</div>
+  </div>
+  <div class="kpi-card kpi-yellow">
+    <div class="kpi-label">Pendientes</div>
+    <div class="kpi-value">{{ stats.pending or 0 }}</div>
+  </div>
+  <div class="kpi-card kpi-red">
+    <div class="kpi-label">Rechazados</div>
+    <div class="kpi-value">{{ stats.rejected or 0 }}</div>
+  </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="action-bar">
+  <a href="/payment/new" class="btn btn-primary">+ Nuevo Pago Manual</a>
+  <span class="action-sep">·</span>
+  <a href="/api/payments" target="_blank" class="btn btn-outline">📡 Ver API JSON</a>
+  <span class="action-sep">·</span>
+  <a href="/api/stats" target="_blank" class="btn btn-outline">📈 Stats JSON</a>
+</div>
+
+<!-- Tabla de pagos -->
+<div class="card">
+  <h2>Últimos 50 Pagos</h2>
+  {% if payments %}
+  <div class="table-wrapper">
+    <table class="sp-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Monto</th>
+          <th>Método</th>
+          <th>Estado</th>
+          <th>Descripción</th>
+          <th>Fecha</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td><code>{{ p.id }}</code></td>
+          <td>{{ p.customer or "—" }}</td>
+          <td class="amount">{{ p.currency }} {{ "%.2f"|format(p.amount) }}</td>
+          <td>{{ p.method }}</td>
+          <td><span class="pill pill-{{ p.status }}">{{ p.status }}</span></td>
+          <td>{{ (p.description or "")[:40] }}</td>
+          <td class="date">{{ p.created_at[:16] }}</td>
+          <td><a href="/payment/{{ p.id }}" class="btn-sm">Ver</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Aún no hay pagos registrados.</p>
+    <a href="/payment/new" class="btn btn-primary">Crear primer pago</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

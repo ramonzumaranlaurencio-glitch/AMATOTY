@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}SafePay PRO{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="nav-logo">💳</span>
+    <span class="nav-title">Trujillo SafePay PRO</span>
+    <span class="nav-badge">MICROSERVICIO · Puerto 5001</span>
+  </div>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/payment/new" class="btn-nav-primary">+ Nuevo Pago</a>
+  </div>
+</nav>
+
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  SafePay PRO · Servicio independiente · <a href="http://127.0.0.1:5050" target="_blank">← Volver a LCA PRO</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Pago · SafePay PRO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>💳 Registrar Nuevo Pago</h1>
+  <p>Formulario de pago manual</p>
+</div>
+
+<div class="card card-narrow">
+  <form method="POST" action="/payment/new">
+    <div class="form-group">
+      <label>Cliente / Nombre</label>
+      <input type="text" name="customer" placeholder="Ej: Juan Pérez" class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label>Email del Cliente</label>
+      <input type="email" name="customer_email" placeholder="cliente@email.com" class="form-input">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Monto *</label>
+        <input type="number" name="amount" step="0.01" min="0.01" required
+               placeholder="0.00" class="form-input">
+      </div>
+      <div class="form-group">
+        <label>Moneda</label>
+        <select name="currency" class="form-input">
+          {% for c in currencies %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Método de Pago *</label>
+      <select name="method" class="form-input" required>
+        {% for m in methods %}
+        <option value="{{ m }}">{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea name="description" rows="3" class="form-input"
+                placeholder="Ej: Pago por producto XYZ"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-block">Registrar Pago</button>
+      <a href="/dashboard" class="btn btn-outline btn-block">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

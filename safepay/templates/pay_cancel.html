@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Pago Cancelado · SafePay PRO{% endblock %}
+
+{% block content %}
+<div class="result-page result-cancel">
+  <div class="result-icon">❌</div>
+  <h1>Pago Cancelado</h1>
+  <p class="result-sub">Cancelaste el proceso de pago. No se realizó ningún cargo.</p>
+
+  {% if payment %}
+  <div class="result-card">
+    <table class="detail-table">
+      <tr><th>ID de Operación</th><td><code>{{ payment.id }}</code></td></tr>
+      <tr><th>Monto</th>
+          <td class="amount">{{ payment.currency }} {{ "%.2f"|format(payment.amount) }}</td></tr>
+      <tr><th>Estado</th>
+          <td><span class="pill pill-pendiente">pendiente</span></td></tr>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="result-actions">
+    {% if payment.id %}
+    <a href="/payment/{{ payment.id }}/checkout"
+       onclick="event.preventDefault(); document.getElementById('retry-form').submit();"
+       class="btn btn-primary">Intentar de nuevo</a>
+    <form id="retry-form" method="POST"
+          action="/payment/{{ payment.id }}/checkout" style="display:none"></form>
+    {% endif %}
+    <a href="/dashboard" class="btn btn-outline">← Volver al Dashboard</a>
+  </div>
+</div>
+{% endblock %}

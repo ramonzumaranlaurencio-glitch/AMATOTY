@@ -20,11 +20,22 @@ try:
     import cloudinary
     import cloudinary.uploader
     _CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
+    _CLD_CLOUD = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
+    _CLD_KEY = os.environ.get("CLOUDINARY_API_KEY", "")
+    _CLD_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "")
     if _CLOUDINARY_URL:
         cloudinary.config(cloudinary_url=_CLOUDINARY_URL)
         _USE_CLOUDINARY = True
+    elif _CLD_CLOUD and _CLD_KEY and _CLD_SECRET:
+        cloudinary.config(cloud_name=_CLD_CLOUD, api_key=_CLD_KEY, api_secret=_CLD_SECRET, secure=True)
+        _USE_CLOUDINARY = True
     else:
-        _USE_CLOUDINARY = False
+        # Última opción: verificar si ya está configurado (ej. variable de entorno del sistema)
+        try:
+            cfg = cloudinary.config()
+            _USE_CLOUDINARY = bool(cfg.cloud_name and cfg.api_key and cfg.api_secret)
+        except Exception:
+            _USE_CLOUDINARY = False
 except ImportError:
     _USE_CLOUDINARY = False
 
@@ -55,8 +66,14 @@ def _cloudinary_delete(public_id: str, resource_type: str = "image") -> None:
 platform_bp = Blueprint("product_platform", __name__, url_prefix="/api/platform")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "data" / "lca_pro_final.db"
-UPLOAD_DIR = BASE_DIR / "Productos"
+
+# Permite usar un disco persistente en Render/Railway/etc.
+# Ej: DATA_DIR=/var/data  UPLOAD_DIR=/var/data/uploads
+_DATA_DIR = Path(os.environ.get("DATA_DIR", str(BASE_DIR / "data")))
+_UPLOAD_DIR_ENV = os.environ.get("UPLOAD_DIR", "")
+
+DB_PATH = _DATA_DIR / "lca_pro_final.db"
+UPLOAD_DIR = Path(_UPLOAD_DIR_ENV) if _UPLOAD_DIR_ENV else BASE_DIR / "Productos"
 PUBLIC_UPLOAD_PREFIX = "Productos"
 
 TOKEN_TTL_DAYS = 14
@@ -198,6 +215,16 @@ def image_publishable(metadata, has_uploaded_image=False):
 
 def init_platform_db():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if not _USE_CLOUDINARY:
+        import sys
+        print(
+            "[ADVERTENCIA] CLOUDINARY_URL no está configurado. "
+            "Las imágenes se guardarán en disco local y se PERDERÁN si el servidor se reinicia "
+            "(almacenamiento efímero en Render/Heroku). "
+            "Configura CLOUDINARY_URL en las variables de entorno del servidor.",
+            file=sys.stderr,
+        )
     conn = get_db()
     cur = conn.cursor()
     cur.executescript(
@@ -933,6 +960,41 @@ def reset_password():
         conn.close()
 
 
+@platform_bp.route("/admin/storage-status", methods=["GET"])
+@require_auth
+def storage_status(user):
+    """Diagnóstico rápido: muestra si Cloudinary está activo y cuántos archivos quedan en disco local."""
+    _org_id, membership = None, None
+    conn = get_db()
+    try:
+        _org_id, membership = resolve_org(conn, user, request.args.get("organization_id"))
+        if not require_role(membership, MANAGE_ROLES):
+            return jsonify({"error": "Permiso insuficiente."}), 403
+        local_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM platform_product_media WHERE storage_key NOT LIKE 'cloudinary:%'"
+        ).fetchone()["n"]
+        cloud_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM platform_product_media WHERE storage_key LIKE 'cloudinary:%'"
+        ).fetchone()["n"]
+        cld_info = {}
+        if _USE_CLOUDINARY:
+            try:
+                cfg = cloudinary.config()
+                cld_info = {"cloud_name": cfg.cloud_name, "configured": True}
+            except Exception:
+                cld_info = {"configured": True}
+        return jsonify({
+            "cloudinary_active": _USE_CLOUDINARY,
+            "cloudinary": cld_info,
+            "media_in_cloudinary": cloud_count,
+            "media_in_local_disk": local_count,
+            "db_path": str(DB_PATH),
+            "upload_dir": str(UPLOAD_DIR),
+        })
+    finally:
+        conn.close()
+
+
 @platform_bp.route("/me", methods=["GET"])
 @require_auth
 def me(user):
@@ -1429,6 +1491,69 @@ def delete_media(user, media_id):
         audit(conn, user["id"], media["organization_id"], "media", media_id, "delete")
         conn.commit()
         return jsonify({"ok": True})
+    finally:
+        conn.close()
+
+
+@platform_bp.route("/admin/migrate-media-to-cloudinary", methods=["POST"])
+@require_auth
+def migrate_media_to_cloudinary(user):
+    """Sube a Cloudinary todas las imágenes/videos que están guardados en disco local.
+    Solo accesible para roles owner/admin. Idempotente: si ya está en Cloudinary, lo omite."""
+    conn = get_db()
+    try:
+        _org_id, membership = resolve_org(conn, user, request.json.get("organization_id") if request.is_json else None)
+        if not require_role(membership, MANAGE_ROLES):
+            return jsonify({"error": "Permiso insuficiente. Se requiere owner o admin."}), 403
+        if not _USE_CLOUDINARY:
+            return jsonify({"error": "Cloudinary no está configurado. Agrega CLOUDINARY_URL en las variables de entorno."}), 400
+
+        rows = conn.execute(
+            "SELECT id, media_type, url, storage_key, filename, mime_type FROM platform_product_media"
+            " WHERE storage_key NOT LIKE 'cloudinary:%'"
+        ).fetchall()
+
+        migrated, skipped, errors = [], [], []
+        for row in rows:
+            media_id = row["id"]
+            storage_key = row["storage_key"] or ""
+            # Determinar ruta local del archivo
+            if storage_key:
+                local_path = BASE_DIR / storage_key
+            else:
+                # Intentar por URL legacy (ej: "Productos/archivo.jpg")
+                url_part = (row["url"] or "").lstrip("/")
+                local_path = BASE_DIR / url_part
+
+            if not local_path.is_file():
+                skipped.append({"id": media_id, "reason": f"Archivo no encontrado: {local_path}"})
+                continue
+
+            try:
+                raw = local_path.read_bytes()
+                cld_resource_type = "video" if row["media_type"] == "video" else "image"
+                storage_name = local_path.name
+                cld_public_id = f"amatoty/productos/{storage_name}"
+                public_url = _cloudinary_upload(raw, cld_public_id, cld_resource_type)
+                new_storage_key = f"cloudinary:{cld_resource_type}:{cld_public_id}"
+                conn.execute(
+                    "UPDATE platform_product_media SET url = ?, storage_key = ? WHERE id = ?",
+                    (public_url, new_storage_key, media_id),
+                )
+                migrated.append({"id": media_id, "url": public_url})
+            except Exception as exc:
+                errors.append({"id": media_id, "error": str(exc)})
+
+        conn.commit()
+        return jsonify({
+            "ok": True,
+            "migrated": len(migrated),
+            "skipped": len(skipped),
+            "errors": len(errors),
+            "detail_migrated": migrated,
+            "detail_skipped": skipped,
+            "detail_errors": errors,
+        })
     finally:
         conn.close()
 

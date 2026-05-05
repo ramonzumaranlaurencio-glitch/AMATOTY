@@ -1,3 +1,42 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# Entornos virtuales
+.venv/
+.venv-1/
+venv/
+env/
+
+# Variables de entorno — NUNCA subir al repo
+.env
+safepay/.env
+*.env
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+safepay/data/
+
+# Logs
+*.log
 .codex_*.log
+logs/
+
+# Exportaciones y frames temporales
+exports/
+frames/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+.idea/
+.qodo/
+

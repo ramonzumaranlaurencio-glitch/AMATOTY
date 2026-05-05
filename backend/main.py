@@ -128,7 +128,15 @@ def _data_path(*parts):
 
 SITE_DIR = _data_path("docs")
 LOCAL_SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "docs"))
-TRACKING_DB_PATH = _data_path("data", "lca_pro_final.db")
+
+# DATA_DIR permite apuntar a un disco persistente en Render/Railway/etc.
+# Ej: DATA_DIR=/var/data
+_DATA_DIR_ENV = os.environ.get("DATA_DIR", "")
+if _DATA_DIR_ENV:
+    TRACKING_DB_PATH = os.path.join(_DATA_DIR_ENV, "lca_pro_final.db")
+else:
+    TRACKING_DB_PATH = _data_path("data", "lca_pro_final.db")
+
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 GEMINI_DIAGNOSTICO_SCHEMA = {

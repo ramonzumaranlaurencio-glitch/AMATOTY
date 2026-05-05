@@ -15,6 +15,13 @@ import pandas as pd
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 
+# ── SafePay PRO (microservicio independiente en puerto 5001) ──────────────────
+try:
+    from safepay.safepay_client import SafePayClient, SafePayError
+    _SAFEPAY_AVAILABLE = True
+except ImportError:
+    _SAFEPAY_AVAILABLE = False
+
 
 APP_NAME = "LCA PRO FINAL ÚNICA"
 DATA = Path("data")
@@ -1082,7 +1089,7 @@ def main():
     with st.sidebar:
         st.markdown("## 🏢 LCA PRO FINAL")
         st.caption("Versión única PRO")
-        page = st.radio("Navegación", ["Dashboard","Checklist","Web Afiliada","Video","Publicación","Analytics","Crecimiento Viral","Productos","Cuentas","Configuración"])
+        page = st.radio("Navegación", ["Dashboard","Checklist","Web Afiliada","Video","Publicación","Analytics","Crecimiento Viral","Productos","Cuentas","Configuración","💳 SafePay PRO"])
         st.divider()
         m = daily_metrics()
         st.metric("Comisión", f"${m['commission']:.2f}")
@@ -1108,6 +1115,101 @@ def main():
         accounts_page()
     elif page == "Configuración":
         settings_page()
+    elif page == "💳 SafePay PRO":
+        safepay_page()
+
+
+# ─── Página SafePay PRO ────────────────────────────────────────────────────────
+def safepay_page():
+    header("💳 SafePay PRO", "Microservicio de pagos independiente · Puerto 5001")
+
+    if not _SAFEPAY_AVAILABLE:
+        st.error("El módulo safepay no está disponible. Verifica que la carpeta safepay/ exista.")
+        return
+
+    client = SafePayClient()
+    online = client.is_online()
+
+    # ── Estado del servicio ────────────────────────────────────────────────────
+    if online:
+        st.success("✅ SafePay PRO está **activo** en http://127.0.0.1:5001")
+    else:
+        st.error("❌ SafePay PRO **no está corriendo**. Inícialo con: `python safepay/app.py`")
+        st.code("python safepay/app.py", language="bash")
+        st.stop()
+
+    # ── Acceso directo al dashboard ────────────────────────────────────────────
+    st.markdown(
+        '<a href="http://127.0.0.1:5001/dashboard" target="_blank">'
+        '<button style="background:#2563eb;color:white;border:none;padding:10px 24px;'
+        'border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;">'
+        '🔗 Abrir Dashboard SafePay</button></a>',
+        unsafe_allow_html=True,
+    )
+    st.markdown("")
+
+    # ── Estadísticas rápidas ───────────────────────────────────────────────────
+    try:
+        stats = client.stats()
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            kpi("Total Pagos", stats.get("total", 0))
+        with col2:
+            kpi("Monto Cobrado", f"S/ {stats.get('total_amount', 0):.2f}")
+        with col3:
+            kpi("Pendientes", stats.get("pending", 0))
+        with col4:
+            kpi("Rechazados", stats.get("rejected", 0))
+    except SafePayError as e:
+        st.warning(f"No se pudieron cargar las estadísticas: {e}")
+
+    st.divider()
+
+    # ── Crear pago rápido ──────────────────────────────────────────────────────
+    with st.expander("➕ Crear Pago Rápido", expanded=False):
+        with st.form("safepay_quick_form"):
+            col_a, col_b = st.columns(2)
+            with col_a:
+                sp_amount   = st.number_input("Monto", min_value=0.01, step=1.0, value=10.0)
+                sp_method   = st.selectbox("Método", ["Yape","Plin","BCP","Interbank","Efectivo","Tarjeta"])
+            with col_b:
+                sp_currency = st.selectbox("Moneda", ["PEN","USD"])
+                sp_customer = st.text_input("Cliente", placeholder="Nombre del cliente")
+            sp_desc = st.text_input("Descripción", placeholder="Descripción del pago")
+            submitted = st.form_submit_button("Crear Pago")
+
+        if submitted:
+            try:
+                result = client.create_payment(
+                    amount=sp_amount,
+                    method=sp_method,
+                    currency=sp_currency,
+                    description=sp_desc,
+                    customer=sp_customer,
+                    metadata={"source": "lca-pro-main"},
+                )
+                st.success(f"✅ Pago creado: **{result['id']}**")
+                st.markdown(
+                    f'<a href="{result["dashboard_url"]}" target="_blank">'
+                    f'Ver pago en SafePay →</a>',
+                    unsafe_allow_html=True,
+                )
+            except SafePayError as e:
+                st.error(f"Error al crear pago: {e}")
+
+    # ── Últimos pagos ──────────────────────────────────────────────────────────
+    st.markdown("### Últimos Pagos")
+    try:
+        payments = client.list_payments()
+        if payments:
+            import pandas as pd
+            df = pd.DataFrame(payments)[["id","customer","amount","currency","method","status","created_at"]]
+            df.columns = ["ID","Cliente","Monto","Moneda","Método","Estado","Fecha"]
+            st.dataframe(df, use_container_width=True, hide_index=True)
+        else:
+            st.info("Sin pagos registrados aún.")
+    except SafePayError as e:
+        st.warning(f"No se pudieron cargar los pagos: {e}")
 
 
 if __name__ == "__main__":
