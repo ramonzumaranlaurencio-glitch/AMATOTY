@@ -139,8 +139,11 @@ else:
 
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
-# URL del microservicio SafePay (ajusta con la URL real de Render cuando lo despliegues)
-SAFEPAY_URL = os.environ.get("SAFEPAY_URL", "http://127.0.0.1:5001").rstrip("/")
+# URL del microservicio SafePay.
+# En producción (Render) se inyecta SAFEPAY_API_URL con la URL pública.
+# En local se usa 127.0.0.1:5001 como fallback.
+SAFEPAY_URL = os.environ.get("SAFEPAY_API_URL") or os.environ.get("SAFEPAY_URL", "http://127.0.0.1:5001")
+SAFEPAY_URL = SAFEPAY_URL.rstrip("/")
 
 GEMINI_DIAGNOSTICO_SCHEMA = {
     "type": "object",
@@ -554,9 +557,10 @@ def oye_bonita_underscore():
     return _send_site_file("oye-bonita.html")
 
 
+@app.route("/health")
 @app.route("/healthz")
 def healthz():
-    return jsonify({"ok": True, "service": "amatoty-backend"}), 200
+    return jsonify({"ok": True, "service": "lca-pro"}), 200
 
 
 @app.route("/track", methods=["POST"])

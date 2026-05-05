@@ -1,8 +1,7 @@
 flask
 flask-cors
-pillow
-mediapipe
-numpy
 gunicorn
+pillow
 google-genai
 cloudinary
+python-dotenv
