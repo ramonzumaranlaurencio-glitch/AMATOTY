@@ -67,8 +67,11 @@ CURRENCIES       = ["PEN", "USD"]
 PAYMENT_STATUSES = ["pendiente", "procesando", "pagado", "completado", "rechazado", "reembolsado"]
 
 # ─── Init BD ──────────────────────────────────────────────────────────────────
-init_db()
-migrate_db()
+try:
+    init_db()
+    migrate_db()
+except Exception as _db_init_err:
+    logger.error("DB init failed at startup (will retry on first request): %s", _db_init_err)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def now_iso() -> str:
@@ -345,7 +348,17 @@ def health():
         "port":     SAFEPAY_PORT,
         "provider": PAYMENT_PROVIDER,
         "db":       DB_BACKEND,
+        "db_ok":    _db_ping(),
     })
+
+
+def _db_ping() -> bool:
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False
 
 
 # ── Listar pagos ──────────────────────────────────────────────────────────────
