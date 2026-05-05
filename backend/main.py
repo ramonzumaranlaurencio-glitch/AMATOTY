@@ -140,13 +140,9 @@ else:
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 # URL del microservicio SafePay.
-# En producción (Render) se inyecta SAFEPAY_API_URL con la URL pública.
-# En local se usa 127.0.0.1:5001 como fallback.
-_raw_safepay = os.environ.get("SAFEPAY_API_URL") or os.environ.get("SAFEPAY_URL", "")
-# Seguridad: ignorar si no empieza con http (ej: DATABASE_URL por error de config)
-if not _raw_safepay or not _raw_safepay.startswith("http"):
-    _raw_safepay = "http://127.0.0.1:5001"
-SAFEPAY_URL = _raw_safepay.rstrip("/")
+# En producción (Render) se inyecta SAFEPAY_API_URL=https://trujillo-safepay-pro.onrender.com
+# En local se usa http://127.0.0.1:5001 como fallback.
+SAFEPAY_API_URL = os.getenv("SAFEPAY_API_URL", "http://127.0.0.1:5001").rstrip("/")
 
 GEMINI_DIAGNOSTICO_SCHEMA = {
     "type": "object",
@@ -2208,7 +2204,7 @@ def safepay_checkout():
 
     try:
         req = urllib.request.Request(
-            f"{SAFEPAY_URL}/api/payments/create",
+            f"{SAFEPAY_API_URL}/api/payments/create",
             data=payload,
             headers={"Content-Type": "application/json"},
             method="POST",
@@ -2220,7 +2216,7 @@ def safepay_checkout():
 
     pay_id = result.get("id", "")
     # Si Stripe está activo, devuelve checkout_url directo; si no, la URL del detalle
-    checkout_url = result.get("checkout_url") or f"{SAFEPAY_URL}/payment/{pay_id}"
+    checkout_url = result.get("checkout_url") or f"{SAFEPAY_API_URL}/payment/{pay_id}"
 
     return jsonify({
         "ok":         True,

@@ -68,7 +68,7 @@ class SafePayClient:
             return resp.json()
         except requests.exceptions.ConnectionError:
             raise SafePayError(
-                "SafePay no disponible. ¿Está corriendo en http://127.0.0.1:5001?"
+                f"SafePay no disponible. Verifica que el servicio esté activo en: {self.base}"
             )
         except requests.exceptions.Timeout:
             raise SafePayError("SafePay tardó demasiado en responder.")
@@ -84,7 +84,7 @@ class SafePayClient:
             return resp.json()
         except requests.exceptions.ConnectionError:
             raise SafePayError(
-                "SafePay no disponible. ¿Está corriendo en http://127.0.0.1:5001?"
+                f"SafePay no disponible. Verifica que el servicio esté activo en: {self.base}"
             )
         except requests.exceptions.Timeout:
             raise SafePayError("SafePay tardó demasiado en responder.")
