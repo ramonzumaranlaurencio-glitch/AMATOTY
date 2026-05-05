@@ -2198,18 +2198,18 @@ def safepay_checkout():
     print(f"[safepay] request body: {data}", flush=True)
     print(f"[safepay] SAFEPAY_API_URL = {SAFEPAY_API_URL!r}", flush=True)
 
-    amount = float(data.get("amount") or 0)
+    amount = float(data.get("amount") or data.get("importe") or data.get("monto") or 0)
     if amount <= 0:
         return jsonify({"ok": False, "error": "El monto debe ser mayor a 0"}), 400
 
     safepay_url = f"{SAFEPAY_API_URL}/api/payments/create"
     body = {
-        "amount":         amount,
-        "currency":       data.get("currency", "PEN"),
+        "amount":         amount,   # siempre en inglés
+        "currency":       data.get("currency") or data.get("moneda", "PEN"),
         "method":         "Online",
-        "description":    data.get("product_name") or data.get("description") or "Compra",
-        "customer":       data.get("customer", ""),
-        "customer_email": data.get("customer_email", ""),
+        "description":    data.get("product_name") or data.get("description") or data.get("producto") or "Compra",
+        "customer":       data.get("customer") or data.get("cliente", ""),
+        "customer_email": data.get("customer_email") or data.get("email", ""),
     }
     print(f"[safepay] POST {safepay_url} body={body}", flush=True)
 

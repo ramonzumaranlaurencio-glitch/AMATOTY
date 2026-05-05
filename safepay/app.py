@@ -384,12 +384,13 @@ def api_payments_create():
     """
     data = request.get_json(force=True, silent=True) or {}
 
-    amount = float(data.get("amount", 0))
+    # Acepta tanto 'amount' (inglés) como 'importe'/'monto' (español)
+    amount = float(data.get("amount") or data.get("importe") or data.get("monto") or 0)
     if amount <= 0:
         return jsonify({"error": "amount debe ser mayor a 0"}), 400
 
-    method   = data.get("method", "Online")
-    currency = data.get("currency", "PEN")
+    method   = data.get("method") or data.get("metodo", "Online")
+    currency = data.get("currency") or data.get("moneda", "PEN")
     pay_id   = _new_sp_id()
     n        = now_iso()
 
