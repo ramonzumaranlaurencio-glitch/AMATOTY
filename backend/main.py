@@ -2,6 +2,8 @@ import json
 import os
 import re
 import sqlite3
+import sys
+import traceback
 import unicodedata
 import urllib.parse
 import urllib.request
@@ -2193,34 +2195,57 @@ def safepay_checkout():
       { "ok": true, "pay_url": "https://...", "payment_id": "SP-..." }
     """
     data = request.get_json(silent=True) or {}
+    print(f"[safepay] request body: {data}", flush=True)
+    print(f"[safepay] SAFEPAY_API_URL = {SAFEPAY_API_URL!r}", flush=True)
+
     amount = float(data.get("amount") or 0)
     if amount <= 0:
         return jsonify({"ok": False, "error": "El monto debe ser mayor a 0"}), 400
 
-    payload = json.dumps({
+    safepay_url = f"{SAFEPAY_API_URL}/api/payments/create"
+    body = {
         "amount":         amount,
         "currency":       data.get("currency", "PEN"),
         "method":         "Online",
         "description":    data.get("product_name") or data.get("description") or "Compra",
         "customer":       data.get("customer", ""),
         "customer_email": data.get("customer_email", ""),
-    }).encode()
+    }
+    print(f"[safepay] POST {safepay_url} body={body}", flush=True)
 
     try:
-        req = urllib.request.Request(
-            f"{SAFEPAY_API_URL}/api/payments/create",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            result = json.loads(resp.read().decode())
+        try:
+            import requests as _requests
+            resp = _requests.post(safepay_url, json=body, timeout=10)
+            print(f"[safepay] HTTP {resp.status_code} response: {resp.text[:500]}", flush=True)
+            resp.raise_for_status()
+            result = resp.json()
+        except ImportError:
+            # Fallback a urllib si requests no está instalado
+            payload_bytes = json.dumps(body).encode()
+            req = urllib.request.Request(
+                safepay_url,
+                data=payload_bytes,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+                raw = r.read().decode()
+            print(f"[safepay] urllib response: {raw[:500]}", flush=True)
+            result = json.loads(raw)
     except Exception as exc:
-        return jsonify({"ok": False, "error": f"SafePay no disponible: {exc}"}), 503
+        tb = traceback.format_exc()
+        print(f"[safepay] ERROR: {exc}\n{tb}", flush=True)
+        return jsonify({
+            "ok":          False,
+            "error":       f"SafePay no disponible: {exc}",
+            "safepay_url": safepay_url,
+            "detail":      tb.splitlines()[-1] if tb else "",
+        }), 503
 
     pay_id = result.get("id", "")
-    # Si Stripe está activo, devuelve checkout_url directo; si no, la URL del detalle
     checkout_url = result.get("checkout_url") or f"{SAFEPAY_API_URL}/payment/{pay_id}"
+    print(f"[safepay] pay_id={pay_id!r} checkout_url={checkout_url!r}", flush=True)
 
     return jsonify({
         "ok":         True,
