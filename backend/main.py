@@ -140,12 +140,12 @@ else:
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 # URL del microservicio SafePay.
-# En producción (Render) se inyecta SAFEPAY_API_URL=https://trujillo-safepay-pro.onrender.com
-# En local se usa http://127.0.0.1:5001 como fallback.
+# Prioridad: variable de entorno SAFEPAY_API_URL > SAFEPAY_URL > URL de producción por defecto.
+# En local, levanta el microservicio en http://127.0.0.1:5001.
 # Seguridad: rechazar si no empieza con http (ej: postgresql:// por error de config en Render)
-_safepay_raw = os.getenv("SAFEPAY_API_URL", "")
+_safepay_raw = os.getenv("SAFEPAY_API_URL") or os.getenv("SAFEPAY_URL") or ""
 if not _safepay_raw or not _safepay_raw.startswith("http"):
-    _safepay_raw = "http://127.0.0.1:5001"
+    _safepay_raw = "https://trujillo-safepay-pro.onrender.com"
 SAFEPAY_API_URL = _safepay_raw.rstrip("/")
 
 GEMINI_DIAGNOSTICO_SCHEMA = {
