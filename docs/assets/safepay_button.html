@@ -1,0 +1,117 @@
+<!--
+  ══════════════════════════════════════════════════════════════════
+  SNIPPET: Botón "Comprar con SafePay"
+  Pega este bloque donde quieras mostrar el botón en tu página HTML.
+  El script al final puede ir una sola vez en el <body>.
+  ══════════════════════════════════════════════════════════════════
+-->
+
+<!-- ① Botón por producto (repite por cada producto) -->
+<button
+  class="btn-safepay"
+  onclick="pagarConSafePay(this)"
+  data-product="Nombre del Producto"
+  data-amount="99.90"
+  data-currency="PEN"
+>
+  💳 Comprar con SafePay
+</button>
+
+<!-- ② Estilos del botón (pon esto en tu <style> o style.css) -->
+<style>
+.btn-safepay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.btn-safepay:hover  { background: #1d4ed8; }
+.btn-safepay:active { transform: scale(.97); }
+.btn-safepay:disabled { background: #94a3b8; cursor: not-allowed; }
+</style>
+
+<!-- ③ Script (un solo <script> al final del <body> en toda la página) -->
+<script>
+/**
+ * pagarConSafePay(btn)
+ *
+ * Lee data-product, data-amount, data-currency del botón pulsado.
+ * Llama a /api/safepay/checkout en el backend principal.
+ * Redirige al usuario a la URL de pago que devuelve SafePay.
+ *
+ * Atributos del botón:
+ *   data-product   = nombre del producto
+ *   data-amount    = precio numérico (ej. 99.90)
+ *   data-currency  = moneda (PEN, USD, MXN, etc.)
+ *   data-customer  = nombre del cliente (opcional)
+ *   data-email     = email del cliente (opcional)
+ */
+async function pagarConSafePay(btn) {
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Procesando...';
+
+  try {
+    const resp = await fetch('/api/safepay/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_name:   btn.dataset.product  || 'Producto',
+        amount:         parseFloat(btn.dataset.amount  || '0'),
+        currency:       btn.dataset.currency || 'PEN',
+        customer:       btn.dataset.customer || '',
+        customer_email: btn.dataset.email    || '',
+      }),
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      throw new Error(data.error || 'Error al crear el pago');
+    }
+
+    // Redirige al usuario a la página de pago de SafePay
+    window.location.href = data.pay_url;
+
+  } catch (err) {
+    alert('No se pudo iniciar el pago: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+</script>
+
+
+<!--
+══════════════════════════════════════════════════════════════════
+EJEMPLO CON DATOS DINÁMICOS (cuando los productos vienen de JS)
+══════════════════════════════════════════════════════════════════
+Si tus productos se renderizan desde JavaScript (como en smart-search),
+genera el botón así dentro de tu template string:
+
+  `<button class="btn-safepay"
+     onclick="pagarConSafePay(this)"
+     data-product="${producto.nombre}"
+     data-amount="${producto.precio_numero || producto.price_sale}"
+     data-currency="${producto.currency || 'PEN'}"
+     data-email="">
+     💳 Comprar con SafePay
+   </button>`
+
+══════════════════════════════════════════════════════════════════
+VARIABLES DE ENTORNO REQUERIDAS EN EL BACKEND PRINCIPAL
+══════════════════════════════════════════════════════════════════
+  SAFEPAY_URL = https://amatoty.onrender.com   ← URL donde corre SafePay
+
+En local (desarrollo):
+  SAFEPAY_URL = http://127.0.0.1:5001          ← valor por defecto
+══════════════════════════════════════════════════════════════════
+-->

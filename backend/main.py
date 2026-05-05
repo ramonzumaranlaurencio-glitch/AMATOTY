@@ -139,6 +139,9 @@ else:
 
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
+# URL del microservicio SafePay (ajusta con la URL real de Render cuando lo despliegues)
+SAFEPAY_URL = os.environ.get("SAFEPAY_URL", "http://127.0.0.1:5001").rstrip("/")
+
 GEMINI_DIAGNOSTICO_SCHEMA = {
     "type": "object",
     "properties": {
@@ -2076,6 +2079,56 @@ def site_file(filename):
     if normalized.startswith("api/"):
         return jsonify({"error": "Ruta API no encontrada."}), 404
     return _send_site_file(normalized)
+
+
+# ── Integración SafePay ───────────────────────────────────────────────────────
+
+@app.route("/api/safepay/checkout", methods=["POST"])
+def safepay_checkout():
+    """
+    Crea un pago en SafePay y devuelve la URL de pago.
+    Body JSON esperado:
+      { "product_name": "...", "amount": 99.90, "currency": "PEN",
+        "customer": "...", "customer_email": "..." }
+    Respuesta:
+      { "ok": true, "pay_url": "https://...", "payment_id": "SP-..." }
+    """
+    data = request.get_json(silent=True) or {}
+    amount = float(data.get("amount") or 0)
+    if amount <= 0:
+        return jsonify({"ok": False, "error": "El monto debe ser mayor a 0"}), 400
+
+    payload = json.dumps({
+        "amount":         amount,
+        "currency":       data.get("currency", "PEN"),
+        "method":         "Online",
+        "description":    data.get("product_name") or data.get("description") or "Compra",
+        "customer":       data.get("customer", ""),
+        "customer_email": data.get("customer_email", ""),
+    }).encode()
+
+    try:
+        req = urllib.request.Request(
+            f"{SAFEPAY_URL}/api/payments/create",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            result = json.loads(resp.read().decode())
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"SafePay no disponible: {exc}"}), 503
+
+    pay_id = result.get("id", "")
+    # Si Stripe está activo, devuelve checkout_url directo; si no, la URL del detalle
+    checkout_url = result.get("checkout_url") or f"{SAFEPAY_URL}/payment/{pay_id}"
+
+    return jsonify({
+        "ok":         True,
+        "payment_id": pay_id,
+        "status":     result.get("status", "pendiente"),
+        "pay_url":    checkout_url,
+    })
 
 
 if __name__ == "__main__":
