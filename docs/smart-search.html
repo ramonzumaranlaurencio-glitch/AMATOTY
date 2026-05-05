@@ -512,6 +512,14 @@ function applyFilters() {
   showExpertAdvice();
 }
 
+function normalizeText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[/\-_]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function executeSearch() {
   const button = document.getElementById("runSearch");
   button.disabled = true;
@@ -537,12 +545,7 @@ async function executeSearch() {
       formData.append("margin", String(payload.margin));
       response = await postForm("/api/smart-analyze-media", formData);
     } else {
-      // response = await postJson("/api/smart-search", payload);
-      // FORZAR modo local
-      response = null;
-    }
-      // response = await postJson("/api/smart-search", payload);
-    response = await postJson("/api/smart-search", payload);
+      response = await postJson("/api/smart-search", payload);
     }
     lastAiPayload = response;
     renderEvidence(response);
@@ -565,11 +568,9 @@ async function executeSearch() {
       document.getElementById("detailPanel").innerHTML = `<div class="empty">El asesor no devolvió productos para esta evidencia. Prueba con una foto más clara, una medida, marca o modelo.</div>`;
     }
   } catch (err) {
-    // Si la API falla, buscar en todos los catálogos internos disponibles
     const message = err.message || String(err);
     let allProducts = [];
     try {
-      // Intenta cargar productos de varios catálogos internos
       const trending = await loadJson("/assets/trending_products.json");
       const productsJson = await loadJson("/data/products.json");
       allProducts = [
@@ -577,36 +578,17 @@ async function executeSearch() {
         ...ProductAIGuard.extractProducts(productsJson)
       ].map(normalize);
     } catch (e) {
-      // Si no se pueden cargar, usar los productos ya cargados
       allProducts = products.length ? products.slice() : [];
     }
     const q = document.getElementById("query").value.trim().toLowerCase();
-  function normalizeText(text) {
-  return String(text || "")
-    .toLowerCase()
-    .replace(/[\/\-_]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-filtered = allProducts.filter(p => {
-  const blob = normalizeText([
-    p.name,
-    p.brand,
-    p.category,
-    p.product_type,
-    p.problem,
-    p.target,
-    p.specs,
-    p.search_query,
-    p.image_alt,
-    p.image_must_show?.join(" ")
-  ].join(" "));
-
-  const words = normalizeText(q).split(" ").filter(Boolean);
-
-  return !words.length || words.every(word => blob.includes(word));
-});
+    filtered = allProducts.filter(p => {
+      const blob = normalizeText([
+        p.name, p.brand, p.category, p.product_type, p.problem, p.target,
+        p.specs, p.search_query, p.image_alt, p.image_must_show?.join(" ")
+      ].join(" "));
+      const words = normalizeText(q).split(" ").filter(Boolean);
+      return !words.length || words.every(word => blob.includes(word));
+    });
     renderResults();
     setStatus("Error API, mostrando productos locales");
     document.getElementById("aiMode").textContent = "Catálogo local";
@@ -615,7 +597,7 @@ filtered = allProducts.filter(p => {
   } finally {
     button.disabled = false;
     button.textContent = "Buscar Pro";
-  
+  }
 }
 
 function mergeProducts(current, incoming) {
