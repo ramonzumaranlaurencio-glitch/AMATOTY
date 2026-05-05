@@ -105,20 +105,42 @@ tr:last-child td{border-bottom:0}
 .empty{border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--muted);background:#fbfcfe;text-align:center}
 .split-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .recovery{margin-top:4px;color:#1d5fd7;background:transparent;border:0;padding:0;font-weight:800;text-align:left}
+.hamburger-btn{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:6px;background:white;font-size:20px;line-height:1;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
 @media(max-width:1100px){
-  .auth-screen,.app-shell,.grid-2{grid-template-columns:1fr}
-  .sidebar{position:static}
+  .auth-screen{grid-template-columns:1fr}
+  .auth-aside{display:none}
+  .app-shell{grid-template-columns:1fr}
+  .sidebar{
+    position:fixed;left:-260px;top:0;height:100vh;width:238px;
+    z-index:100;transition:left .25s ease;overflow-y:auto
+  }
+  .app-shell.sidebar-open .sidebar{left:0}
+  .app-shell.sidebar-open .sidebar-overlay{display:block}
+  .hamburger-btn{display:inline-flex}
+  .grid-2{grid-template-columns:1fr}
   .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .toolbar{grid-template-columns:1fr}
+  .toolbar{grid-template-columns:1fr 1fr;gap:8px}
+  .toolbar input[type=search]{grid-column:1/-1}
   .phase-board{grid-template-columns:1fr}
+  .topbar{padding:0 14px;gap:10px}
+  .main{width:100%}
 }
 @media(max-width:640px){
-  .auth-panel,.auth-aside,.workspace{padding:16px}
-  .topbar{height:auto;align-items:flex-start;flex-direction:column;padding:14px 16px}
+  .auth-panel,.workspace{padding:12px}
+  .topbar{height:auto;flex-direction:row;flex-wrap:wrap;padding:10px 12px;gap:8px;align-items:center}
+  .topbar h2{font-size:17px}
   .top-actions{width:100%;flex-wrap:wrap}
-  .org-select{width:100%;min-width:0}
+  .org-select{flex:1 1 140px;min-width:0}
   .metrics{grid-template-columns:1fr}
   .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .toolbar{grid-template-columns:1fr}
+  table{font-size:12px}
+  th,td{padding:7px 6px}
+  .row-actions{flex-direction:column;gap:4px}
+  .row-actions button{width:100%}
+  .panel-body{padding:10px}
+  .form-section{padding:10px}
 }
 </style>
 </head>
@@ -206,10 +228,14 @@ tr:last-child td{border-bottom:0}
       <div id="userBadge">Usuario: -</div>
     </div>
   </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
   <main class="main">
     <div class="topbar">
-      <h2 id="viewTitle">Dashboard</h2>
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <button id="hamburgerBtn" class="hamburger-btn" type="button" aria-label="Menu">&#9776;</button>
+        <h2 id="viewTitle">Dashboard</h2>
+      </div>
       <div class="top-actions">
         <select id="organizationSelect" class="org-select"></select>
         <button id="refreshBtn" class="plain-btn" type="button">Actualizar</button>
@@ -887,7 +913,14 @@ $("#logoutBtn").addEventListener("click", () => {
   localStorage.removeItem("platformOrganizationId");
   location.reload();
 });
-$$(".side-nav button").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.view)));
+function closeSidebar(){
+  document.querySelector(".app-shell").classList.remove("sidebar-open");
+}
+$("#hamburgerBtn").addEventListener("click", () => {
+  document.querySelector(".app-shell").classList.toggle("sidebar-open");
+});
+$("#sidebarOverlay").addEventListener("click", closeSidebar);
+$$(".side-nav button").forEach(btn => btn.addEventListener("click", () => { showView(btn.dataset.view); if(window.innerWidth<=1100) closeSidebar(); }));
 $("#filterProductsBtn").addEventListener("click", () => loadProducts().catch(err => toast(err.message)));
 $("#productSearch").addEventListener("search", () => loadProducts().catch(err => toast(err.message)));
 $("#newProductBtn").addEventListener("click", resetProductForm);
