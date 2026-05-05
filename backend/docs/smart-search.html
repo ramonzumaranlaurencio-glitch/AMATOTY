@@ -967,13 +967,6 @@ async function loadProducts() {
     const trendingProducts = ProductAIGuard.extractProducts(trending).map(normalize);
     all = mergeProducts(all, trendingProducts);
   } catch (_) {}
-  // 3. Cargar beauty_products.json si existe
-  try {
-    const beauty = await loadJson("/assets/beauty_products.json");
-    const beautyProducts = ProductAIGuard.extractProducts(beauty).map(normalize);
-    all = mergeProducts(all, beautyProducts);
-  } catch (_) {}
-
   try {
     products = all;
     filtered = products.slice();
