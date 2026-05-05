@@ -34,8 +34,19 @@ PAYMENT_PROVIDER    = os.getenv("PAYMENT_PROVIDER",    "manual")   # stripe | ma
 PAYMENT_SECRET_KEY  = os.getenv("PAYMENT_SECRET_KEY",  "")
 PAYMENT_PUBLIC_KEY  = os.getenv("PAYMENT_PUBLIC_KEY",  "")
 WEBHOOK_SECRET      = os.getenv("WEBHOOK_SECRET",      "")
-BASE_URL            = os.getenv("BASE_URL",            "http://127.0.0.1:5001")
 SAFEPAY_PORT        = int(os.getenv("PORT",            "5001"))
+
+# BASE_URL: en Render se inyecta RENDER_EXTERNAL_URL automáticamente.
+# En local usamos http://127.0.0.1:5001
+BASE_URL = (
+    os.getenv("BASE_URL")
+    or os.getenv("RENDER_EXTERNAL_URL")
+    or f"http://127.0.0.1:{SAFEPAY_PORT}"
+)
+# Render a veces entrega la URL sin esquema — lo normalizamos
+if BASE_URL and not BASE_URL.startswith("http"):
+    BASE_URL = "https://" + BASE_URL
+BASE_URL = BASE_URL.rstrip("/")
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:5050,http://localhost:5050")
 ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
