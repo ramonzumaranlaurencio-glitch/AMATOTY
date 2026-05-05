@@ -7,114 +7,169 @@
 <link rel="stylesheet" href="assets/style.css">
 <style>
 :root{
-  --bg:#f4f6f8;
-  --ink:#17202a;
-  --muted:#667085;
-  --line:#d9e0e8;
-  --panel:#fff;
-  --nav:#162238;
-  --nav-ink:#edf3fb;
-  --green:#0f7b4f;
-  --blue:#1d5fd7;
-  --amber:#b76e00;
-  --red:#b42318;
-  --violet:#6846b7;
-  --shadow:0 10px 24px rgba(16,24,40,.08);
+  --bg:#0f1117;
+  --bg2:#161b27;
+  --ink:#e8edf5;
+  --ink2:#a8b5cc;
+  --line:#232b3e;
+  --panel:#1a2035;
+  --panel2:#202840;
+  --nav:#0d1526;
+  --nav-ink:#c8d6ee;
+  --accent:#3b82f6;
+  --accent2:#6366f1;
+  --green:#10b981;
+  --green2:#065f46;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --violet:#8b5cf6;
+  --cyan:#06b6d4;
+  --shadow:0 8px 32px rgba(0,0,0,.45);
+  --shadow2:0 2px 8px rgba(0,0,0,.3);
+  --radius:10px;
+  --radius-sm:7px;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',Arial,sans-serif;line-height:1.5}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
+::placeholder{color:var(--ink2);opacity:.7}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ── UTILIDADES ── */
 .hidden{display:none!important}
-.auth-screen{min-height:100vh;display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);background:#eef2f7}
-.auth-panel{background:var(--panel);padding:34px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
+
+/* ── AUTH ── */
+.auth-screen{min-height:100vh;display:grid;grid-template-columns:minmax(340px,460px) minmax(0,1fr);background:var(--bg)}
+.auth-panel{background:var(--panel);padding:38px 36px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-mark{width:38px;height:38px;border-radius:8px;background:#162238;color:white;display:grid;place-items:center;font-weight:900}
-.brand h1{margin:0;font-size:22px;letter-spacing:0}
-.brand span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
-.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.tab-btn,.ghost-btn,.primary-btn,.danger-btn,.plain-btn{border-radius:6px;border:1px solid var(--line);background:white;color:var(--ink);padding:10px 12px;font-weight:800}
-.tab-btn.active{background:#162238;color:white;border-color:#162238}
-.primary-btn{background:#1d5fd7;color:white;border-color:#1d5fd7}
-.danger-btn{background:white;color:var(--red);border-color:#f4b7b2}
-.ghost-btn{background:#eef4ff;color:#1d5fd7;border-color:#bfd3ff}
-.plain-btn{background:#fff}
-.form{display:grid;gap:12px}
-.field label{display:block;font-size:12px;font-weight:800;color:#4b5563;margin-bottom:5px;text-transform:uppercase}
-.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;padding:10px 11px;color:var(--ink)}
-.field textarea{min-height:92px;resize:vertical}
-.check-field{display:flex;align-items:center;gap:9px;color:#344054;font-weight:800}
-.check-field input{width:auto}
-.form-section{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:10px}
-.form-section legend{padding:0 6px;color:#344054;font-size:12px;font-weight:900;text-transform:uppercase}
-.auth-aside{padding:42px;display:flex;align-items:center}
-.phase-board{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.phase-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:var(--shadow)}
-.phase-card span{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}
-.phase-card strong{display:block;margin-top:8px;font-size:18px}
-.app-shell{min-height:100vh;display:grid;grid-template-columns:238px minmax(0,1fr)}
-.sidebar{background:var(--nav);color:var(--nav-ink);padding:18px;display:flex;flex-direction:column;gap:18px}
-.side-brand{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.16)}
-.side-brand .brand-mark{background:#2a75dd}
-.side-brand strong{font-size:16px}
-.side-nav{display:grid;gap:8px}
-.side-nav button{display:flex;align-items:center;gap:10px;border:0;border-radius:6px;background:transparent;color:#c9d6e8;padding:10px 12px;text-align:left;font-weight:800}
-.side-nav button.active,.side-nav button:hover{background:rgba(255,255,255,.12);color:white}
-.side-footer{margin-top:auto;color:#b9c7da;font-size:12px}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 4px 14px rgba(59,130,246,.4)}
+.brand h1{margin:0;font-size:22px;color:var(--ink);letter-spacing:-.3px}
+.brand span{display:block;color:var(--ink2);font-size:13px;margin-top:2px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.tab-btn{border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--panel2);color:var(--ink2);padding:11px 12px;font-weight:700;transition:all .18s}
+.tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border-color:transparent;box-shadow:0 4px 14px rgba(59,130,246,.35)}
+.auth-aside{padding:48px;display:flex;align-items:center;background:var(--bg2)}
+.phase-board{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.phase-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow2);transition:transform .2s}
+.phase-card:hover{transform:translateY(-2px)}
+.phase-card span{display:block;color:var(--accent);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.phase-card strong{display:block;margin-top:8px;font-size:16px;color:var(--ink)}
+
+/* ── FORMULARIOS ── */
+.form{display:grid;gap:14px}
+.field label{display:block;font-size:11px;font-weight:800;color:var(--ink2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel2);color:var(--ink);padding:10px 12px;transition:border-color .18s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:#1e2a42}
+.field textarea{min-height:80px;resize:vertical}
+.check-field{display:flex;align-items:center;gap:10px;color:var(--ink2);font-weight:700;font-size:13px}
+.check-field input{width:auto;accent-color:var(--accent)}
+.form-section{border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:grid;gap:12px;background:rgba(59,130,246,.04)}
+.form-section legend{padding:0 8px;color:var(--accent);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── BOTONES ── */
+.primary-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;border-radius:var(--radius-sm);padding:11px 20px;font-weight:800;box-shadow:0 4px 14px rgba(59,130,246,.35);transition:transform .15s,box-shadow .15s}
+.primary-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(59,130,246,.5)}
+.ghost-btn{background:rgba(59,130,246,.12);color:var(--accent);border:1px solid rgba(59,130,246,.3);border-radius:var(--radius-sm);padding:10px 16px;font-weight:700;transition:all .18s}
+.ghost-btn:hover{background:rgba(59,130,246,.22)}
+.danger-btn{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:10px 14px;font-weight:700;transition:all .18s}
+.danger-btn:hover{background:rgba(239,68,68,.2)}
+.plain-btn{background:var(--panel2);color:var(--ink2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 14px;font-weight:700;transition:all .18s}
+.plain-btn:hover{border-color:var(--accent);color:var(--ink)}
+.recovery{margin-top:2px;color:var(--accent);background:transparent;border:0;padding:0;font-weight:700;font-size:13px}
+
+/* ── SHELL ── */
+.app-shell{min-height:100vh;display:grid;grid-template-columns:240px minmax(0,1fr)}
+.sidebar{background:var(--nav);color:var(--nav-ink);padding:20px;display:flex;flex-direction:column;gap:20px;border-right:1px solid var(--line)}
+.side-brand{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.side-brand .brand-mark{width:36px;height:36px;font-size:16px}
+.side-brand strong{font-size:15px;color:var(--ink);letter-spacing:-.2px}
+.side-nav{display:grid;gap:4px}
+.side-nav button{display:flex;align-items:center;gap:10px;border:0;border-radius:var(--radius-sm);background:transparent;color:var(--ink2);padding:11px 13px;text-align:left;font-weight:700;font-size:14px;transition:all .18s}
+.side-nav button:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+.side-nav button.active{background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(99,102,241,.2));color:white;border-left:3px solid var(--accent)}
+.side-footer{margin-top:auto;color:var(--ink2);font-size:12px;display:grid;gap:4px}
 .main{min-width:0;display:flex;flex-direction:column}
-.topbar{height:70px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 22px}
-.topbar h2{margin:0;font-size:20px;letter-spacing:0}
+
+/* ── TOPBAR ── */
+.topbar{height:64px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 22px;box-shadow:var(--shadow2)}
+.topbar h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
 .top-actions{display:flex;align-items:center;gap:10px;min-width:0}
-.org-select{min-width:210px;border:1px solid var(--line);border-radius:6px;padding:9px;background:white}
-.workspace{padding:18px 22px 28px;display:grid;gap:16px}
+.org-select{min-width:200px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;background:var(--panel2);color:var(--ink)}
+
+/* ── WORKSPACE ── */
+.workspace{padding:20px 24px 32px;display:grid;gap:18px}
 .metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.metric{background:white;border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:0 4px 14px rgba(16,24,40,.04)}
-.metric span{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}
-.metric strong{display:block;margin-top:7px;font-size:26px}
-.metric.green strong{color:var(--green)}.metric.blue strong{color:var(--blue)}.metric.amber strong{color:var(--amber)}.metric.red strong{color:var(--red)}
-.grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:14px}
-.panel{background:white;border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 14px rgba(16,24,40,.04);min-width:0}
-.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
-.panel-head h3{margin:0;font-size:15px;text-transform:uppercase;letter-spacing:0;color:#344054}
-.panel-body{padding:14px}
-.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 150px 150px auto;gap:10px;margin-bottom:12px}
-.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:6px;padding:9px;background:white}
-.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}
-table{width:100%;border-collapse:collapse;background:white;font-size:14px}
-th{background:#f7f9fc;color:#344054;text-transform:uppercase;font-size:11px;text-align:left}
-th,td{padding:10px;border-bottom:1px solid #edf1f5;vertical-align:top}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow2);position:relative;overflow:hidden;transition:transform .2s}
+.metric:hover{transform:translateY(-2px)}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.metric.green::before{background:var(--green)}
+.metric.blue::before{background:var(--accent)}
+.metric.amber::before{background:var(--amber)}
+.metric.red::before{background:var(--red)}
+.metric.violet::before{background:var(--violet)}
+.metric span{display:block;color:var(--ink2);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.metric strong{display:block;margin-top:8px;font-size:28px;font-weight:900;letter-spacing:-1px}
+.metric.green strong{color:var(--green)}.metric.blue strong{color:var(--accent)}.metric.amber strong{color:var(--amber)}.metric.red strong{color:var(--red)}.metric.violet strong{color:var(--violet)}
+
+/* ── PANELES ── */
+.grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow2);min-width:0}
+.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel2);border-radius:var(--radius) var(--radius) 0 0}
+.panel-head h3{margin:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;color:var(--accent)}
+.panel-body{padding:16px}
+
+/* ── TABLA ── */
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 150px 150px auto;gap:10px;margin-bottom:14px}
+.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;background:var(--panel2);color:var(--ink)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;background:var(--panel);font-size:13px}
+th{background:var(--panel2);color:var(--ink2);text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:.6px;text-align:left;border-bottom:1px solid var(--line)}
+th,td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
 tr:last-child td{border-bottom:0}
-.row-actions{display:flex;flex-wrap:wrap;gap:6px}
-.status{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}
-.status.draft{background:#f3f4f6;color:#344054}.status.published{background:#dcfce7;color:#166534}.status.archived{background:#fee2e2;color:#991b1b}.status.approved{background:#dbeafe;color:#1d4ed8}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(59,130,246,.07)}
+.row-actions{display:flex;flex-wrap:wrap;gap:5px}
+.row-actions button{padding:5px 9px;font-size:11px;font-weight:700}
+
+/* ── STATUS BADGES ── */
+.status{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;letter-spacing:.3px}
+.status.draft{background:rgba(156,163,175,.15);color:#9ca3af;border:1px solid rgba(156,163,175,.2)}
+.status.published{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.status.archived{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.status.approved{background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.25)}
+
+/* ── MEDIA ── */
 .media-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.media-tile{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#f6f8fb;aspect-ratio:1}
+.media-tile{position:relative;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;background:var(--panel2);aspect-ratio:1}
 .media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover;display:block}
-.media-tile button{position:absolute;right:5px;top:5px;border:0;border-radius:5px;background:rgba(23,32,42,.8);color:white;padding:4px 7px}
+.media-tile button{position:absolute;right:5px;top:5px;border:0;border-radius:5px;background:rgba(0,0,0,.7);color:white;padding:4px 7px;font-size:12px}
+
+/* ── DETALLES / PROMOS ── */
 .detail-list{display:grid;gap:8px}
-.detail-item{border:1px solid var(--line);border-radius:8px;padding:10px;background:#fbfcfe}
-.detail-item span{display:block;font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase}
-.detail-item strong{display:block;margin-top:4px}
+.detail-item{border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px;background:var(--panel2)}
+.detail-item span{display:block;font-size:11px;color:var(--ink2);font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.detail-item strong{display:block;margin-top:4px;color:var(--ink)}
 .promo-list{display:grid;gap:10px}
-.promo-item{border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
-.promo-item h4{margin:0 0 6px;font-size:15px}
-.promo-item p{margin:6px 0;color:#344054}
+.promo-item{border:1px solid var(--line);border-radius:var(--radius);padding:14px;background:var(--panel2)}
+.promo-item h4{margin:0 0 6px;font-size:15px;color:var(--ink)}
+.promo-item p{margin:5px 0;color:var(--ink2);font-size:13px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{display:inline-block;background:#eef4ff;color:#1d5fd7;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}
-.toast{position:fixed;right:16px;bottom:16px;background:#17202a;color:white;padding:12px 14px;border-radius:8px;box-shadow:var(--shadow);max-width:360px;z-index:20}
-.empty{border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--muted);background:#fbfcfe;text-align:center}
-.split-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.recovery{margin-top:4px;color:#1d5fd7;background:transparent;border:0;padding:0;font-weight:800;text-align:left}
-.hamburger-btn{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:6px;background:white;font-size:20px;line-height:1;flex-shrink:0}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+.chip{display:inline-block;background:rgba(99,102,241,.15);color:var(--accent2);border:1px solid rgba(99,102,241,.2);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}
+
+/* ── UTILIDADES ── */
+.toast{position:fixed;right:18px;bottom:18px;background:linear-gradient(135deg,#1e2a3a,#253047);color:var(--ink);padding:14px 18px;border-radius:var(--radius);box-shadow:var(--shadow);max-width:360px;z-index:200;border:1px solid var(--line);font-weight:600}
+.empty{border:1px dashed var(--line);border-radius:var(--radius);padding:22px;color:var(--ink2);background:var(--panel2);text-align:center;font-size:14px}
+.split-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px}
+.hamburger-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel2);color:var(--ink);font-size:20px;line-height:1;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
+
+/* ── RESPONSIVE ── */
 @media(max-width:1100px){
   .auth-screen{grid-template-columns:1fr}
   .auth-aside{display:none}
   .app-shell{grid-template-columns:1fr}
-  .sidebar{
-    position:fixed;left:-260px;top:0;height:100vh;width:238px;
-    z-index:100;transition:left .25s ease;overflow-y:auto
-  }
+  .sidebar{position:fixed;left:-260px;top:0;height:100vh;width:240px;z-index:100;transition:left .25s ease;overflow-y:auto}
   .app-shell.sidebar-open .sidebar{left:0}
   .app-shell.sidebar-open .sidebar-overlay{display:block}
   .hamburger-btn{display:inline-flex}
@@ -123,25 +178,26 @@ tr:last-child td{border-bottom:0}
   .toolbar{grid-template-columns:1fr 1fr;gap:8px}
   .toolbar input[type=search]{grid-column:1/-1}
   .phase-board{grid-template-columns:1fr}
-  .topbar{padding:0 14px;gap:10px}
+  .topbar{padding:0 14px}
   .main{width:100%}
 }
 @media(max-width:640px){
-  .auth-panel,.workspace{padding:12px}
+  .auth-panel,.workspace{padding:14px}
   .topbar{height:auto;flex-direction:row;flex-wrap:wrap;padding:10px 12px;gap:8px;align-items:center}
-  .topbar h2{font-size:17px}
+  .topbar h2{font-size:16px}
   .top-actions{width:100%;flex-wrap:nowrap;gap:6px}
   .org-select{flex:1 1 0;min-width:0}
-  #logoutBtn{flex-shrink:0;padding:9px 10px;font-size:13px}
-  .metrics{grid-template-columns:1fr}
+  #logoutBtn{flex-shrink:0;padding:9px 10px;font-size:12px}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric strong{font-size:22px}
   .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .toolbar{grid-template-columns:1fr}
   table{font-size:12px}
-  th,td{padding:7px 6px}
-  .row-actions{flex-direction:column;gap:4px}
-  .row-actions button{width:100%}
-  .panel-body{padding:10px}
-  .form-section{padding:10px}
+  th,td{padding:8px 7px}
+  .row-actions{gap:4px}
+  .row-actions button{font-size:10px;padding:4px 7px}
+  .panel-body{padding:12px}
+  .form-section{padding:11px}
 }
 </style>
 </head>
@@ -294,49 +350,76 @@ tr:last-child td{border-bottom:0}
             <div class="panel-body">
               <form id="productForm" class="form">
                 <input id="productId" type="hidden">
-                <div class="field"><label for="productName">Nombre</label><input id="productName" required></div>
-                <div class="field"><label for="productDescription">Descripcion</label><textarea id="productDescription"></textarea></div>
-                <div class="field"><label for="productSpecs">Ficha tecnica</label><textarea id="productSpecs" placeholder="Material: acero&#10;Medida: 30 cm&#10;Garantia: 12 meses"></textarea></div>
-                <div class="field"><label for="productCategory">Categoria</label><input id="productCategory"></div>
-                <div class="grid-2" style="grid-template-columns:1fr 1fr">
-                  <div class="field"><label for="productPrice">Precio</label><input id="productPrice" type="number" min="0" step="0.01"></div>
-                  <div class="field"><label for="productCurrency">Moneda</label><input id="productCurrency" value="USD" maxlength="6"></div>
-                </div>
-                <div class="grid-2" style="grid-template-columns:1fr 1fr">
-                  <div class="field"><label for="productStock">Stock</label><input id="productStock" type="number" min="0" value="0"></div>
-                  <div class="field"><label for="productPriority">Prioridad</label><select id="productPriority"><option value="1">Alta</option><option value="2">Media alta</option><option value="3" selected>Media</option><option value="4">Baja</option><option value="5">Muy baja</option></select></div>
-                </div>
-                <div class="field"><label for="productStatus">Estado</label><select id="productStatus"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
-                <div class="field"><label for="productSku">SKU</label><input id="productSku"></div>
-                <div class="field"><label for="productUrl">Enlace</label><input id="productUrl" type="url"></div>
+
+                <!-- Sección 1: Info básica -->
                 <fieldset class="form-section">
-                  <legend>Imagen publica</legend>
-                  <div class="field"><label for="productImageUrl">URL imagen</label><input id="productImageUrl" type="url" placeholder="https://... o assets/..."></div>
-                  <div class="grid-2" style="grid-template-columns:1fr 1fr">
+                  <legend>📦 Información básica</legend>
+                  <div class="field"><label for="productName">Nombre del producto</label><input id="productName" required placeholder="Ej: Licuadora portátil 600ml"></div>
+                  <div class="field"><label for="productDescription">Descripción</label><textarea id="productDescription" placeholder="Describe el producto brevemente..."></textarea></div>
+                  <div class="field"><label for="productCategory">Categoría</label><input id="productCategory" placeholder="Ej: Cocina, Electrónica, Automotriz"></div>
+                  <div class="field"><label for="productSku">SKU / Código</label><input id="productSku" placeholder="Ej: A001"></div>
+                  <div class="field"><label for="productUrl">Enlace del producto</label><input id="productUrl" type="url" placeholder="https://..."></div>
+                </fieldset>
+
+                <!-- Sección 2: Precio, stock y estado -->
+                <fieldset class="form-section">
+                  <legend>💰 Precio, stock y estado</legend>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="field"><label for="productPrice">Precio</label><input id="productPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>
+                    <div class="field"><label for="productCurrency">Moneda</label><input id="productCurrency" value="USD" maxlength="6" placeholder="USD"></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                    <div class="field"><label for="productStock">Stock</label><input id="productStock" type="number" min="0" value="0"></div>
+                    <div class="field"><label for="productPriority">Prioridad</label><select id="productPriority"><option value="1">🔴 Alta</option><option value="2">🟠 Media alta</option><option value="3" selected>🟡 Media</option><option value="4">🟢 Baja</option><option value="5">⚪ Muy baja</option></select></div>
+                    <div class="field"><label for="productStatus">Estado</label><select id="productStatus"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
+                  </div>
+                </fieldset>
+
+                <!-- Sección 3: Ficha técnica -->
+                <fieldset class="form-section">
+                  <legend>📋 Ficha técnica</legend>
+                  <div class="field"><label for="productSpecs">Especificaciones (una por línea)</label><textarea id="productSpecs" placeholder="Material: acero inoxidable&#10;Medida: 30 cm&#10;Garantía: 12 meses&#10;Voltaje: 110V"></textarea></div>
+                </fieldset>
+
+                <!-- Sección 4: Imagen -->
+                <fieldset class="form-section">
+                  <legend>🖼️ Imagen pública</legend>
+                  <div class="field"><label for="productImageUrl">URL de la imagen</label><input id="productImageUrl" type="url" placeholder="https://... o assets/imagen.jpg"></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                     <div class="field"><label for="productImageSource">Fuente</label><select id="productImageSource"><option value="">Sin fuente</option><option value="oye_bonita_assets">Oye Bonita</option><option value="amazon_verified">Amazon verificado</option><option value="amazon_candidate">Amazon por verificar</option><option value="official">Oficial</option><option value="local_verified">Local verificado</option></select></div>
-                    <div class="field"><label for="productImageScore">Coincidencia</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
+                    <div class="field"><label for="productImageScore">Coincidencia (0–1)</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
                   </div>
                   <label class="check-field" for="productImageVerified"><input id="productImageVerified" type="checkbox"> La imagen coincide con el producto</label>
                 </fieldset>
+
+                <!-- Sección 5: Archivos -->
                 <fieldset class="form-section">
-                  <legend>Banner principal</legend>
-                  <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Mostrar en carrusel</label>
-                  <div class="field"><label for="bannerTitle">Titulo</label><input id="bannerTitle" placeholder="Usa el nombre si lo dejas vacio"></div>
-                  <div class="field"><label for="bannerDescription">Descripcion corta</label><textarea id="bannerDescription" placeholder="Texto breve para el banner"></textarea></div>
-                  <div class="field"><label for="bannerImage">Imagen</label><input id="bannerImage" type="url" placeholder="https://... o assets/..."></div>
-                  <div class="grid-2" style="grid-template-columns:1fr 1fr">
-                    <div class="field"><label for="bannerButtonText">Texto boton</label><input id="bannerButtonText" placeholder="Ver producto"></div>
-                    <div class="field"><label for="bannerCategory">Categoria</label><input id="bannerCategory" placeholder="Usa la categoria si lo dejas vacio"></div>
-                  </div>
-                  <div class="field"><label for="bannerLink">Enlace boton</label><input id="bannerLink" type="url" placeholder="Usa el enlace del producto si lo dejas vacio"></div>
+                  <legend>📁 Archivos multimedia</legend>
+                  <div class="field"><label for="productMedia">Subir imágenes o videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple style="padding:8px"></div>
                 </fieldset>
-                <div class="field"><label for="productMedia">Imagenes y videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple></div>
+
+                <!-- Sección 6: Banner -->
+                <fieldset class="form-section">
+                  <legend>🎯 Banner principal (carrusel)</legend>
+                  <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Mostrar este producto en el carrusel</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="field"><label for="bannerTitle">Título del banner</label><input id="bannerTitle" placeholder="Usa el nombre si lo dejas vacío"></div>
+                    <div class="field"><label for="bannerCategory">Categoría banner</label><input id="bannerCategory" placeholder="Usa la categoría si lo dejas vacío"></div>
+                  </div>
+                  <div class="field"><label for="bannerDescription">Descripción corta</label><textarea id="bannerDescription" placeholder="Texto breve que aparecerá en el banner..." style="min-height:60px"></textarea></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="field"><label for="bannerImage">URL imagen del banner</label><input id="bannerImage" type="url" placeholder="https://..."></div>
+                    <div class="field"><label for="bannerButtonText">Texto del botón</label><input id="bannerButtonText" placeholder="Ver producto"></div>
+                  </div>
+                  <div class="field"><label for="bannerLink">Enlace del botón</label><input id="bannerLink" type="url" placeholder="Usa el enlace del producto si lo dejas vacío"></div>
+                </fieldset>
+
                 <div class="split-actions">
-                  <button class="primary-btn" type="submit">Guardar</button>
-                  <button id="generateFromFormBtn" class="ghost-btn" type="button">Generar promo</button>
+                  <button class="primary-btn" type="submit">💾 Guardar producto</button>
+                  <button id="generateFromFormBtn" class="ghost-btn" type="button">✨ Generar promo</button>
                 </div>
               </form>
-              <div style="height:14px"></div>
+              <div style="height:16px"></div>
               <div id="mediaGrid" class="media-grid"></div>
             </div>
           </section>
