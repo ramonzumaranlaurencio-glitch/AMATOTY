@@ -55,7 +55,7 @@ ALLOWED_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = SECRET_KEY
 
-CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permite llamadas desde el frontend
 
 # ─── Catálogos ────────────────────────────────────────────────────────────────
 PAYMENT_METHODS  = ["Yape", "Plin", "BCP", "Interbank", "Efectivo", "Tarjeta", "Online"]

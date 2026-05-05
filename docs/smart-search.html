@@ -265,6 +265,16 @@ const API_ORIGIN = window.location.hostname.includes("github.io")
   ? "https://amatoty.onrender.com"
   : "";
 
+// URL de SafePay — mismo origen si lo sirve el mismo servidor,
+// o la URL externa de Render cuando el sitio corre en otro lugar.
+const SAFEPAY_BASE = (function() {
+  const host = window.location.hostname;
+  // En Render el propio servidor es SafePay
+  if (host.endsWith(".onrender.com")) return window.location.origin;
+  // Local: SafePay corre en el puerto 5001
+  return "http://127.0.0.1:5001";
+})();
+
 function setStatus(message) {
   document.getElementById("resultCount").textContent = message;
 }
@@ -727,22 +737,44 @@ async function pagarProducto(index) {
   if (!item) return;
   const currency = document.getElementById("currency").value || "USD";
   const amount = parseFloat((item.price_sale || salePrice(item) || 1).toFixed(2));
+  _showPayStatus("⏳ Conectando con SafePay...", "info");
   try {
-    const resp = await fetch("/api/safepay/checkout", {
+    const resp = await fetch(`${SAFEPAY_BASE}/api/payments/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_name: item.name,
         amount: amount,
         currency: currency,
+        method: "Online",
+        description: item.name,
+        customer: "",
+        customer_email: "",
       }),
     });
     const data = await resp.json();
-    if (!resp.ok || !data.ok) throw new Error(data.error || "Error SafePay");
-    window.location.href = data.pay_url;
+    if (!resp.ok || data.error) throw new Error(data.error || "Error al crear pago");
+    _showPayStatus("", "");
+    window.location.href = `${SAFEPAY_BASE}/payment/${data.id}`;
   } catch (err) {
-    alert("No se pudo iniciar el pago: " + err.message);
+    _showPayStatus("❌ SafePay no disponible: " + err.message, "error");
   }
+}
+
+function _showPayStatus(msg, type) {
+  let box = document.getElementById("_safepayStatus");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "_safepayStatus";
+    box.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:10px;font-weight:700;font-size:14px;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:opacity .3s";
+    document.body.appendChild(box);
+  }
+  if (!msg) { box.style.opacity = "0"; return; }
+  box.style.opacity = "1";
+  box.style.background = type === "error" ? "#fef2f2" : "#eff6ff";
+  box.style.color = type === "error" ? "#dc2626" : "#1d4ed8";
+  box.style.border = type === "error" ? "1px solid #fecaca" : "1px solid #bfdbfe";
+  box.textContent = msg;
+  if (type === "error") setTimeout(() => { box.style.opacity = "0"; }, 6000);
 }
 
 function saveCart() {
@@ -870,7 +902,7 @@ document.getElementById("country").addEventListener("change", () => {
 document.getElementById("clearBtn").addEventListener("click", () => { document.getElementById("query").value = ""; document.getElementById("categoryFilter").value = ""; applyFilters(); });
 document.getElementById("emptyCart").addEventListener("click", () => { cart = []; saveCart(); });
 document.getElementById("checkoutBtn").addEventListener("click", async () => {
-  if (!cart.length) { alert("El carrito está vacío."); return; }
+  if (!cart.length) { _showPayStatus("El carrito está vacío.", "error"); return; }
   const btn = document.getElementById("checkoutBtn");
   const originalText = btn.textContent;
   btn.disabled = true;
@@ -878,21 +910,26 @@ document.getElementById("checkoutBtn").addEventListener("click", async () => {
   const currency = document.getElementById("currency").value || "USD";
   const total = cart.reduce((sum, item) => sum + salePrice(item), 0);
   const names = cart.map(item => item.name).join(", ");
+  _showPayStatus("⏳ Conectando con SafePay...", "info");
   try {
-    const resp = await fetch("/api/safepay/checkout", {
+    const resp = await fetch(`${SAFEPAY_BASE}/api/payments/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_name: names.length > 120 ? names.slice(0, 117) + "..." : names,
         amount: parseFloat(total.toFixed(2)),
         currency: currency,
+        method: "Online",
+        description: names.length > 120 ? names.slice(0, 117) + "..." : names,
+        customer: "",
+        customer_email: "",
       }),
     });
     const data = await resp.json();
-    if (!resp.ok || !data.ok) throw new Error(data.error || "Error SafePay");
-    window.location.href = data.pay_url;
+    if (!resp.ok || data.error) throw new Error(data.error || "Error SafePay");
+    _showPayStatus("", "");
+    window.location.href = `${SAFEPAY_BASE}/payment/${data.id}`;
   } catch (err) {
-    alert("No se pudo iniciar el pago: " + err.message);
+    _showPayStatus("❌ No se pudo conectar con SafePay: " + err.message, "error");
     btn.disabled = false;
     btn.textContent = originalText;
   }
