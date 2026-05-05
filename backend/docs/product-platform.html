@@ -830,7 +830,16 @@ async function saveProduct(event) {
   if (files.length) {
     const form = new FormData();
     Array.from(files).forEach(file => form.append("files", file));
-    await uploadApi(`/products/${encodeURIComponent(data.product.id)}/media`, form);
+    try {
+      await uploadApi(`/products/${encodeURIComponent(data.product.id)}/media`, form);
+    } catch (uploadErr) {
+      toast(`⚠️ Producto guardado, pero error al subir imagen: ${uploadErr.message}`);
+      await loadProducts();
+      const fresh2 = state.products.find(p => p.id === data.product.id);
+      if (fresh2) selectProduct(fresh2);
+      await loadDashboard();
+      return;
+    }
     $("#productMedia").value = "";
   }
   toast("Producto guardado.");

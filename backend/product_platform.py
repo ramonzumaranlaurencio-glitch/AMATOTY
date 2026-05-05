@@ -31,14 +31,17 @@ except ImportError:
 
 def _cloudinary_upload(raw: bytes, public_id: str, resource_type: str = "image") -> str:
     """Sube bytes a Cloudinary y devuelve la URL segura."""
-    result = cloudinary.uploader.upload(
-        BytesIO(raw),
-        public_id=public_id,
-        resource_type=resource_type,
-        overwrite=True,
-        use_filename=False,
-    )
-    return result["secure_url"]
+    try:
+        result = cloudinary.uploader.upload(
+            BytesIO(raw),
+            public_id=public_id,
+            resource_type=resource_type,
+            overwrite=True,
+            use_filename=False,
+        )
+        return result["secure_url"]
+    except Exception as cld_exc:
+        raise RuntimeError(f"Cloudinary: {cld_exc}") from cld_exc
 
 
 def _cloudinary_delete(public_id: str, resource_type: str = "image") -> None:
@@ -1330,9 +1333,23 @@ def upload_product_media(user, product_id):
             cld_resource_type = "video" if media_type == "video" else "image"
             if _USE_CLOUDINARY:
                 cld_public_id = f"amatoty/productos/{storage_name}"
-                public_url = _cloudinary_upload(raw, cld_public_id, cld_resource_type)
+                try:
+                    public_url = _cloudinary_upload(raw, cld_public_id, cld_resource_type)
+                except RuntimeError as cld_err:
+                    # Fallback: guardar localmente si Cloudinary falla
+                    try:
+                        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+                        target = UPLOAD_DIR / storage_name
+                        target.write_bytes(raw)
+                        public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
+                        cld_public_id = None  # no hay que borrarlo de Cloudinary
+                    except Exception:
+                        return jsonify({"error": f"No se pudo guardar el archivo. {cld_err}"}), 500
                 # storage_key guarda el public_id para poder borrarlo después
-                storage_key_val = f"cloudinary:{cld_resource_type}:{cld_public_id}"
+                if cld_public_id:
+                    storage_key_val = f"cloudinary:{cld_resource_type}:{cld_public_id}"
+                else:
+                    storage_key_val = str((UPLOAD_DIR / storage_name).relative_to(BASE_DIR))
                 # también guardamos en disco local como caché (ignorar si falla)
                 try:
                     target = UPLOAD_DIR / storage_name
@@ -1340,6 +1357,7 @@ def upload_product_media(user, product_id):
                 except Exception:
                     pass
             else:
+                UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                 target = UPLOAD_DIR / storage_name
                 target.write_bytes(raw)
                 public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
@@ -1378,6 +1396,8 @@ def upload_product_media(user, product_id):
         audit(conn, user["id"], row["organization_id"], "product", product_id, "upload_media", {"count": len(saved)})
         conn.commit()
         return jsonify({"ok": True, "media": saved})
+    except Exception as exc:
+        return jsonify({"error": f"Error al subir archivo: {exc}"}), 500
     finally:
         conn.close()
 
