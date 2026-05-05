@@ -1352,17 +1352,84 @@ def _merge_product_lists(*lists):
     return _sort_smart_products(merged)
 
 
+def _load_platform_products(query="", category=""):
+    """Lee los productos publicados de la BD del platform y los convierte al
+    formato estándar que usa smart-search."""
+    try:
+        from product_platform import get_db, public_product_payload, product_media
+        conn = get_db()
+        try:
+            clauses = ["p.status = 'published'", "o.status = 'active'"]
+            params = []
+            if query:
+                q = f"%{query.lower()}%"
+                clauses.append("(LOWER(p.name) LIKE ? OR LOWER(p.description) LIKE ? OR LOWER(p.category) LIKE ?)")
+                params.extend([q, q, q])
+            if category:
+                clauses.append("LOWER(p.category) = ?")
+                params.append(category.lower())
+            rows = conn.execute(
+                f"""
+                SELECT p.*, o.name AS organization_name
+                FROM platform_products p
+                JOIN platform_organizations o ON o.id = p.organization_id
+                WHERE {' AND '.join(clauses)}
+                ORDER BY p.priority ASC, p.updated_at DESC
+                LIMIT 200
+                """,
+                params,
+            ).fetchall()
+            result = []
+            for row in rows:
+                org = conn.execute(
+                    "SELECT * FROM platform_organizations WHERE id = ?",
+                    (row["organization_id"],),
+                ).fetchone()
+                media = product_media(conn, row["id"])
+                payload = public_product_payload(row, media, org)
+                # Mapear al formato esperado por smart-search
+                price = float(row["price"] or 10)
+                result.append({
+                    "name":        row["name"],
+                    "brand":       (payload.get("metadata") or {}).get("brand") or row["organization_name"] or "",
+                    "category":    row["category"] or "",
+                    "description": row["description"] or "",
+                    "short_desc":  row["description"][:120] if row["description"] else "",
+                    "price_base":  price,
+                    "price_sale":  price,
+                    "currency":    row["currency"] or "USD",
+                    "stock":       row["stock"] or 0,
+                    "image":       payload.get("image") or "",
+                    "source_links": payload.get("source_links") or [],
+                    "confidence":  0.90,
+                    "provider":    row["organization_name"] or "",
+                    "sku":         row["sku"] or "",
+                    "id":          row["id"],
+                    "_source":     "platform_db",
+                })
+            return result
+        finally:
+            conn.close()
+    except Exception as exc:
+        import sys
+        print(f"[smart-search] No se pudo leer platform_products: {exc}", file=sys.stderr)
+        return []
+
+
 def _smart_search_fallback(query, category, currency, margin):
-    products = _load_trending_products()
-    query = (query or "").lower()
-    category = (category or "").lower()
-    if query or category:
-        products = [
+    # 1. Productos de la BD del platform (guardados por el usuario)
+    platform = _load_platform_products(query=query, category=category)
+    # 2. Catálogo base (trending_products.json)
+    trending = _load_trending_products()
+    query_l   = (query or "").lower()
+    category_l = (category or "").lower()
+    if query_l or category_l:
+        trending = [
             product
-            for product in products
+            for product in trending
             if (
-                not query
-                or query
+                not query_l
+                or query_l
                 in " ".join(
                     [
                         str(product.get("name", "")),
@@ -1376,10 +1443,18 @@ def _smart_search_fallback(query, category, currency, margin):
                     ]
                 ).lower()
             )
-            and (not category or str(product.get("category", "")).lower() == category)
+            and (not category_l or str(product.get("category", "")).lower() == category_l)
         ]
+    # Unir: primero los de BD (tienen prioridad), luego el catálogo base
+    seen = set()
+    products = []
+    for product in platform + trending:
+        key = str(product.get("name", "")).lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            products.append(product)
     for product in products:
-        base = float(product.get("price_base") or product.get("base_price") or 10)
+        base = float(product.get("price_base") or product.get("base_price") or product.get("price") or 10)
         product["price_base"] = base
         product["price_sale"] = round(base * (1 + margin / 100), 2)
         product["currency"] = currency

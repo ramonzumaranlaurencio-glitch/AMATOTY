@@ -948,9 +948,28 @@ document.getElementById("recordAudioBtn")?.addEventListener("click", async event
 async function loadProducts() {
   setStatus("Cargando...");
   document.getElementById("runSearch").disabled = true;
+  let all = [];
+  // 1. Cargar desde la BD del platform (productos guardados por el usuario)
+  try {
+    const platformData = await loadJson("/api/platform/public-products?limit=200");
+    const platformProducts = ProductAIGuard.extractProducts(platformData).map(normalize);
+    all = [...platformProducts];
+  } catch (_) {}
+  // 2. Cargar desde trending_products.json (catálogo base)
   try {
     const trending = await loadJson("/assets/trending_products.json");
-    products = ProductAIGuard.extractProducts(trending).map(normalize);
+    const trendingProducts = ProductAIGuard.extractProducts(trending).map(normalize);
+    all = mergeProducts(all, trendingProducts);
+  } catch (_) {}
+  // 3. Cargar beauty_products.json si existe
+  try {
+    const beauty = await loadJson("/assets/beauty_products.json");
+    const beautyProducts = ProductAIGuard.extractProducts(beauty).map(normalize);
+    all = mergeProducts(all, beautyProducts);
+  } catch (_) {}
+
+  try {
+    products = all;
     filtered = products.slice();
     loadCategories();
     loadAdvancedFilters();
@@ -958,6 +977,10 @@ async function loadProducts() {
     renderCart();
     document.getElementById("runSearch").disabled = false;
     showExpertAdvice();
+    if (!products.length) {
+      setStatus("Sin productos en catálogo");
+      document.getElementById("detailPanel").innerHTML = '<div class="empty">Aún no hay productos publicados. Agrega productos en el <a href="product-platform.html">Panel de Productos</a> y publícalos.</div>';
+    }
   } catch (err) {
     products = [];
     filtered = [];
