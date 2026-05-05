@@ -147,7 +147,7 @@ GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 # Seguridad: rechazar si no empieza con http (ej: postgresql:// por error de config en Render)
 _safepay_raw = os.getenv("SAFEPAY_API_URL") or os.getenv("SAFEPAY_URL") or ""
 if not _safepay_raw or not _safepay_raw.startswith("http"):
-    _safepay_raw = "https://trujillo-safepay-pro.onrender.com"
+    _safepay_raw = "https://amatoty-1.onrender.com"
 SAFEPAY_API_URL = _safepay_raw.rstrip("/")
 
 GEMINI_DIAGNOSTICO_SCHEMA = {
@@ -2248,10 +2248,11 @@ def safepay_checkout():
     print(f"[safepay] pay_id={pay_id!r} checkout_url={checkout_url!r}", flush=True)
 
     return jsonify({
-        "ok":         True,
-        "payment_id": pay_id,
-        "status":     result.get("status", "pendiente"),
-        "pay_url":    checkout_url,
+        "ok":           True,
+        "payment_id":   pay_id,
+        "status":       result.get("status", "pendiente"),
+        "pay_url":      checkout_url,
+        "checkout_url": checkout_url,
     })
 
 
