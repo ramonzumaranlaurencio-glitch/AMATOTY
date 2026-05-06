@@ -54,10 +54,7 @@ main{max-width:none;padding:0}
 .btn-ghost:hover{background:rgba(217,119,6,.14)}
 .btn-lite{border:1px solid var(--line);background:var(--panel2);color:var(--ink2);border-radius:var(--radius-sm);padding:8px 11px;font-weight:700;transition:all .18s}
 .btn-lite:hover{border-color:var(--accent);color:var(--accent)}
-.btn-safepay-row{border:none;background:#2563eb;color:#fff;border-radius:var(--radius-sm);padding:8px 11px;font-weight:700;cursor:pointer;transition:background .18s}
-.btn-safepay-row:hover{background:#1d4ed8}
-.btn-safepay-detail{border:none;background:#2563eb;color:#fff;border-radius:var(--radius-sm);padding:10px 16px;font-weight:800;cursor:pointer;margin-left:8px;transition:background .18s}
-.btn-safepay-detail:hover{background:#1d4ed8}
+
 
 /* ── INTEL STRIP ── */
 .intel-strip{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1fr;box-shadow:0 2px 6px rgba(30,58,95,.07)}
@@ -636,29 +633,28 @@ function renderResults() {
     return;
   }
   body.innerHTML = filtered.map((p, index) => {
-    // Ocultar campos internos y etiquetas técnicas
     const name = ProductAIGuard.escapeHtml(p.name || "");
     const brand = ProductAIGuard.escapeHtml(p.brand || "");
     const category = ProductAIGuard.escapeHtml(p.category || "");
-    // Mostrar solo specs relevantes (ocultar search_query, nivel_confianza, etc)
+    const imgSrc = p.image && p.image !== "" ? p.image : "assets/placeholder.png";
     const visibleSpecs = (p.specs_list || []).filter(s => {
       const key = (s.etiqueta || "").toLowerCase();
       return !["search_query","nivel_confianza","producto_principal","rfq listo","id","codigo","internal","interno"].some(w => key.includes(w));
     });
-    const specText = visibleSpecs.length ? `${ProductAIGuard.escapeHtml(visibleSpecs[0].etiqueta)}: ${ProductAIGuard.escapeHtml(visibleSpecs[0].valor)}` : "Por validar";
+    const specText = visibleSpecs.length ? `${ProductAIGuard.escapeHtml(visibleSpecs[0].etiqueta)}: ${ProductAIGuard.escapeHtml(visibleSpecs[0].valor)}` : "";
     return `
-   <tr onclick="selectProduct(${index})">
-  <td><div class="product-cell">
-    <img class="market-thumb" src="${p.image || 'assets/placeholder.png'}" alt="${p.name}">
-  </div></td> 
-      <td>${specText}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small><div class="provider-links">${providerLinks(p)}</div></td>
+    <tr onclick="selectProduct(${index})">
+      <td><div class="product-cell">
+        <img class="market-thumb" src="${imgSrc}" alt="${name}" onerror="this.src='assets/placeholder.png'">
+        <div><strong>${name}</strong><br><small>${brand}</small></div>
+      </div></td>
+      <td>${ProductAIGuard.escapeHtml(category)}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small></td>
+      <td>${specText}</td>
       <td><span class="money">${money(p.price_sale || salePrice(p))}</span><br><small>Base ${money(basePrice(p))}</small><br><small>Rating ${Number(p.rating || 4.2).toFixed(1)}/5</small></td>
       <td><div class="action-row">
         <button class="btn-lite" onclick="event.stopPropagation(); addToCart(${index})" type="button">Agregar</button>
-        <button class="btn-safepay-row" onclick="event.stopPropagation(); pagarProducto(${index})" type="button">💳 Pagar</button>
         <button class="btn-lite" onclick="event.stopPropagation(); addToCompare(${index})" type="button">Comparar</button>
-        <button class="btn-lite" onclick="event.stopPropagation(); viewTechSheet(${index})" type="button">Ver ficha tecnica</button>
-        <button class="btn-lite" onclick="event.stopPropagation(); consultAvailability(${index})" type="button">Consultar disponibilidad</button>
+        <button class="btn-lite" onclick="event.stopPropagation(); consultAvailability(${index})" type="button">Ver oferta</button>
       </div></td>
     </tr>
     `;
@@ -698,9 +694,8 @@ function selectProduct(index) {
     <h4>Fuentes de consulta</h4>
     <div class="provider-links">${providerLinks(selected)}</div>
     <button class="btn-sap" onclick="addSelected()" type="button">Agregar al carrito</button>
-    <button class="btn-safepay-detail" onclick="pagarProducto(filtered.indexOf(selected))" type="button">💳 Comprar ahora con SafePay</button>
     <button class="btn-lite" onclick="addToCompare(filtered.indexOf(selected))" type="button" style="margin-left:8px">Comparar</button>
-    <button class="btn-lite" onclick="consultAvailability(filtered.indexOf(selected))" type="button" style="margin-left:8px">Consultar disponibilidad</button>
+    <button class="btn-lite" onclick="consultAvailability(filtered.indexOf(selected))" type="button" style="margin-left:8px">Ver oferta</button>
   `;
 }
 
