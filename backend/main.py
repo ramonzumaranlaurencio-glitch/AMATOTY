@@ -343,11 +343,12 @@ def _send_site_file(filename):
     if normalized == "oye-bonita":
         normalized = "oye-bonita.html"
     if normalized.lower().startswith("productos/"):
-        products_dir = _data_path("Productos")
         product_file = normalized.split("/", 1)[1]
-        product_path = os.path.abspath(os.path.join(products_dir, product_file))
-        if product_path.startswith(os.path.abspath(products_dir)) and os.path.exists(product_path):
-            return send_from_directory(products_dir, product_file)
+        # Check workspace root Productos/ first (local), then backend/docs/Productos/ (Render)
+        for products_dir in [_data_path("Productos"), os.path.join(LOCAL_SITE_DIR, "Productos")]:
+            product_path = os.path.abspath(os.path.join(products_dir, product_file))
+            if product_path.startswith(os.path.abspath(products_dir)) and os.path.exists(product_path):
+                return send_from_directory(products_dir, product_file)
     site_dirs = [LOCAL_SITE_DIR, SITE_DIR] if normalized == "product-platform.html" else [SITE_DIR, LOCAL_SITE_DIR]
     for site_dir in site_dirs:
         path = os.path.abspath(os.path.join(site_dir, normalized))
@@ -2305,7 +2306,7 @@ def create_order():
 
     try:
         import requests as _req
-        resp = _req.post(safepay_url, json=sp_body, timeout=15)
+        resp = _req.post(safepay_url, json=sp_body, timeout=60)
         print(f"[orders] SafePay response {resp.status_code}: {resp.text[:400]}", flush=True)
         resp.raise_for_status()
         sp_result = resp.json()
@@ -2314,7 +2315,7 @@ def create_order():
         import urllib.request as _ur
         req = _ur.Request(safepay_url, data=payload_bytes,
                           headers={"Content-Type": "application/json"}, method="POST")
-        with _ur.urlopen(req, timeout=15) as r:
+        with _ur.urlopen(req, timeout=60) as r:
             sp_result = json.loads(r.read().decode())
     except Exception as exc:
         print(f"[orders] SafePay error: {exc}", flush=True)
@@ -2484,7 +2485,7 @@ def safepay_checkout():
     try:
         try:
             import requests as _requests
-            resp = _requests.post(safepay_url, json=body, timeout=10)
+            resp = _requests.post(safepay_url, json=body, timeout=60)
             print(f"[safepay] HTTP {resp.status_code} response: {resp.text[:500]}", flush=True)
             resp.raise_for_status()
             result = resp.json()
@@ -2497,7 +2498,7 @@ def safepay_checkout():
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=10) as r:
+            with urllib.request.urlopen(req, timeout=60) as r:
                 raw = r.read().decode()
             print(f"[safepay] urllib response: {raw[:500]}", flush=True)
             result = json.loads(raw)
