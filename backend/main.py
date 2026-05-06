@@ -2182,7 +2182,272 @@ def site_file(filename):
     return _send_site_file(normalized)
 
 
-# ── Integración SafePay ───────────────────────────────────────────────────────
+# ── Orders ────────────────────────────────────────────────────────────────────
+
+def _order_db():
+    from product_platform import get_db
+    return get_db()
+
+
+def _make_order_id():
+    import uuid
+    return "ORD-" + uuid.uuid4().hex[:12].upper()
+
+
+def _make_item_id():
+    import uuid
+    return "OIT-" + uuid.uuid4().hex[:10].upper()
+
+
+def _now_str():
+    from datetime import datetime
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+
+@app.route("/api/orders", methods=["POST"])
+def create_order():
+    """
+    Create an order from the cart and initiate SafePay checkout.
+    Body JSON:
+    {
+      "cart": [{"product_id": "...", "name": "...", "unit_price": 9.90,
+                "quantity": 2, "currency": "USD", "sku": ""}],
+      "customer": {"name":"","email":"","phone":"","address":"",
+                   "city":"","state":"","zip":"","country":""},
+      "shipping": 0,
+      "tax": 0,
+      "currency": "USD",
+      "organization_id": ""   // optional
+    }
+    """
+    data = request.get_json(silent=True) or {}
+    cart = data.get("cart") or []
+    if not cart:
+        return jsonify({"ok": False, "error": "Cart is empty"}), 400
+
+    customer = data.get("customer") or {}
+    if not customer.get("email"):
+        return jsonify({"ok": False, "error": "customer.email is required"}), 400
+
+    currency = str(data.get("currency") or "USD").upper()
+    shipping = float(data.get("shipping") or 0)
+    tax = float(data.get("tax") or 0)
+    org_id = data.get("organization_id") or ""
+
+    # Calculate totals
+    subtotal = sum(
+        float(item.get("unit_price") or 0) * int(item.get("quantity") or 1)
+        for item in cart
+    )
+    total = round(subtotal + shipping + tax, 2)
+    subtotal = round(subtotal, 2)
+
+    order_id = _make_order_id()
+    now = _now_str()
+
+    try:
+        conn = _order_db()
+        conn.execute(
+            """
+            INSERT INTO platform_orders
+            (id, organization_id, customer_name, customer_email, customer_phone,
+             customer_address, customer_city, customer_state, customer_zip,
+             customer_country, subtotal, shipping, tax, total, currency,
+             status, created_at, updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_payment',?,?)
+            """,
+            (
+                order_id, org_id,
+                customer.get("name", ""), customer.get("email", ""),
+                customer.get("phone", ""), customer.get("address", ""),
+                customer.get("city", ""), customer.get("state", ""),
+                customer.get("zip", ""), customer.get("country", ""),
+                subtotal, shipping, tax, total, currency, now, now,
+            ),
+        )
+        for item in cart:
+            qty = int(item.get("quantity") or 1)
+            unit = float(item.get("unit_price") or 0)
+            conn.execute(
+                """
+                INSERT INTO platform_order_items
+                (id, order_id, product_id, product_name, sku,
+                 unit_price, quantity, subtotal, currency, snapshot_json)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    _make_item_id(), order_id,
+                    item.get("product_id") or "",
+                    item.get("name") or "Product",
+                    item.get("sku") or "",
+                    unit, qty, round(unit * qty, 2), currency,
+                    json.dumps(item),
+                ),
+            )
+        conn.commit()
+        conn.close()
+    except Exception as exc:
+        print(f"[orders] DB error: {exc}", flush=True)
+        return jsonify({"ok": False, "error": f"DB error: {exc}"}), 500
+
+    # Call SafePay
+    safepay_url = f"{SAFEPAY_API_URL}/api/payments/create"
+    sp_body = {
+        "amount": total,
+        "currency": currency,
+        "method": "Online",
+        "description": f"Order {order_id} — {len(cart)} item(s)",
+        "customer": customer.get("name", ""),
+        "customer_email": customer.get("email", ""),
+        "metadata": {"order_id": order_id},
+    }
+    print(f"[orders] Calling SafePay: {safepay_url} body={sp_body}", flush=True)
+
+    try:
+        import requests as _req
+        resp = _req.post(safepay_url, json=sp_body, timeout=15)
+        print(f"[orders] SafePay response {resp.status_code}: {resp.text[:400]}", flush=True)
+        resp.raise_for_status()
+        sp_result = resp.json()
+    except ImportError:
+        payload_bytes = json.dumps(sp_body).encode()
+        import urllib.request as _ur
+        req = _ur.Request(safepay_url, data=payload_bytes,
+                          headers={"Content-Type": "application/json"}, method="POST")
+        with _ur.urlopen(req, timeout=15) as r:
+            sp_result = json.loads(r.read().decode())
+    except Exception as exc:
+        print(f"[orders] SafePay error: {exc}", flush=True)
+        return jsonify({
+            "ok": False,
+            "error": f"Order created (id={order_id}) but SafePay failed: {exc}",
+            "order_id": order_id,
+            "total": total,
+        }), 502
+
+    sp_id = sp_result.get("id", "")
+    checkout_url = sp_result.get("checkout_url") or f"{SAFEPAY_API_URL}/payment/{sp_id}"
+
+    # Save SafePay reference
+    try:
+        conn = _order_db()
+        conn.execute(
+            "UPDATE platform_orders SET safepay_id=?, checkout_url=?, updated_at=? WHERE id=?",
+            (sp_id, checkout_url, _now_str(), order_id),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as exc:
+        print(f"[orders] Could not save safepay_id: {exc}", flush=True)
+
+    return jsonify({
+        "ok": True,
+        "order_id": order_id,
+        "safepay_id": sp_id,
+        "total": total,
+        "currency": currency,
+        "checkout_url": checkout_url,
+        "pay_url": checkout_url,
+        "status": "pending_payment",
+    }), 201
+
+
+@app.route("/api/orders/<order_id>", methods=["GET"])
+def get_order(order_id):
+    """Return order status and items."""
+    try:
+        conn = _order_db()
+        row = conn.execute(
+            "SELECT * FROM platform_orders WHERE id=?", (order_id,)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"ok": False, "error": "Order not found"}), 404
+        items = conn.execute(
+            "SELECT * FROM platform_order_items WHERE order_id=?", (order_id,)
+        ).fetchall()
+        conn.close()
+        order = dict(row)
+        order["items"] = [dict(i) for i in items]
+        return jsonify({"ok": True, "order": order})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@app.route("/api/orders/<order_id>/confirm", methods=["POST"])
+def confirm_order(order_id):
+    """
+    Called by SafePay webhook or manually to mark an order as paid.
+    Body: { "safepay_status": "pagado", "transaction_id": "..." }
+    """
+    data = request.get_json(silent=True) or {}
+    sp_status = data.get("safepay_status") or data.get("status") or "pagado"
+    tx_id = data.get("transaction_id") or ""
+    now = _now_str()
+    try:
+        conn = _order_db()
+        row = conn.execute(
+            "SELECT * FROM platform_orders WHERE id=?", (order_id,)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"ok": False, "error": "Order not found"}), 404
+        conn.execute(
+            """UPDATE platform_orders
+               SET status='paid', safepay_status=?, updated_at=?
+               WHERE id=?""",
+            (sp_status, now, order_id),
+        )
+        conn.commit()
+        conn.close()
+        print(f"[orders] Order {order_id} marked PAID (tx={tx_id})", flush=True)
+        return jsonify({"ok": True, "order_id": order_id, "status": "paid"})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+# ── SafePay webhook (confirmacion automatica de pago) ─────────────────────────
+
+@app.route("/api/safepay/webhook", methods=["POST"])
+def safepay_webhook():
+    """
+    SafePay calls this URL after a successful payment.
+    It sends the payment id and order metadata, we mark the order as paid.
+    """
+    data = request.get_json(silent=True) or {}
+    print(f"[safepay-webhook] received: {data}", flush=True)
+    sp_id = data.get("id") or data.get("payment_id") or ""
+    sp_status = data.get("status") or ""
+    metadata = data.get("metadata") or {}
+    order_id = metadata.get("order_id") or data.get("order_id") or ""
+
+    if not order_id:
+        # Try to find order by safepay_id
+        try:
+            conn = _order_db()
+            row = conn.execute(
+                "SELECT id FROM platform_orders WHERE safepay_id=?", (sp_id,)
+            ).fetchone()
+            conn.close()
+            if row:
+                order_id = dict(row)["id"]
+        except Exception:
+            pass
+
+    if order_id and sp_status in ("pagado", "paid", "completado", "completed"):
+        try:
+            conn = _order_db()
+            conn.execute(
+                "UPDATE platform_orders SET status='paid', safepay_status=?, updated_at=? WHERE id=?",
+                (sp_status, _now_str(), order_id),
+            )
+            conn.commit()
+            conn.close()
+            print(f"[safepay-webhook] Order {order_id} → PAID", flush=True)
+        except Exception as exc:
+            print(f"[safepay-webhook] DB update failed: {exc}", flush=True)
+
+    return jsonify({"ok": True}), 200
 
 @app.route("/api/safepay/checkout", methods=["POST"])
 def safepay_checkout():

@@ -402,6 +402,52 @@ def init_platform_db():
             ON platform_promotions(organization_id, status);
         CREATE INDEX IF NOT EXISTS idx_platform_sessions_token
             ON platform_sessions(token_hash);
+
+        -- ── Orders & order items ──────────────────────────────────────────
+        CREATE TABLE IF NOT EXISTS platform_orders (
+            id TEXT PRIMARY KEY,
+            organization_id TEXT,
+            customer_name TEXT NOT NULL DEFAULT '',
+            customer_email TEXT NOT NULL DEFAULT '',
+            customer_phone TEXT NOT NULL DEFAULT '',
+            customer_address TEXT NOT NULL DEFAULT '',
+            customer_city TEXT NOT NULL DEFAULT '',
+            customer_state TEXT NOT NULL DEFAULT '',
+            customer_zip TEXT NOT NULL DEFAULT '',
+            customer_country TEXT NOT NULL DEFAULT '',
+            subtotal REAL NOT NULL DEFAULT 0,
+            shipping REAL NOT NULL DEFAULT 0,
+            tax REAL NOT NULL DEFAULT 0,
+            total REAL NOT NULL DEFAULT 0,
+            currency TEXT NOT NULL DEFAULT 'USD',
+            status TEXT NOT NULL DEFAULT 'pending_payment',
+            safepay_id TEXT,
+            safepay_status TEXT,
+            checkout_url TEXT,
+            receipt_url TEXT,
+            notes TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS platform_order_items (
+            id TEXT PRIMARY KEY,
+            order_id TEXT NOT NULL,
+            product_id TEXT,
+            product_name TEXT NOT NULL,
+            sku TEXT NOT NULL DEFAULT '',
+            unit_price REAL NOT NULL DEFAULT 0,
+            quantity INTEGER NOT NULL DEFAULT 1,
+            subtotal REAL NOT NULL DEFAULT 0,
+            currency TEXT NOT NULL DEFAULT 'USD',
+            snapshot_json TEXT NOT NULL DEFAULT '{}',
+            FOREIGN KEY(order_id) REFERENCES platform_orders(id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_platform_orders_org
+            ON platform_orders(organization_id, status);
+        CREATE INDEX IF NOT EXISTS idx_platform_order_items_order
+            ON platform_order_items(order_id);
         """
     )
     conn.commit()

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — LCA PRO</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f7f8fc; min-height: 100vh;
+           display: flex; align-items: center; justify-content: center; margin: 0; }
+    .confirm-box { background: #fff; border-radius: 14px; padding: 40px 36px;
+                   max-width: 500px; width: 94vw; text-align: center;
+                   box-shadow: 0 6px 32px rgba(0,0,0,.1); }
+    .confirm-icon { font-size: 72px; margin-bottom: 16px; }
+    .confirm-title { font-size: 26px; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+    .confirm-sub { font-size: 15px; color: #555; margin-bottom: 24px; line-height: 1.5; }
+    .confirm-order { background: #f0eeff; border-radius: 8px; padding: 14px 20px;
+                     font-size: 14px; color: #333; margin-bottom: 24px; text-align: left; }
+    .confirm-order b { color: #6c63ff; }
+    .btn-home { display: inline-block; padding: 13px 32px; background: #6c63ff; color: #fff;
+                border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; }
+    .btn-home:hover { background: #574fd6; }
+    .loading { color: #888; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <div class="confirm-box">
+    <div class="confirm-icon" id="icon">⏳</div>
+    <div class="confirm-title" id="title">Verifying payment…</div>
+    <div class="confirm-sub" id="sub">Please wait while we confirm your order.</div>
+    <div class="confirm-order" id="order-detail" style="display:none"></div>
+    <a href="/" class="btn-home" id="btn-home" style="display:none">Back to store</a>
+  </div>
+
+  <script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") || params.get("orderId");
+
+    function setUI(icon, title, sub, orderHtml) {
+      document.getElementById("icon").textContent = icon;
+      document.getElementById("title").textContent = title;
+      document.getElementById("sub").textContent = sub;
+      if (orderHtml) {
+        const el = document.getElementById("order-detail");
+        el.innerHTML = orderHtml;
+        el.style.display = "block";
+      }
+      document.getElementById("btn-home").style.display = "inline-block";
+    }
+
+    if (!orderId) {
+      setUI("✅", "Thank you for your purchase!", "Your order has been placed. Check your email for details.", "");
+      return;
+    }
+
+    fetch("/api/orders/" + encodeURIComponent(orderId))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.ok) {
+          setUI("⚠️", "Order not found", "We couldn't find your order. Contact support if needed.", "");
+          return;
+        }
+        const o = data.order;
+        const isPaid = (o.status === "paid" || o.status === "pagado");
+        setUI(
+          isPaid ? "✅" : "🕐",
+          isPaid ? "Payment confirmed!" : "Awaiting payment confirmation",
+          isPaid
+            ? `Thank you, ${o.customer_name || "customer"}! Your order has been confirmed.`
+            : "Your order is placed. Once SafePay confirms the payment, your order will be processed.",
+          `<b>Order ID:</b> ${o.id}<br>
+           <b>Status:</b> ${o.status}<br>
+           <b>Total:</b> ${o.currency} ${parseFloat(o.total || 0).toFixed(2)}<br>
+           <b>Email:</b> ${o.customer_email || "—"}`
+        );
+      })
+      .catch(() => {
+        setUI("✅", "Thank you for your purchase!", "Your order is being processed. You will receive a confirmation email shortly.", "");
+      });
+  })();
+  </script>
+</body>
+</html>
