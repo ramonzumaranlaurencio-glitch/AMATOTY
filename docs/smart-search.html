@@ -402,6 +402,7 @@ const SAFEPAY_PROXY = API_ORIGIN + "/api/safepay/checkout";
 
 let products = [];
 let filtered = [];
+let rotated = [];  // orden visible en el grid (con rotación diaria)
 let cart = JSON.parse(localStorage.getItem("lcaCart_v2")||"[]");
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
@@ -547,7 +548,7 @@ function renderGrid(){
 
   // Rotación diaria: reordenar los productos del grid según el día
   const offset=getDailyOffset(filtered.length,8);
-  const rotated=[...filtered.slice(offset),...filtered.slice(0,offset)];
+  rotated=[...filtered.slice(offset),...filtered.slice(0,offset)];
 
   if(!rotated.length){
     grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Sin resultados</h3><p style="color:var(--ink2)">Prueba con otra búsqueda o limpia los filtros.</p></div>`;
@@ -599,7 +600,7 @@ function renderGrid(){
 // ── DETALLE PRODUCTO ───────────────────────────────────────────────────────
 let currentDetailIdx=-1;
 function openDetail(idx){
-  const p=filtered[idx];
+  const p=rotated[idx];
   if(!p)return;
   currentDetailIdx=idx;
   const img=p.image||"assets/placeholder.png";
@@ -654,7 +655,7 @@ function closeCart(){
 function clearCart(){cart=[];saveCart();updateCartBadge();renderCartDrawer();}
 
 function addToCart(idx){
-  const p=filtered[idx];if(!p)return;
+  const p=rotated[idx];if(!p)return;
   const pid=String(p.id||p.sku||p.name);
   const existing=cart.find(i=>i.pid===pid);
   if(existing){existing.qty++;}
