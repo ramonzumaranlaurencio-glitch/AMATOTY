@@ -2178,7 +2178,7 @@ def site_file(filename):
     if normalized.startswith("docs/"):
         normalized = normalized[5:]
     if normalized.startswith("api/"):
-        return jsonify({"error": "Ruta API no encontrada."}), 404
+        return jsonify({"error": "Ruta API no encontrada o metodo no permitido."}), 404
     return _send_site_file(normalized)
 
 
@@ -2408,12 +2408,15 @@ def confirm_order(order_id):
 
 # ── SafePay webhook (confirmacion automatica de pago) ─────────────────────────
 
-@app.route("/api/safepay/webhook", methods=["POST"])
+@app.route("/api/safepay/webhook", methods=["GET", "POST"])
 def safepay_webhook():
     """
     SafePay calls this URL after a successful payment.
     It sends the payment id and order metadata, we mark the order as paid.
+    GET: health-check so you can verify the endpoint is reachable.
     """
+    if request.method == "GET":
+        return jsonify({"ok": True, "status": "webhook endpoint active", "hint": "POST to confirm a payment"}), 200
     data = request.get_json(silent=True) or {}
     print(f"[safepay-webhook] received: {data}", flush=True)
     sp_id = data.get("id") or data.get("payment_id") or ""
