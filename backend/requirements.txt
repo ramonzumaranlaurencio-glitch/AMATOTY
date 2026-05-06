@@ -1,7 +1,24 @@
-flask
-flask-cors
-gunicorn
-pillow
-google-genai
-cloudinary
-python-dotenv
+# Web framework
+flask==3.1.3
+flask-cors==6.0.2
+gunicorn==22.0.0
+
+# Base de datos
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.9
+
+# Variables de entorno
+python-dotenv==1.0.1
+
+# Pagos
+stripe==10.5.0
+
+# Imágenes
+cloudinary==1.41.0
+pillow==12.2.0
+
+# IA Gemini
+google-genai==1.75.0
+
+# HTTP
+requests==2.33.1

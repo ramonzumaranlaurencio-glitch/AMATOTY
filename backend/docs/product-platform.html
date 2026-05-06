@@ -157,6 +157,26 @@ tbody tr:hover{background:#eff6ff}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chip{display:inline-block;background:#ede9fe;color:var(--accent2);border:1px solid #ddd6fe;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}
 
+/* ── CARRUSEL EDITOR ── */
+.carousel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.carousel-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow2);transition:transform .2s,box-shadow .2s}
+.carousel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.carousel-card.in-carousel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.18),var(--shadow2)}
+.carousel-card-img{width:100%;height:120px;object-fit:cover;background:var(--panel2);display:block}
+.carousel-card-img-empty{width:100%;height:120px;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:28px}
+.carousel-card-body{padding:10px}
+.carousel-card-name{font-weight:800;font-size:13px;color:var(--ink);margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carousel-card-cat{font-size:11px;color:var(--ink2);margin-bottom:8px}
+.carousel-card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.carousel-badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:#dbeafe;color:var(--accent);border:1px solid #bfdbfe;margin-bottom:6px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--panel);border-radius:var(--radius);max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.22)}
+.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border-radius:var(--radius) var(--radius) 0 0;position:sticky;top:0}
+.modal-head h3{margin:0;font-size:14px;font-weight:900;color:var(--accent)}
+.modal-close{background:transparent;border:0;font-size:20px;color:var(--ink2);cursor:pointer;line-height:1;padding:2px 6px}
+.modal-body{padding:18px}
+
 /* ── UTILIDADES ── */
 .toast{position:fixed;right:18px;bottom:18px;background:var(--nav);color:white;padding:14px 18px;border-radius:var(--radius);box-shadow:var(--shadow);max-width:360px;z-index:200;font-weight:600}
 .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:22px;color:var(--ink2);background:var(--panel2);text-align:center;font-size:14px}
@@ -277,6 +297,7 @@ tbody tr:hover{background:#eff6ff}
     <nav class="side-nav">
       <button class="active" data-view="dashboardView" type="button">Dashboard</button>
       <button data-view="productsView" type="button">Productos</button>
+      <button data-view="carouselView" type="button">🎠 Carrusel</button>
       <button data-view="promotionsView" type="button">Promociones</button>
       <button data-view="companyView" type="button">Empresa</button>
     </nav>
@@ -426,6 +447,32 @@ tbody tr:hover{background:#eff6ff}
         </div>
       </section>
 
+      <section id="carouselView" class="view hidden">
+        <div style="display:grid;gap:18px">
+          <!-- En el carrusel -->
+          <section class="panel">
+            <div class="panel-head">
+              <h3>🎠 En el carrusel</h3>
+              <button id="refreshCarouselBtn" class="plain-btn" type="button">Actualizar</button>
+            </div>
+            <div class="panel-body">
+              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos que aparecen en el banner principal. Haz clic en <strong>Editar</strong> para personalizar título, imagen y enlace de cada tarjeta.</p>
+              <div id="carouselActiveGrid" class="carousel-grid"></div>
+            </div>
+          </section>
+          <!-- Todos los productos disponibles -->
+          <section class="panel">
+            <div class="panel-head">
+              <h3>📦 Agregar al carrusel</h3>
+            </div>
+            <div class="panel-body">
+              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos publicados disponibles. Activa el interruptor para añadirlos al carrusel.</p>
+              <div id="carouselAvailableGrid" class="carousel-grid"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
       <section id="promotionsView" class="view hidden">
         <div class="grid-2">
           <section class="panel">
@@ -460,6 +507,33 @@ tbody tr:hover{background:#eff6ff}
     </div>
   </main>
 </section>
+
+<div id="carouselModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="carouselModalTitle">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="carouselModalTitle">Editar entrada de carrusel</h3>
+      <button class="modal-close" id="carouselModalClose" type="button" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input id="carouselEditProductId" type="hidden">
+      <form id="carouselEditForm" class="form">
+        <label class="check-field" for="carouselEditShow" style="margin-bottom:10px">
+          <input id="carouselEditShow" type="checkbox"> Mostrar en el carrusel
+        </label>
+        <div class="field"><label for="carouselEditTitle">Título del banner</label><input id="carouselEditTitle" placeholder="Usa el nombre del producto si lo dejas vacío"></div>
+        <div class="field"><label for="carouselEditCategory">Categoría</label><input id="carouselEditCategory" placeholder="Usa la categoría del producto"></div>
+        <div class="field"><label for="carouselEditDescription">Descripción corta</label><textarea id="carouselEditDescription" style="min-height:70px" placeholder="Texto breve que aparecerá en el banner..."></textarea></div>
+        <div class="field"><label for="carouselEditImage">URL de imagen del banner</label><input id="carouselEditImage" type="url" placeholder="https://... o Productos/imagen.jpg"><div id="carouselImagePreview" style="margin-top:8px;min-height:80px;background:var(--panel2);border-radius:6px;overflow:hidden;display:none"><img id="carouselPreviewImg" style="width:100%;max-height:180px;object-fit:cover" alt="Preview"></div></div>
+        <div class="field"><label for="carouselEditButton">Texto del botón</label><input id="carouselEditButton" placeholder="Ver producto"></div>
+        <div class="field"><label for="carouselEditLink">Enlace del botón</label><input id="carouselEditLink" type="url" placeholder="https://..."></div>
+        <div class="split-actions" style="margin-top:6px">
+          <button class="primary-btn" type="submit">💾 Guardar</button>
+          <button class="plain-btn" id="carouselModalCancelBtn" type="button">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div id="toast" class="toast hidden"></div>
 
@@ -586,7 +660,7 @@ function fillCompanyForm() {
 }
 
 async function loadAll() {
-  await Promise.all([loadDashboard(), loadProducts(), loadPromotions(), loadSuggestions()]);
+  await Promise.all([loadDashboard(), loadProducts(), loadPromotions(), loadSuggestions(), loadCarousel()]);
 }
 
 async function loadDashboard() {
@@ -952,9 +1026,126 @@ async function saveCompany(event) {
 function showView(id) {
   $$(".view").forEach(view => view.classList.toggle("hidden", view.id !== id));
   $$(".side-nav button").forEach(btn => btn.classList.toggle("active", btn.dataset.view === id));
-  const labels = {dashboardView:"Dashboard", productsView:"Productos", promotionsView:"Promociones", companyView:"Empresa"};
+  const labels = {dashboardView:"Dashboard", productsView:"Productos", carouselView:"🎠 Carrusel", promotionsView:"Promociones", companyView:"Empresa"};
   $("#viewTitle").textContent = labels[id] || "Panel";
 }
+
+// ─── CARRUSEL ────────────────────────────────────────────────────────────────
+
+async function loadCarousel() {
+  // Reutilizamos la lista de productos ya cargada; si aún no está, la cargamos
+  if (!state.products || !state.products.length) {
+    await loadProducts();
+  }
+  renderCarousel();
+}
+
+function carouselCardHtml(product, inCarousel) {
+  const img = product.metadata?.banner_image || product.metadata?.image || product.metadata?.imagen || "";
+  const mediaImg = (product.media || []).find(m => m.media_type === "image");
+  const imgSrc = img || (mediaImg ? mediaAbsUrl(mediaImg.url) : "");
+  const imgHtml = imgSrc
+    ? `<img class="carousel-card-img" src="${escapeHtml(mediaAbsUrl(imgSrc))}" alt="${escapeHtml(product.name)}" onerror="this.parentElement.innerHTML='<div class=\\'carousel-card-img-empty\\'>🖼️</div>'">`
+    : `<div class="carousel-card-img-empty">🖼️</div>`;
+  return `
+    <div class="carousel-card${inCarousel ? " in-carousel" : ""}">
+      ${imgHtml}
+      <div class="carousel-card-body">
+        ${inCarousel ? '<span class="carousel-badge">✔ En carrusel</span>' : ""}
+        <p class="carousel-card-name" title="${escapeHtml(product.name)}">${escapeHtml(product.name)}</p>
+        <p class="carousel-card-cat">${escapeHtml(product.category || "-")} · <span class="status ${escapeHtml(product.status)}">${escapeHtml(product.status)}</span></p>
+        <div class="carousel-card-actions">
+          ${inCarousel
+            ? `<button class="danger-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-remove" data-id="${escapeHtml(product.id)}" type="button">Quitar</button>`
+            : `<button class="ghost-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-add" data-id="${escapeHtml(product.id)}" type="button">+ Añadir</button>`}
+          <button class="plain-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-edit" data-id="${escapeHtml(product.id)}" type="button">✏ Editar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCarousel() {
+  const active = state.products.filter(p => asBool(p.metadata?.mostrar_en_banner ?? p.metadata?.show_in_banner));
+  const available = state.products.filter(p => !asBool(p.metadata?.mostrar_en_banner ?? p.metadata?.show_in_banner));
+  $("#carouselActiveGrid").innerHTML = active.length
+    ? active.map(p => carouselCardHtml(p, true)).join("")
+    : `<div class="empty">Ningún producto en el carrusel. Añade uno desde la sección de abajo.</div>`;
+  $("#carouselAvailableGrid").innerHTML = available.filter(p => p.status !== "archived").length
+    ? available.filter(p => p.status !== "archived").map(p => carouselCardHtml(p, false)).join("")
+    : `<div class="empty">Todos los productos publicados ya están en el carrusel.</div>`;
+}
+
+function openCarouselEdit(productId) {
+  const product = state.products.find(p => p.id === productId);
+  if (!product) return;
+  const meta = product.metadata || {};
+  $("#carouselEditProductId").value = product.id;
+  $("#carouselModalTitle").textContent = `Editar: ${product.name}`;
+  $("#carouselEditShow").checked = asBool(meta.mostrar_en_banner ?? meta.show_in_banner);
+  $("#carouselEditTitle").value = meta.banner_title || meta.title || "";
+  $("#carouselEditCategory").value = meta.banner_category || product.category || "";
+  $("#carouselEditDescription").value = meta.banner_description || meta.descripcion_corta || meta.short_desc || "";
+  const imgVal = meta.banner_image || meta.image || meta.imagen || "";
+  $("#carouselEditImage").value = imgVal;
+  updateCarouselPreview(imgVal);
+  $("#carouselEditButton").value = meta.banner_button_text || meta.button_text || meta.cta || "";
+  $("#carouselEditLink").value = meta.banner_link || meta.button_link || product.product_url || "";
+  $("#carouselModal").classList.add("open");
+}
+
+function updateCarouselPreview(url) {
+  const previewBox = $("#carouselImagePreview");
+  const previewImg = $("#carouselPreviewImg");
+  const resolved = url ? mediaAbsUrl(url) : "";
+  if (resolved) {
+    previewImg.src = resolved;
+    previewBox.style.display = "block";
+  } else {
+    previewBox.style.display = "none";
+  }
+}
+
+function closeCarouselModal() {
+  $("#carouselModal").classList.remove("open");
+}
+
+async function saveCarouselBanner(event) {
+  event.preventDefault();
+  const productId = $("#carouselEditProductId").value;
+  if (!productId) return;
+  const payload = {
+    mostrar_en_banner: $("#carouselEditShow").checked,
+    banner_title: $("#carouselEditTitle").value.trim(),
+    banner_category: $("#carouselEditCategory").value.trim(),
+    banner_description: $("#carouselEditDescription").value.trim(),
+    banner_image: $("#carouselEditImage").value.trim(),
+    banner_button_text: $("#carouselEditButton").value.trim(),
+    banner_link: $("#carouselEditLink").value.trim()
+  };
+  try {
+    await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    toast("Carrusel actualizado.");
+    closeCarouselModal();
+    await loadProducts();
+    renderCarousel();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function toggleCarouselEntry(productId, addToCarousel) {
+  const payload = {mostrar_en_banner: addToCarousel};
+  try {
+    await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    toast(addToCarousel ? "Añadido al carrusel." : "Quitado del carrusel.");
+    await loadProducts();
+    renderCarousel();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 $("#loginTab").addEventListener("click", () => setAuthMode("login"));
 $("#registerTab").addEventListener("click", () => setAuthMode("register"));
@@ -1041,6 +1232,26 @@ $("#promotionsList").addEventListener("click", event => {
   approvePromotion(button.dataset.id).catch(err => toast(err.message));
 });
 $("#companyForm").addEventListener("submit", event => saveCompany(event).catch(err => toast(err.message)));
+
+// Carrusel
+$("#refreshCarouselBtn").addEventListener("click", () => loadCarousel().then(() => toast("Carrusel actualizado.")).catch(err => toast(err.message)));
+$("#carouselModalClose").addEventListener("click", closeCarouselModal);
+$("#carouselModalCancelBtn").addEventListener("click", closeCarouselModal);
+$("#carouselModal").addEventListener("click", event => { if (event.target === $("#carouselModal")) closeCarouselModal(); });
+$("#carouselEditForm").addEventListener("submit", event => saveCarouselBanner(event).catch(err => toast(err.message)));
+$("#carouselEditImage").addEventListener("input", event => updateCarouselPreview(event.target.value.trim()));
+$("#carouselActiveGrid").addEventListener("click", event => {
+  const btn = event.target.closest("button[data-action]");
+  if (!btn) return;
+  if (btn.dataset.action === "carousel-remove") toggleCarouselEntry(btn.dataset.id, false).catch(err => toast(err.message));
+  if (btn.dataset.action === "carousel-edit") openCarouselEdit(btn.dataset.id);
+});
+$("#carouselAvailableGrid").addEventListener("click", event => {
+  const btn = event.target.closest("button[data-action]");
+  if (!btn) return;
+  if (btn.dataset.action === "carousel-add") toggleCarouselEntry(btn.dataset.id, true).catch(err => toast(err.message));
+  if (btn.dataset.action === "carousel-edit") openCarouselEdit(btn.dataset.id);
+});
 
 if (state.token) {
   loadMe().catch(err => {

@@ -2173,6 +2173,66 @@ def validar_imagen_producto():
     )
 
 
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """Chat interactivo con Gemini 2.5. Recibe { message, history } y devuelve { reply }."""
+    data = request.get_json(silent=True) or {}
+    user_message = str(data.get("message") or "").strip()
+    history = data.get("history") or []
+    if not user_message:
+        return jsonify({"error": "Mensaje vacío."}), 400
+
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY no configurada en el servidor."}), 503
+
+    try:
+        from google import genai
+        from google.genai import types
+    except Exception:
+        return jsonify({"error": "Falta instalar google-genai."}), 503
+
+    system_prompt = (
+        "Eres AMIA, la asistente inteligente de AMATOTY – Smart Finds Review. "
+        "Tu rol: ayudar a los visitantes a encontrar productos, responder preguntas "
+        "sobre reviews, comparar opciones, y orientar sobre el diagnóstico facial "
+        "Oye Bonita. Responde siempre en el idioma del usuario (español o inglés). "
+        "Sé concisa, amable y directa. Si no sabes algo, dilo honestamente."
+    )
+
+    contents = []
+    # Incluir historial previo (máx 10 turnos para no exceder tokens)
+    for turn in (history[-10:] if isinstance(history, list) else []):
+        role = turn.get("role", "user")
+        text = str(turn.get("text") or turn.get("content") or "")
+        if role in ("user", "model") and text:
+            contents.append(types.Content(role=role, parts=[types.Part.from_text(text=text)]))
+    # Mensaje actual
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=user_message)]))
+
+    try:
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                temperature=0.6,
+                max_output_tokens=512,
+            ),
+        )
+        reply = response.text or ""
+        return jsonify({"reply": reply})
+    except Exception as exc:
+        err = str(exc)
+        # Si Gemini está saturado, devolver mensaje amable
+        if "503" in err or "UNAVAILABLE" in err:
+            return jsonify({"reply": "Estoy un poco ocupada ahora, intenta en unos segundos. 😊"}), 200
+        if "429" in err or "RESOURCE_EXHAUSTED" in err:
+            return jsonify({"reply": "Demasiadas solicitudes. Por favor espera un momento. ⏳"}), 200
+        return jsonify({"error": f"Error Gemini: {err[:200]}"}), 500
+
+
 @app.route("/<path:filename>")
 def site_file(filename):
     normalized = filename.strip("/")

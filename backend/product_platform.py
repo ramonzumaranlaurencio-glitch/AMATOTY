@@ -74,6 +74,10 @@ _UPLOAD_DIR_ENV = os.environ.get("UPLOAD_DIR", "")
 
 DB_PATH = _DATA_DIR / "lca_pro_final.db"
 UPLOAD_DIR = Path(_UPLOAD_DIR_ENV) if _UPLOAD_DIR_ENV else BASE_DIR / "Productos"
+# Carpeta de imágenes estáticas comprometidas en git (backend/docs/Productos/).
+# Las imágenes guardadas aquí siguen el mismo patrón que las imágenes existentes
+# (base-mate.png, crema-calma.png, etc.) y son servidas por el servidor estático.
+LOCAL_DOCS_PRODUCTOS_DIR = Path(__file__).resolve().parent / "docs" / "Productos"
 PUBLIC_UPLOAD_PREFIX = "Productos"
 
 TOKEN_TTL_DAYS = 14
@@ -215,6 +219,7 @@ def image_publishable(metadata, has_uploaded_image=False):
 
 def init_platform_db():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    LOCAL_DOCS_PRODUCTOS_DIR.mkdir(parents=True, exist_ok=True)
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not _USE_CLOUDINARY:
         import sys
@@ -1403,6 +1408,44 @@ def archive_product(user, product_id):
         conn.close()
 
 
+@platform_bp.route("/products/<product_id>/banner", methods=["PATCH"])
+@require_auth
+def update_product_banner(user, product_id):
+    """Actualiza solo la configuración del carrusel/banner de un producto."""
+    data = request.get_json(silent=True) or {}
+    conn = get_db()
+    try:
+        row, membership = get_product_for_user(conn, user, product_id)
+        if not row:
+            return jsonify({"error": "Producto no encontrado."}), 404
+        if not require_role(membership, WRITE_ROLES):
+            return jsonify({"error": "Permiso insuficiente."}), 403
+        existing_metadata = json_loads(row["metadata_json"], {})
+        banner_fields = {
+            "mostrar_en_banner": json_bool(data.get("mostrar_en_banner", existing_metadata.get("mostrar_en_banner", False))),
+            "show_in_banner": json_bool(data.get("mostrar_en_banner", existing_metadata.get("mostrar_en_banner", False))),
+            "banner_title": str(data.get("banner_title") or existing_metadata.get("banner_title") or "").strip(),
+            "banner_description": str(data.get("banner_description") or existing_metadata.get("banner_description") or "").strip(),
+            "banner_image": str(data.get("banner_image") or existing_metadata.get("banner_image") or "").strip(),
+            "banner_link": str(data.get("banner_link") or existing_metadata.get("banner_link") or "").strip(),
+            "banner_button_text": str(data.get("banner_button_text") or existing_metadata.get("banner_button_text") or "").strip(),
+            "banner_category": str(data.get("banner_category") or existing_metadata.get("banner_category") or "").strip(),
+        }
+        updated_metadata = {**existing_metadata, **banner_fields}
+        conn.execute(
+            "UPDATE platform_products SET metadata_json = ?, updated_at = ? WHERE id = ?",
+            (json.dumps(updated_metadata, ensure_ascii=False), now_iso(), product_id),
+        )
+        audit(conn, user["id"], row["organization_id"], "product", product_id, "update_banner", banner_fields)
+        conn.commit()
+        updated = conn.execute("SELECT * FROM platform_products WHERE id = ?", (product_id,)).fetchone()
+        return jsonify({"ok": True, "product": clean_product(updated, product_media(conn, product_id))})
+    finally:
+        conn.close()
+
+
+
+
 @platform_bp.route("/products/<product_id>/media", methods=["POST"])
 @require_auth
 def upload_product_media(user, product_id):
@@ -1449,6 +1492,12 @@ def upload_product_media(user, product_id):
                         UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                         target = UPLOAD_DIR / storage_name
                         target.write_bytes(raw)
+                        # También guardar en backend/docs/Productos/ para seguir el mismo patrón
+                        LOCAL_DOCS_PRODUCTOS_DIR.mkdir(parents=True, exist_ok=True)
+                        try:
+                            (LOCAL_DOCS_PRODUCTOS_DIR / storage_name).write_bytes(raw)
+                        except Exception:
+                            pass
                         public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
                         cld_public_id = None  # no hay que borrarlo de Cloudinary
                     except Exception:
@@ -1462,12 +1511,21 @@ def upload_product_media(user, product_id):
                 try:
                     target = UPLOAD_DIR / storage_name
                     target.write_bytes(raw)
+                    # Copia a backend/docs/Productos/ para seguir el patrón de imágenes existentes
+                    LOCAL_DOCS_PRODUCTOS_DIR.mkdir(parents=True, exist_ok=True)
+                    (LOCAL_DOCS_PRODUCTOS_DIR / storage_name).write_bytes(raw)
                 except Exception:
                     pass
             else:
                 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                 target = UPLOAD_DIR / storage_name
                 target.write_bytes(raw)
+                # Guardar también en backend/docs/Productos/ (mismo patrón que imágenes existentes)
+                LOCAL_DOCS_PRODUCTOS_DIR.mkdir(parents=True, exist_ok=True)
+                try:
+                    (LOCAL_DOCS_PRODUCTOS_DIR / storage_name).write_bytes(raw)
+                except Exception:
+                    pass
                 public_url = f"{PUBLIC_UPLOAD_PREFIX}/{storage_name}"
                 storage_key_val = str(target.relative_to(BASE_DIR))
             conn.execute(
