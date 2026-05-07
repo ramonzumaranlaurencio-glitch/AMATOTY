@@ -735,8 +735,11 @@ document.getElementById("checkoutBtn").addEventListener("click",async()=>{
     if(!resp.ok||!data.ok)throw new Error(data.error||"Error SafePay");
     window.location.href=data.pay_url;
   }catch(err){
-    showToast("❌ SafePay no disponible: "+err.message);
-    btn.disabled=false;btn.textContent="Generar pedido";
+    const isDown=err.message.includes("502")||err.message.includes("503")||err.message.includes("Failed to fetch");
+    showToast(isDown
+      ? "⏳ El servidor de pago está iniciando. Espera 30 segundos e intenta de nuevo."
+      : "❌ SafePay no disponible: "+err.message);
+    btn.disabled=false;btn.textContent=(window.I18N&&window.I18N.t('btn_checkout'))||"Generar pedido";
   }
 });
 
@@ -856,6 +859,15 @@ async function loadProducts(){
 }
 
 loadProducts();
+
+// ── SAFEPAY WARMUP ─────────────────────────────────────────────────────────
+// Ping SafePay on load so it wakes up before the user clicks checkout
+(async()=>{
+  try{
+    await fetch(SAFEPAY_PROXY,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({warmup:true}),signal:AbortSignal.timeout(8000)});
+  }catch(_){/* expected on free tier cold start */}
+})();
 </script>
 <script src="assets/ai_chat.js" defer></script>
 </body>
