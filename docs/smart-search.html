@@ -1,11 +1,16 @@
 ﻿<!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Busca Inteligente – AMATOTY</title>
+<title>Smart Search – AMATOTY</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
+<link rel="alternate" hreflang="en" href="en/">
+<link rel="alternate" hreflang="es" href="es/">
+<link rel="alternate" hreflang="pt" href="pt/">
+<link rel="alternate" hreflang="x-default" href="smart-search.html">
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js"></script>
 <script src="assets/product_ai_guard.js"></script>
 <style>
 :root{
@@ -193,20 +198,20 @@ button{cursor:pointer}
 }
 </style>
 </head>
-<body>
+<body data-page-title="page_title_smart">
 
 <!-- ── HEADER ── -->
 <div class="top-header">
   <div class="top-header-inner">
     <a href="index.html" class="brand-name">AMATOTY</a>
     <div class="search-bar">
-      <input id="query" type="search" placeholder="¿Qué producto buscas?">
-      <select id="categoryFilter"><option value="">Todas las categorías</option></select>
-      <button id="runSearch" type="button">🔍 Buscar</button>
+      <input id="query" type="search" data-i18n-ph="search_ph" placeholder="What product are you looking for?">
+      <select id="categoryFilter"><option value="" data-i18n="all_categories">All categories</option></select>
+      <button id="runSearch" type="button" data-i18n="btn_search">🔍 Search</button>
     </div>
     <div class="header-actions">
-      <button class="header-icon-btn" title="Mi ubicación">📍</button>
-      <button class="header-icon-btn" id="cartBtn" title="Carrito" onclick="openCart()">
+      <button class="header-icon-btn" data-i18n="location_title" data-i18n-attr="title" title="My location">📍</button>
+      <button class="header-icon-btn" id="cartBtn" data-i18n="cart_title" data-i18n-attr="title" title="Cart" onclick="openCart()">
         🛒<span class="badge" id="cartBadge" style="display:none">0</span>
       </button>
     </div>
@@ -216,23 +221,23 @@ button{cursor:pointer}
 <!-- ── NAV SECUNDARIO ── -->
 <div class="top-nav">
   <div class="top-nav-inner">
-    <a href="index.html">Inicio</a>
-    <a href="smart-search.html" class="active">Busca Inteligente</a>
-    <a href="category/index.html">Categorías</a>
-    <a href="product-platform.html">Panel Productos</a>
-    <a href="blog/index.html">Blog</a>
+    <a href="index.html" data-i18n="nav_home">Home</a>
+    <a href="smart-search.html" class="active" data-i18n="nav_smart_search">Smart Search</a>
+    <a href="category/index.html" data-i18n="nav_categories">Categories</a>
+    <a href="product-platform.html" data-i18n="nav_product_panel">Product Panel</a>
+    <a href="blog/index.html" data-i18n="nav_blog">Blog</a>
     <a href="oye-bonita.html">Oye Bonita</a>
-    <a href="about.html">Sobre nosotros</a>
-    <a href="contact.html">Contacto</a>
+    <a href="about.html" data-i18n="nav_about">About us</a>
+    <a href="contact.html" data-i18n="nav_contact">Contact</a>
   </div>
 </div>
 
 <!-- ── BARRA UBICACIÓN / PAÍS ── -->
 <div class="location-bar">
-  📍 Mercado:
+  📍 <span data-i18n="market">Market</span>:
   <select id="country" onchange="onCountryChange()">
     <option value="PE">Perú</option>
-    <option value="US">Estados Unidos</option>
+    <option value="US">United States</option>
     <option value="MX">México</option>
     <option value="CO">Colombia</option>
     <option value="CL">Chile</option>
@@ -242,18 +247,18 @@ button{cursor:pointer}
     <option value="BR">Brasil</option>
     <option value="UY">Uruguay</option>
   </select>
-  &nbsp;|&nbsp; Moneda:
+  &nbsp;|&nbsp; <span data-i18n="currency_label">Currency</span>:
   <select id="currency" onchange="renderResults()">
-    <option value="USD">USD</option>
-    <option value="PEN">PEN</option>
-    <option value="MXN">MXN</option>
-    <option value="COP">COP</option>
-    <option value="CLP">CLP</option>
-    <option value="ARS">ARS</option>
-    <option value="BOB">BOB</option>
-    <option value="BRL">BRL</option>
+    <option value="USD">USD $</option>
+    <option value="PEN">PEN S/</option>
+    <option value="MXN">MXN $</option>
+    <option value="COP">COP $</option>
+    <option value="CLP">CLP $</option>
+    <option value="ARS">ARS $</option>
+    <option value="BOB">BOB Bs</option>
+    <option value="BRL">BRL R$</option>
   </select>
-  &nbsp;|&nbsp; <span id="aiModeBadge" class="ai-badge">Cargando catálogo...</span>
+  &nbsp;|&nbsp; <span id="aiModeBadge" class="ai-badge" data-i18n="loading_catalog">Loading catalog...</span>
 </div>
 
 <!-- ── CARRUSEL ── -->
@@ -263,7 +268,7 @@ button{cursor:pointer}
 <!-- ── CATEGORÍAS RÁPIDAS ── -->
 <div class="cat-strip">
   <div class="cat-strip-inner" id="catStrip">
-    <a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span>Ver todo</span></a>
+    <a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span data-i18n="view_all">View all</span></a>
   </div>
 </div>
 
@@ -272,56 +277,56 @@ button{cursor:pointer}
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h3>Filtrar resultados</h3>
+    <h3 data-i18n="filter_results">Filter results</h3>
     <div class="filter-group">
-      <label>Tipo de entrega</label>
+      <label data-i18n="delivery_type">Delivery type</label>
       <select id="availabilityFilter">
-        <option value="">Todas</option>
-        <option value="available">Con stock</option>
-        <option value="quote">A cotizar</option>
+        <option value="" data-i18n="opt_all">All</option>
+        <option value="available" data-i18n="opt_in_stock">In stock</option>
+        <option value="quote" data-i18n="opt_quote">Request quote</option>
       </select>
     </div>
     <div class="filter-group">
-      <label>Marca</label>
-      <select id="brandFilter"><option value="">Todas</option></select>
+      <label data-i18n="brand">Brand</label>
+      <select id="brandFilter"><option value="" data-i18n="opt_all">All</option></select>
     </div>
     <div class="filter-group">
-      <label>Calidad</label>
+      <label data-i18n="quality">Quality</label>
       <select id="qualityFilter">
-        <option value="">Todas</option>
-        <option value="professional">Profesional</option>
-        <option value="premium">Premium</option>
-        <option value="economy">Económica</option>
+        <option value="" data-i18n="opt_all">All</option>
+        <option value="professional" data-i18n="opt_professional">Professional</option>
+        <option value="premium" data-i18n="opt_premium">Premium</option>
+        <option value="economy" data-i18n="opt_economy">Economy</option>
       </select>
     </div>
     <div class="filter-group">
-      <label>Precio mínimo</label>
+      <label data-i18n="min_price">Minimum price</label>
       <input id="minPrice" type="number" min="0" placeholder="0">
     </div>
     <div class="filter-group">
-      <label>Precio máximo</label>
-      <input id="maxPrice" type="number" min="0" placeholder="Sin límite">
+      <label data-i18n="max_price">Maximum price</label>
+      <input id="maxPrice" type="number" min="0" data-i18n-ph="no_limit" placeholder="No limit">
     </div>
     <div class="filter-group">
-      <label>Compatibilidad / medida</label>
-      <input id="compatibilityFilter" type="search" placeholder="modelo, medida, norma">
+      <label data-i18n="compatibility">Compatibility / size</label>
+      <input id="compatibilityFilter" type="search" data-i18n-ph="compat_ph" placeholder="model, size, standard">
     </div>
     <div class="filter-group">
-      <label>Material</label>
-      <input id="materialFilter" type="search" placeholder="acero, caucho, plástico">
+      <label data-i18n="material">Material</label>
+      <input id="materialFilter" type="search" data-i18n-ph="material_ph" placeholder="steel, rubber, plastic">
     </div>
     <div class="filter-group">
       <div class="media-drop">
-        <label for="imageInput" style="font-size:11px;font-weight:800;color:var(--accent);display:block;margin-bottom:4px">📷 Imagen o audio (IA)</label>
+        <label for="imageInput" style="font-size:11px;font-weight:800;color:var(--accent);display:block;margin-bottom:4px" data-i18n="image_audio">📷 Image or audio (AI)</label>
         <input id="imageInput" type="file" accept="image/*,audio/*">
-        <small id="mediaName">Sube foto del producto o nota de voz</small>
+        <small id="mediaName" data-i18n="upload_hint">Upload product photo or voice note</small>
         <audio id="audioPreview" controls style="display:none;width:100%;margin-top:6px"></audio>
       </div>
     </div>
-    <button class="btn-search-main" id="searchSideBtn" type="button" onclick="executeSearch()">🔍 Buscar</button>
-    <button class="btn-clear-sm" id="clearBtn" type="button">Limpiar filtros</button>
+    <button class="btn-search-main" id="searchSideBtn" type="button" onclick="executeSearch()" data-i18n="btn_search">🔍 Search</button>
+    <button class="btn-clear-sm" id="clearBtn" type="button" data-i18n="btn_clear">Clear filters</button>
     <div style="margin-top:10px">
-      <button class="btn-clear-sm" id="recordAudioBtn" type="button" style="width:100%">🎤 Grabar audio</button>
+      <button class="btn-clear-sm" id="recordAudioBtn" type="button" style="width:100%" data-i18n="btn_record">🎤 Record audio</button>
     </div>
   </aside>
 
@@ -331,16 +336,16 @@ button{cursor:pointer}
     <!-- BARRA INFO / ORDENAR -->
     <div class="info-bar">
       <div class="info-bar-left">
-        <span class="result-count">Resultados (<strong id="resultCount">0</strong>)</span>
+        <span class="result-count"><span data-i18n="results">Results</span> (<strong id="resultCount">0</strong>)</span>
         <div id="expertAdviceInline" style="font-size:12px;color:#b45309;display:none"></div>
       </div>
       <div class="sort-row">
-        Ordenar por:
+        <span data-i18n="sort_by">Sort by:</span>
         <select id="sort" onchange="applyFilters()">
-          <option value="score">Recomendados</option>
-          <option value="price_asc">Menor precio</option>
-          <option value="price_desc">Mayor precio</option>
-          <option value="category">Categoría</option>
+          <option value="score" data-i18n="sort_recommended">Recommended</option>
+          <option value="price_asc" data-i18n="sort_price_asc">Lowest price</option>
+          <option value="price_desc" data-i18n="sort_price_desc">Highest price</option>
+          <option value="category" data-i18n="sort_category">Category</option>
         </select>
       </div>
     </div>
@@ -355,17 +360,17 @@ button{cursor:pointer}
 <div id="cartOverlay" onclick="closeCart()"></div>
 <div id="cartDrawer">
   <div class="drawer-head">
-    <h2>🛒 Mi Carrito</h2>
+    <h2 data-i18n="my_cart">🛒 My Cart</h2>
     <button class="drawer-close" onclick="closeCart()">✕</button>
   </div>
   <div class="drawer-body" id="cartItems"></div>
   <div class="drawer-footer">
     <div class="drawer-totals">
-      <div class="drawer-total-row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
-      <div class="drawer-total-row grand"><span>Total</span><span id="cartTotal">$0.00</span></div>
+      <div class="drawer-total-row"><span data-i18n="subtotal">Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+      <div class="drawer-total-row grand"><span data-i18n="total">Total</span><span id="cartTotal">$0.00</span></div>
     </div>
-    <button class="btn-checkout" id="checkoutBtn" type="button">Generar pedido</button>
-    <button class="btn-empty-cart" onclick="clearCart()">Vaciar carrito</button>
+    <button class="btn-checkout" id="checkoutBtn" type="button" data-i18n="btn_checkout">Place order</button>
+    <button class="btn-empty-cart" onclick="clearCart()" data-i18n="btn_empty_cart">Empty cart</button>
   </div>
 </div>
 
@@ -373,7 +378,7 @@ button{cursor:pointer}
 <div id="detailOverlay" onclick="if(event.target===this)closeDetail()">
   <div id="detailModal">
     <div class="detail-head">
-      <h2 id="detailTitle">Ficha de producto</h2>
+      <h2 id="detailTitle" data-i18n="product_info">Product details</h2>
       <button class="detail-close" onclick="closeDetail()">✕</button>
     </div>
     <div class="detail-body" id="detailBody"></div>
@@ -406,10 +411,26 @@ let rotated = [];  // orden visible en el grid (con rotación diaria)
 let cart = JSON.parse(localStorage.getItem("lcaCart_v2")||"[]");
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
+
+// Re-apply translations when locale changes (language switcher)
+window.addEventListener('i18n:change', function(e) {
+  const { country, currency } = e.detail;
+  const countryEl  = document.getElementById('country');
+  const currencyEl = document.getElementById('currency');
+  if (countryEl  && countryEl.querySelector(`option[value="${country}"]`))   { countryEl.value  = country;  }
+  if (currencyEl && currencyEl.querySelector(`option[value="${currency}"]`)) { currencyEl.value = currency; }
+  if (typeof renderResults === 'function') renderResults();
+});
+
 function money(val){
+  // Use I18N module when available for live exchange rates
+  if (window.I18N && window.I18N.formatPrice) {
+    const cur = document.getElementById("currency").value || window.I18N.getCurrency() || "USD";
+    return window.I18N.formatPrice(Number(val||0), cur);
+  }
   const cur = document.getElementById("currency").value||"USD";
   const rate = fx[cur]||1;
-  return new Intl.NumberFormat("es-419",{style:"currency",currency:cur,maximumFractionDigits:2}).format(Number(val||0)*rate);
+  return new Intl.NumberFormat("en-US",{style:"currency",currency:cur,maximumFractionDigits:2}).format(Number(val||0)*rate);
 }
 
 function basePrice(p){return Number(p.price_sale||p.unit_price||p.price_base||p.precio_numero||p.precio||p.price||10);}
@@ -480,7 +501,7 @@ const CAT_ICONS={"belleza":"💄","cocina":"🍳","hogar":"🏠","automocion":"�
 function buildCatStrip(){
   const cats=[...new Set(products.map(p=>p.category).filter(Boolean))].sort();
   const strip=document.getElementById("catStrip");
-  strip.innerHTML=`<a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span>Ver todo</span></a>`
+  strip.innerHTML=`<a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span>${(window.I18N&&window.I18N.t('view_all'))||'View all'}</span></a>`
     +cats.map(c=>`<a class="cat-chip" data-cat="${esc(c)}" href="#" onclick="filterCat(event,'${esc(c)}')"><div class="icon">${CAT_ICONS[c.toLowerCase()]||"📦"}</div><span>${esc(c)}</span></a>`).join("");
   // Fill category select
   const sel=document.getElementById("categoryFilter");
@@ -821,7 +842,7 @@ document.getElementById("recordAudioBtn")?.addEventListener("click",async e=>{
 
 // ── CARGA INICIAL ─────────────────────────────────────────────────────────
 async function loadProducts(){
-  document.getElementById("aiModeBadge").textContent="Cargando...";
+  document.getElementById("aiModeBadge").textContent=(window.I18N&&window.I18N.t('loading_catalog'))||'Loading...';
   let all=[];
   try{const d=await loadJson("/api/platform/public-products?limit=200");all=[...ProductAIGuard.extractProducts(d).map(normalize)];}catch(_){}
   try{const d=await loadJson("/assets/trending_products.json");all=mergeProducts(all,ProductAIGuard.extractProducts(d).map(normalize));}catch(_){}

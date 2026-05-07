@@ -1,24 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://tudominio.com/index.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/index.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/category/index.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/smart-search.html</loc><lastmod>2026-05-01</lastmod></url>
-<url><loc>https://tudominio.com/about.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/contact.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/privacy-policy.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/terms.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/affiliate-disclosure.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/editorial-policy.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/how-we-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/cookie-policy.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/dmca.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/portable-mini-blender-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/car-seat-gap-organizer-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/kitchen-food-saver-gadget-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/home-cable-organizer-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/blog/mini-vacuum-cleaner-review.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/category/kitchen.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/category/automotive.html</loc><lastmod>2026-04-30</lastmod></url>
-<url><loc>https://tudominio.com/category/home.html</loc><lastmod>2026-04-30</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- HOME -->
+  <url>
+    <loc>https://amatoty.onrender.com/</loc>
+    <lastmod>2026-05-07</lastmod>
+    <xhtml:link rel="alternate" hreflang="en"        href="https://amatoty.onrender.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="es"        href="https://amatoty.onrender.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt"        href="https://amatoty.onrender.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amatoty.onrender.com/"/>
+  </url>
+
+  <!-- SMART SEARCH -->
+  <url>
+    <loc>https://amatoty.onrender.com/smart-search.html</loc>
+    <lastmod>2026-05-07</lastmod>
+    <xhtml:link rel="alternate" hreflang="en"        href="https://amatoty.onrender.com/smart-search.html"/>
+    <xhtml:link rel="alternate" hreflang="es"        href="https://amatoty.onrender.com/smart-search.html"/>
+    <xhtml:link rel="alternate" hreflang="pt"        href="https://amatoty.onrender.com/smart-search.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amatoty.onrender.com/smart-search.html"/>
+  </url>
+
+  <!-- OYE BONITA -->
+  <url>
+    <loc>https://amatoty.onrender.com/oye-bonita.html</loc>
+    <lastmod>2026-05-07</lastmod>
+    <xhtml:link rel="alternate" hreflang="en"        href="https://amatoty.onrender.com/oye-bonita.html"/>
+    <xhtml:link rel="alternate" hreflang="es"        href="https://amatoty.onrender.com/oye-bonita.html"/>
+    <xhtml:link rel="alternate" hreflang="pt"        href="https://amatoty.onrender.com/oye-bonita.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amatoty.onrender.com/oye-bonita.html"/>
+  </url>
+
+  <!-- BLOG -->
+  <url>
+    <loc>https://amatoty.onrender.com/blog/index.html</loc>
+    <lastmod>2026-04-30</lastmod>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://amatoty.onrender.com/blog/index.html"/>
+  </url>
+  <url><loc>https://amatoty.onrender.com/blog/portable-mini-blender-review.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/blog/car-seat-gap-organizer-review.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/blog/kitchen-food-saver-gadget-review.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/blog/home-cable-organizer-review.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/blog/mini-vacuum-cleaner-review.html</loc><lastmod>2026-04-30</lastmod></url>
+
+  <!-- CATEGORIES -->
+  <url><loc>https://amatoty.onrender.com/category/index.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/category/kitchen.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/category/automotive.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/category/home.html</loc><lastmod>2026-04-30</lastmod></url>
+
+  <!-- STATIC PAGES -->
+  <url><loc>https://amatoty.onrender.com/about.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/contact.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/privacy-policy.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/terms.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/affiliate-disclosure.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/editorial-policy.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/how-we-review.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/cookie-policy.html</loc><lastmod>2026-04-30</lastmod></url>
+  <url><loc>https://amatoty.onrender.com/dmca.html</loc><lastmod>2026-04-30</lastmod></url>
+
 </urlset>
