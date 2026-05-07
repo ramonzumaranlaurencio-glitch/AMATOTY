@@ -2542,57 +2542,37 @@ def safepay_checkout():
     }
     print(f"[safepay] POST {safepay_url} body={body}", flush=True)
 
-    # Render free-tier cold start: reintentar hasta 3 veces esperando que el servicio despierte
-    _MAX_ATTEMPTS = 3
-    _RETRY_DELAYS = [0, 10, 20]  # segundos entre intentos
-
     try:
-        import requests as _requests
-        result = None
-        last_exc = None
-        for _attempt in range(_MAX_ATTEMPTS):
-            if _attempt > 0:
-                print(f"[safepay] Reintento {_attempt}/{_MAX_ATTEMPTS-1} (esperando {_RETRY_DELAYS[_attempt]}s)", flush=True)
-                import time as _time
-                _time.sleep(_RETRY_DELAYS[_attempt])
-                # Ping /health para despertar el servicio antes del reintento
-                try:
-                    _requests.get(f"{SAFEPAY_API_URL}/health", timeout=30)
-                except Exception:
-                    pass
-            try:
-                resp = _requests.post(safepay_url, json=body, timeout=60)
-                print(f"[safepay] Intento {_attempt+1}: HTTP {resp.status_code}", flush=True)
-                if resp.status_code in (502, 503, 504):
-                    last_exc = Exception(f"{resp.status_code} Gateway Error (cold start)")
-                    continue
-                resp.raise_for_status()
-                result = resp.json()
-                break
-            except _requests.exceptions.RequestException as _e:
-                last_exc = _e
-                print(f"[safepay] Intento {_attempt+1} fallido: {_e}", flush=True)
-        if result is None:
-            raise last_exc or Exception("SafePay no respondió después de varios intentos")
-    except ImportError:
-        # Fallback a urllib si requests no está instalado
-        payload_bytes = json.dumps(body).encode()
-        req = urllib.request.Request(
-            safepay_url,
-            data=payload_bytes,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=90) as r:
-            raw = r.read().decode()
-        print(f"[safepay] urllib response: {raw[:500]}", flush=True)
-        result = json.loads(raw)
+        try:
+            import requests as _requests
+            resp = _requests.post(safepay_url, json=body, timeout=12)
+            print(f"[safepay] HTTP {resp.status_code}", flush=True)
+            resp.raise_for_status()
+            raw_text = resp.text
+        except ImportError:
+            # Fallback a urllib si requests no está instalado
+            payload_bytes = json.dumps(body).encode()
+            req = urllib.request.Request(
+                safepay_url,
+                data=payload_bytes,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=12) as r:
+                raw_text = r.read().decode()
+
+        print(f"[safepay] response: {raw_text[:300]}", flush=True)
+        result = json.loads(raw_text)
     except Exception as exc:
         tb = traceback.format_exc()
         print(f"[safepay] ERROR: {exc}\n{tb}", flush=True)
+        # Detectar si la respuesta fue HTML en lugar de JSON
+        err_msg = str(exc)
+        if "token" in err_msg.lower() or "<html" in err_msg.lower():
+            err_msg = "El servicio SafePay no está disponible en este momento (respuesta inesperada). Intenta en unos segundos."
         return jsonify({
             "ok":          False,
-            "error":       f"SafePay no disponible: {exc}",
+            "error":       f"SafePay no disponible: {err_msg}",
             "safepay_url": safepay_url,
             "detail":      tb.splitlines()[-1] if tb else "",
         }), 503
