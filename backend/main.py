@@ -563,6 +563,25 @@ def oye_bonita_underscore():
     return _send_site_file("oye-bonita.html")
 
 
+# ── LANGUAGE ROUTES /en/ /es/ /pt/ ──────────────────────────────────────────
+@app.route("/en/")
+@app.route("/en/index.html")
+def locale_en():
+    return _send_site_file("en/index.html")
+
+
+@app.route("/es/")
+@app.route("/es/index.html")
+def locale_es():
+    return _send_site_file("es/index.html")
+
+
+@app.route("/pt/")
+@app.route("/pt/index.html")
+def locale_pt():
+    return _send_site_file("pt/index.html")
+
+
 @app.route("/health")
 @app.route("/healthz")
 def healthz():
@@ -673,6 +692,107 @@ def universal_product_schema():
             },
         }
     )
+
+
+@app.route("/api/locale", methods=["GET"])
+def api_locale():
+    """
+    Detect country, language and currency from the requester's IP.
+    Clients can pass ?ip=x.x.x.x to override (useful for testing).
+    Returns JSON: { country, language, currency, symbol, source }
+    """
+    _COUNTRY_LANG = {
+        "PE":"es","CO":"es","MX":"es","CL":"es","AR":"es","EC":"es",
+        "BO":"es","PY":"es","UY":"es","VE":"es","CR":"es","PA":"es",
+        "GT":"es","SV":"es","HN":"es","NI":"es","CU":"es","DO":"es","PR":"es",
+        "BR":"pt","PT":"pt","AO":"pt","MZ":"pt",
+        "US":"en","GB":"en","AU":"en","CA":"en","NZ":"en","IE":"en",
+    }
+    _COUNTRY_CURRENCY = {
+        "PE":"PEN","CO":"COP","MX":"MXN","CL":"CLP","AR":"ARS","EC":"USD",
+        "BO":"BOB","PY":"PYG","UY":"UYU","BR":"BRL","VE":"USD",
+        "US":"USD","GB":"GBP","AU":"AUD","CA":"CAD",
+    }
+    _CURRENCY_SYMBOLS = {
+        "USD":"$","PEN":"S/","COP":"$","MXN":"$","CLP":"$","ARS":"$",
+        "BOB":"Bs","PYG":"₲","UYU":"$","BRL":"R$","GBP":"£","EUR":"€",
+        "CAD":"CA$","AUD":"A$",
+    }
+
+    # Resolve client IP (trust X-Forwarded-For behind Render/Heroku proxy)
+    ip = request.args.get("ip") or ""
+    if not ip:
+        forwarded = request.headers.get("X-Forwarded-For", "")
+        ip = forwarded.split(",")[0].strip() if forwarded else request.remote_addr or ""
+
+    # Sanitise: only allow valid IP characters
+    import re as _re
+    ip = _re.sub(r"[^0-9a-fA-F:.]", "", ip)[:45]
+
+    country = "US"
+    source  = "default"
+
+    if ip and ip not in ("127.0.0.1", "::1", "localhost"):
+        try:
+            geo_req = urllib.request.Request(
+                f"https://ipapi.co/{ip}/json/",
+                headers={"User-Agent": "AMATOTY-Locale/1.0"},
+            )
+            with urllib.request.urlopen(geo_req, timeout=4) as resp:
+                geo = json.loads(resp.read().decode("utf-8"))
+            if geo.get("country_code") and not geo.get("error"):
+                country = geo["country_code"].upper()
+                source  = "ipapi"
+        except Exception:
+            pass
+
+    language = _COUNTRY_LANG.get(country, "en")
+    currency = _COUNTRY_CURRENCY.get(country, "USD")
+    symbol   = _CURRENCY_SYMBOLS.get(currency, "$")
+
+    return jsonify({
+        "country":  country,
+        "language": language,
+        "currency": currency,
+        "symbol":   symbol,
+        "source":   source,
+    })
+
+
+@app.route("/api/fx-rates", methods=["GET"])
+def api_fx_rates():
+    """
+    Proxy/cache for exchange rates from open.er-api.com (USD base).
+    Caches in-process for 24 h to avoid hammering the free tier.
+    """
+    cache_key = "_fx_rates_cache"
+    cache_ts_key = "_fx_rates_ts"
+    cached = getattr(app, cache_key, None)
+    cached_ts = getattr(app, cache_ts_key, 0)
+    import time
+    if cached and (time.time() - cached_ts) < 86400:
+        return jsonify(cached)
+    try:
+        req = urllib.request.Request(
+            "https://open.er-api.com/v6/latest/USD",
+            headers={"User-Agent": "AMATOTY-FX/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        setattr(app, cache_key, data)
+        setattr(app, cache_ts_key, time.time())
+        return jsonify(data)
+    except Exception as exc:
+        fallback = {
+            "result": "fallback",
+            "rates": {
+                "USD":1,"PEN":3.75,"COP":4100,"MXN":17.2,"CLP":950,
+                "ARS":1100,"BOB":6.9,"PYG":7400,"UYU":40,"BRL":5.2,
+                "GBP":0.79,"EUR":0.92,"CAD":1.37,"AUD":1.53,
+            },
+            "error": str(exc),
+        }
+        return jsonify(fallback), 200
 
 
 @app.route("/api/catalogo-belleza", methods=["GET"])
