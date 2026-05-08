@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
+# Script to write the redesigned docs/index.html
+import os
+
+HTML = '''\
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>AMATOTY – International Marketplace</title>
+<title>AMATOTY \u2013 International Marketplace</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="alternate" hreflang="en" href="en/">
 <link rel="alternate" hreflang="es" href="es/">
@@ -141,7 +146,7 @@
 
 <!-- HERO -->
 <div class="site-hero">
-  <img class="site-hero-img" src="assets/port-hero.png" alt="AMATOTY International Marketplace – global sourcing and product discovery">
+  <img class="site-hero-img" src="assets/port-hero.png" alt="AMATOTY International Marketplace \u2013 global sourcing and product discovery">
   <div class="site-hero-overlay"></div>
   <div class="site-hero-content">
     <span class="site-hero-eyebrow">International Marketplace</span>
@@ -183,20 +188,20 @@
 <script>
 (function(){
   var F=[
-    {img:"assets/home.jpg",title:"Oye Bonita – Diagnóstico Facial",text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",href:"oye-bonita.html"},
+    {img:"assets/home.jpg",title:"Oye Bonita \u2013 Diagn\u00f3stico Facial",text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",href:"oye-bonita.html"},
     {img:"assets/placeholder.png",title:"Smart Search con IA",text:"Busca cualquier producto con imagen, voz o texto. Resultados globales.",href:"smart-search.html"},
-    {img:"assets/kitchen.jpg",title:"Mini Blender Portátil",text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",href:"blog/portable-mini-blender-review.html"},
-    {img:"assets/placeholder.png",title:"Car Seat Gap Organizer",text:"Nunca más pierdas nada entre los asientos. Diseño universal.",href:"blog/car-seat-gap-organizer-review.html"},
-    {img:"assets/placeholder.png",title:"Kitchen Food Saver",text:"Conserva alimentos frescos más tiempo. Ahorra dinero.",href:"blog/kitchen-food-saver-gadget-review.html"},
-    {img:"assets/placeholder.png",title:"Mini Aspiradora de Escritorio",text:"Limpia teclado y espacios pequeños al instante. Sin cables.",href:"blog/mini-vacuum-cleaner-review.html"}
+    {img:"assets/kitchen.jpg",title:"Mini Blender Port\u00e1til",text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",href:"blog/portable-mini-blender-review.html"},
+    {img:"assets/placeholder.png",title:"Car Seat Gap Organizer",text:"Nunca m\u00e1s pierdas nada entre los asientos. Dise\u00f1o universal.",href:"blog/car-seat-gap-organizer-review.html"},
+    {img:"assets/placeholder.png",title:"Kitchen Food Saver",text:"Conserva alimentos frescos m\u00e1s tiempo. Ahorra dinero.",href:"blog/kitchen-food-saver-gadget-review.html"},
+    {img:"assets/placeholder.png",title:"Mini Aspiradora de Escritorio",text:"Limpia teclado y espacios peque\u00f1os al instante. Sin cables.",href:"blog/mini-vacuum-cleaner-review.html"}
   ];
   var AM=3800,tr=document.getElementById("vc3dTrack"),do_=document.getElementById("vc3dDots"),sc=document.getElementById("vc3dScene"),cu=0,ti=null,ty=null;
   function build(C){
     tr.innerHTML="";do_.innerHTML="";
     C.forEach(function(c,i){
       var e=document.createElement("div");e.className="vc3d-card";e.dataset.idx=i;
-      e.innerHTML="<img src='"+c.img+"' alt='"+c.title+"' loading='lazy' onerror="this.src='assets/placeholder.png'">"
-        +"<div class='vc3d-card-body'><h3>"+c.title+"</h3><p>"+c.text+"</p><a href='"+c.href+"'>Ver más &rarr;</a></div>";
+      e.innerHTML="<img src='"+c.img+"' alt='"+c.title+"' loading='lazy' onerror=\"this.src='assets/placeholder.png'\">"
+        +"<div class='vc3d-card-body'><h3>"+c.title+"</h3><p>"+c.text+"</p><a href='"+c.href+"'>Ver m\u00e1s &rarr;</a></div>";
       e.addEventListener("click",function(){goTo(i);});tr.appendChild(e);
       var d=document.createElement("span");d.className="vc3d-dot"+(i===0?" active":"");
       d.addEventListener("click",function(){goTo(i);});do_.appendChild(d);
@@ -386,3 +391,10 @@ document.getElementById("product-gallery").addEventListener("DOMSubtreeModified"
 <script src="assets/ai_chat.js" defer></script>
 </body>
 </html>
+'''
+
+out = os.path.join(os.path.dirname(__file__), 'docs', 'index.html')
+with open(out, 'w', encoding='utf-8', newline='\n') as f:
+    f.write(HTML)
+print(f'Written {len(HTML)} chars to {out}')
+print('Has BOM:', HTML.startswith('\ufeff'))
