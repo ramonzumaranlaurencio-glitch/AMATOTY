@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Script to write the redesigned docs/index.html
+# Script to write the redesigned docs/index.html — 4-carousel layout
 import os
 
 HTML = '''\
