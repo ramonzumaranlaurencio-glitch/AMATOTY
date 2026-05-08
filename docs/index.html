@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>AMATOTY – International Marketplace</title>
+<title>AMATOTY &ndash; International Marketplace</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="alternate" hreflang="en" href="en/">
 <link rel="alternate" hreflang="es" href="es/">
@@ -11,14 +11,15 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/i18n.js"></script>
 <style>
+/* ── TOKENS ── */
 :root{
   --navy:#0b2545;--navy-mid:#1d3d6e;--accent:#ff9900;--accent-dark:#c97a00;
   --accent-soft:#febd69;--white:#ffffff;--off-white:#f7f9fc;--muted:#5a6a7e;
   --border:#dde3ec;--ink:#0d1b2a;--radius:14px;
   --shadow:0 4px 24px rgba(11,37,69,.10);
 }
-/* HERO */
-.site-hero{position:relative;width:100%;min-height:520px;border-radius:20px;overflow:hidden;margin-bottom:48px;box-shadow:0 12px 48px rgba(11,37,69,.22);}
+/* ── HERO ── */
+.site-hero{position:relative;width:100%;min-height:520px;border-radius:20px;overflow:hidden;margin-bottom:40px;box-shadow:0 12px 48px rgba(11,37,69,.22);}
 .site-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%;}
 .site-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,37,69,.88) 0%,rgba(11,37,69,.65) 55%,rgba(11,37,69,.15) 100%);}
 .site-hero-content{position:relative;z-index:2;padding:64px 52px;max-width:640px;}
@@ -28,98 +29,117 @@
 .site-hero-cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#111;font-weight:900;font-size:1.05em;padding:14px 30px;border-radius:10px;text-decoration:none;box-shadow:0 4px 16px rgba(255,153,0,.40);transition:background .2s,transform .15s;}
 .site-hero-cta:hover{background:var(--accent-dark);color:#fff;transform:translateY(-2px);}
 .site-hero-sub{margin-top:14px;font-size:.9em;color:rgba(255,255,255,.6);}
-/* STATS BAR */
-.stats-bar{display:flex;gap:0;margin-bottom:48px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--white);box-shadow:var(--shadow);}
-.stat-item{flex:1;padding:22px 16px;text-align:center;border-right:1px solid var(--border);}
+/* ── STATS BAR ── */
+.stats-bar{display:flex;margin-bottom:40px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:var(--white);box-shadow:var(--shadow);}
+.stat-item{flex:1;padding:20px 12px;text-align:center;border-right:1px solid var(--border);}
 .stat-item:last-child{border-right:none;}
-.stat-num{font-size:2em;font-weight:900;color:var(--navy);line-height:1;}
-.stat-lbl{font-size:.82em;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
-/* SECTION */
+.stat-num{font-size:1.9em;font-weight:900;color:var(--navy);line-height:1;}
+.stat-lbl{font-size:.78em;color:var(--muted);margin-top:4px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+/* ── SECTION GENERIC ── */
 .sec-title{font-size:1.5em;font-weight:900;color:var(--navy);margin:0 0 6px;}
 .sec-sub{font-size:.95em;color:var(--muted);margin:0 0 28px;}
 .sec-header{text-align:center;margin-bottom:32px;}
 .sec-label{display:inline-block;background:var(--off-white);border:1px solid var(--border);color:var(--navy-mid);font-size:.75em;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:6px;margin-bottom:10px;}
-.site-section{padding:48px 0;border-top:1px solid var(--border);}
-/* PROCESS */
-.process-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
-.process-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;text-align:center;box-shadow:var(--shadow);}
-.process-icon{font-size:2em;margin-bottom:10px;}
-.process-card h3{font-size:.95em;font-weight:900;color:var(--navy);margin:0 0 6px;}
-.process-card p{font-size:.83em;color:var(--muted);margin:0;line-height:1.5;}
-/* CAROUSEL */
-.vc3d-wrap{position:relative;width:100%;max-width:900px;margin:0 auto;}
-.vc3d-scene{perspective:1100px;height:420px;position:relative;overflow:hidden;border-radius:16px;}
-.vc3d-track{position:absolute;inset:0;transform-style:preserve-3d;}
-.vc3d-card{position:absolute;left:50%;width:min(480px,88vw);transform:translateX(-50%);border-radius:16px;overflow:hidden;cursor:pointer;user-select:none;transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .45s,box-shadow .3s;background:var(--white);border:1px solid var(--border);}
-.vc3d-card img{width:100%;height:200px;object-fit:cover;display:block;}
-.vc3d-card-body{padding:16px 20px 18px;}
-.vc3d-card-body h3{margin:0 0 6px;font-size:1em;font-weight:800;color:var(--ink);}
-.vc3d-card-body p{margin:0;font-size:.88em;color:var(--muted);line-height:1.45;}
-.vc3d-card-body a{display:inline-block;margin-top:12px;background:var(--accent);color:#111;padding:7px 20px;border-radius:8px;font-size:.85em;font-weight:800;text-decoration:none;transition:background .2s;}
-.vc3d-card-body a:hover{background:var(--accent-dark);color:#fff;}
-.vc3d-nav{display:flex;justify-content:center;gap:12px;margin-top:16px;}
-.vc3d-btn{background:var(--navy);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:1.1em;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;}
-.vc3d-btn:hover{background:var(--accent);color:#111;}
-.vc3d-dots{display:flex;justify-content:center;gap:7px;margin-top:10px;}
-.vc3d-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s;}
-.vc3d-dot.active{background:var(--accent);}
-/* OYE BONITA */
-.ob-banner{display:flex;align-items:center;gap:40px;background:var(--navy);border-radius:var(--radius);padding:40px 44px;box-shadow:var(--shadow);}
+.site-section{padding:40px 0;border-top:1px solid var(--border);}
+/* ── DUAL CAROUSEL LAYOUT ── */
+.dual-section{padding:0;border-top:none;}
+.duo-row{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-bottom:28px;align-items:start;}
+.duo-row-label{font-size:.7em;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:var(--navy-mid);background:var(--off-white);border:1px solid var(--border);padding:3px 12px;border-radius:6px;display:inline-block;margin-bottom:10px;}
+/* ── LEFT: HORIZONTAL CAROUSEL ── */
+.hcar-wrap{position:relative;border-radius:16px;overflow:hidden;height:300px;background:var(--navy);box-shadow:var(--shadow);}
+.hcar-viewport{width:100%;height:100%;overflow:hidden;}
+.hcar-track{display:flex;height:100%;transition:transform .55s cubic-bezier(.4,0,.2,1);}
+.hcar-slide{flex:0 0 100%;height:100%;position:relative;cursor:pointer;}
+.hcar-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.hcar-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(11,37,69,.82) 0%,rgba(11,37,69,.35) 50%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:22px 24px;}
+.hcar-overlay h3{font-size:1.18em;font-weight:900;color:#fff;margin:0 0 5px;line-height:1.25;}
+.hcar-overlay p{font-size:.84em;color:rgba(255,255,255,.82);margin:0;}
+.hcar-prev,.hcar-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.32);backdrop-filter:blur(3px);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1em;z-index:10;transition:background .2s;display:flex;align-items:center;justify-content:center;}
+.hcar-prev{left:10px;}.hcar-next{right:10px;}
+.hcar-prev:hover,.hcar-next:hover{background:var(--accent);color:#111;}
+.hcar-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;}
+.hcar-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);border:none;cursor:pointer;padding:0;transition:background .2s;}
+.hcar-dot.active{background:var(--accent);}
+/* ── RIGHT: VERTICAL CAROUSEL ── */
+.vcar-wrap{display:flex;flex-direction:column;height:300px;}
+.vcar-viewport{flex:1;overflow:hidden;position:relative;border-radius:12px;}
+.vcar-track{position:absolute;width:100%;top:0;left:0;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+.vcar-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;height:130px;margin-bottom:10px;box-shadow:0 2px 10px rgba(11,37,69,.07);transition:box-shadow .2s,transform .2s;}
+.vcar-card:last-child{margin-bottom:0;}
+.vcar-card:hover{box-shadow:0 6px 22px rgba(11,37,69,.16);transform:translateX(3px);}
+.vcar-card img{width:110px;flex-shrink:0;object-fit:cover;}
+.vcar-card-body{padding:10px 12px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;flex:1;}
+.vcar-card-body h3{font-size:.84em;font-weight:800;color:var(--ink);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vcar-card-body p{font-size:.76em;color:var(--muted);margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vcar-card-body .vcar-hint{font-size:.72em;color:var(--accent-dark);font-weight:700;margin-top:5px;}
+.vcar-nav{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;}
+.vcar-btn{background:var(--navy);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:.85em;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.vcar-btn:hover{background:var(--accent);color:#111;}
+.vcar-dots{display:flex;gap:5px;}
+.vcar-dot{width:6px;height:6px;border-radius:50%;background:var(--border);border:none;cursor:pointer;padding:0;transition:background .2s;}
+.vcar-dot.active{background:var(--accent);}
+/* ── PRODUCT MODAL ── */
+.pmodal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;}
+.pmodal-box{background:var(--white);border-radius:20px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 28px 70px rgba(0,0,0,.32);position:relative;animation:pmodalIn .25s ease;}
+@keyframes pmodalIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+.pmodal-close{position:absolute;top:14px;right:14px;background:var(--off-white);border:none;border-radius:50%;width:34px;height:34px;font-size:1.2em;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1;color:var(--ink);}
+.pmodal-img{width:100%;height:220px;object-fit:cover;border-radius:20px 20px 0 0;display:block;}
+.pmodal-body{padding:22px 24px 26px;}
+.pmodal-body h3{font-size:1.12em;font-weight:900;color:var(--navy);margin:0 0 10px;}
+.pmodal-body p{font-size:.91em;color:var(--muted);line-height:1.65;margin:0 0 18px;}
+.pmodal-btn{display:inline-block;background:var(--accent);color:#111;font-weight:900;padding:11px 24px;border-radius:9px;text-decoration:none;font-size:.92em;transition:background .2s;}
+.pmodal-btn:hover{background:var(--accent-dark);color:#fff;}
+/* ── PROCESS ── */
+.process-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+.process-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;text-align:center;box-shadow:var(--shadow);}
+.process-icon{font-size:1.9em;margin-bottom:8px;}
+.process-card h3{font-size:.93em;font-weight:900;color:var(--navy);margin:0 0 5px;}
+.process-card p{font-size:.81em;color:var(--muted);margin:0;line-height:1.5;}
+/* ── OYE BONITA BANNER ── */
+.ob-banner{display:flex;align-items:center;gap:36px;background:var(--navy);border-radius:var(--radius);padding:36px 40px;box-shadow:var(--shadow);}
 .ob-banner-text{flex:1;color:#fff;}
-.ob-banner-text h2{font-size:1.6em;font-weight:900;margin:0 0 10px;color:#fff;}
-.ob-banner-text p{font-size:1em;color:rgba(255,255,255,.78);margin:0 0 22px;line-height:1.65;}
-.ob-banner-text a{display:inline-block;background:var(--accent);color:#111;font-weight:900;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:.95em;transition:background .2s;}
+.ob-banner-text h2{font-size:1.5em;font-weight:900;margin:0 0 10px;}
+.ob-banner-text p{font-size:.96em;color:rgba(255,255,255,.78);margin:0 0 20px;line-height:1.6;}
+.ob-banner-text a{display:inline-block;background:var(--accent);color:#111;font-weight:900;padding:11px 26px;border-radius:10px;text-decoration:none;font-size:.93em;transition:background .2s;}
 .ob-banner-text a:hover{background:var(--accent-dark);color:#fff;}
-.ob-banner-img{flex:0 0 220px;}
-.ob-banner-img img{width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.28);}
-/* BLOG */
-.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
-.blog-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;}
-.blog-card h3{font-size:1em;font-weight:800;color:var(--ink);margin:0 0 8px;}
-.blog-card p{font-size:.88em;color:var(--muted);margin:0 0 16px;flex:1;line-height:1.5;}
-.blog-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.76em;font-weight:900;margin-bottom:10px;}
+.ob-banner-img{flex:0 0 200px;}
+.ob-banner-img img{width:100%;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.26);}
+/* ── BLOG ── */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
+.blog-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;}
+.blog-card h3{font-size:.97em;font-weight:800;color:var(--ink);margin:0 0 8px;}
+.blog-card p{font-size:.86em;color:var(--muted);margin:0 0 14px;flex:1;line-height:1.5;}
+.blog-badge{display:inline-block;padding:3px 9px;border-radius:6px;font-size:.75em;font-weight:900;margin-bottom:8px;}
 .badge-red{background:#fee2e2;color:#991b1b;}
 .badge-orange{background:#ffedd5;color:#9a3412;}
 .badge-green{background:#dcfce7;color:#166534;}
-.blog-card a.btn-sm{display:inline-block;background:var(--off-white);border:1px solid var(--border);color:var(--navy);padding:7px 16px;border-radius:8px;font-size:.84em;font-weight:700;text-decoration:none;transition:background .2s;align-self:flex-start;}
+.blog-card a.btn-sm{display:inline-block;background:var(--off-white);border:1px solid var(--border);color:var(--navy);padding:7px 15px;border-radius:8px;font-size:.83em;font-weight:700;text-decoration:none;transition:background .2s;align-self:flex-start;}
 .blog-card a.btn-sm:hover{background:var(--navy);color:#fff;}
-/* TRUST */
-.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
-.trust-item{display:flex;align-items:flex-start;gap:14px;}
-.trust-icon{font-size:1.6em;margin-top:2px;flex-shrink:0;}
-.trust-item h4{font-size:.93em;font-weight:900;color:var(--navy);margin:0 0 4px;}
-.trust-item p{font-size:.84em;color:var(--muted);margin:0;line-height:1.45;}
-/* TESTIMONIAL */
-.testimonial-card{background:var(--navy);color:rgba(255,255,255,.9);border-radius:var(--radius);padding:32px 36px;text-align:center;box-shadow:var(--shadow);font-style:italic;font-size:1.08em;line-height:1.7;}
-.testimonial-card cite{display:block;margin-top:14px;font-style:normal;font-size:.83em;color:var(--accent-soft);font-weight:700;}
-/* COMPARADOR */
-.comparador{width:100%;border-collapse:collapse;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
-.comparador th{background:var(--navy);color:#fff;padding:12px 14px;font-size:.85em;letter-spacing:.06em;text-transform:uppercase;}
-.comparador td{padding:11px 14px;font-size:.92em;border-top:1px solid var(--border);}
-.comparador tr:nth-child(even) td{background:var(--off-white);}
-.comparador .highlight td{background:#fff7e6;font-weight:700;}
-/* CTA FINAL */
-.cta-final{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:var(--radius);padding:48px 40px;text-align:center;box-shadow:var(--shadow);}
-.cta-final h2{font-size:1.7em;font-weight:900;color:#fff;margin:0 0 10px;}
-.cta-final p{font-size:1em;color:rgba(255,255,255,.75);margin:0 0 26px;}
-.cta-final-btns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;}
-.cta-btn-primary{display:inline-block;background:var(--accent);color:#111;font-weight:900;padding:13px 30px;border-radius:10px;text-decoration:none;font-size:.98em;transition:background .2s;}
+/* ── TRUST ── */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:14px;}
+.trust-item{display:flex;align-items:flex-start;gap:12px;}
+.trust-icon{font-size:1.5em;margin-top:2px;flex-shrink:0;}
+.trust-item h4{font-size:.91em;font-weight:900;color:var(--navy);margin:0 0 3px;}
+.trust-item p{font-size:.82em;color:var(--muted);margin:0;line-height:1.45;}
+/* ── TESTIMONIAL ── */
+.testimonial-card{background:var(--navy);color:rgba(255,255,255,.9);border-radius:var(--radius);padding:30px 34px;text-align:center;box-shadow:var(--shadow);font-style:italic;font-size:1.05em;line-height:1.72;}
+.testimonial-card cite{display:block;margin-top:12px;font-style:normal;font-size:.82em;color:var(--accent-soft);font-weight:700;}
+/* ── CTA FINAL ── */
+.cta-final{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:var(--radius);padding:44px 38px;text-align:center;box-shadow:var(--shadow);}
+.cta-final h2{font-size:1.65em;font-weight:900;color:#fff;margin:0 0 10px;}
+.cta-final p{font-size:.98em;color:rgba(255,255,255,.74);margin:0 0 24px;}
+.cta-final-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+.cta-btn-primary{display:inline-block;background:var(--accent);color:#111;font-weight:900;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:.96em;transition:background .2s;}
 .cta-btn-primary:hover{background:var(--accent-dark);color:#fff;}
-.cta-btn-ghost{display:inline-block;border:2px solid rgba(255,255,255,.35);color:#fff;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:.98em;transition:border-color .2s,background .2s;}
+.cta-btn-ghost{display:inline-block;border:2px solid rgba(255,255,255,.35);color:#fff;font-weight:700;padding:11px 26px;border-radius:10px;text-decoration:none;font-size:.96em;transition:border-color .2s,background .2s;}
 .cta-btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.10);}
-/* RESPONSIVE */
-@media(max-width:700px){
-  .site-hero{min-height:380px;}
-  .site-hero-content{padding:38px 24px;}
-  .site-hero-content h1{font-size:1.7em;}
-  .stats-bar{flex-direction:column;}
-  .stat-item{border-right:none;border-bottom:1px solid var(--border);}
-  .stat-item:last-child{border-bottom:none;}
-  .vc3d-scene{height:370px;}
-  .vc3d-card img{height:160px;}
-  .ob-banner{flex-direction:column;padding:28px 22px;gap:22px;}
-  .ob-banner-img{flex:none;width:140px;margin:0 auto;}
-  .cta-final{padding:30px 20px;}
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .site-hero{min-height:360px;}.site-hero-content{padding:36px 22px;}.site-hero-content h1{font-size:1.65em;}
+  .stats-bar{flex-direction:column;}.stat-item{border-right:none;border-bottom:1px solid var(--border);}.stat-item:last-child{border-bottom:none;}
+  .duo-row{grid-template-columns:1fr;}.vcar-wrap{height:auto;}.vcar-viewport{height:290px;}
+  .ob-banner{flex-direction:column;padding:26px 20px;gap:20px;}.ob-banner-img{flex:none;width:130px;margin:0 auto;}
+  .hcar-wrap{height:240px;}.cta-final{padding:28px 18px;}
 }
 </style>
 <script src="assets/product_ai_guard.js"></script>
@@ -139,20 +159,20 @@
 </nav></header>
 <main>
 
-<!-- HERO -->
+<!-- ═══════════ HERO ═══════════ -->
 <div class="site-hero">
-  <img class="site-hero-img" src="assets/port-hero.png" alt="AMATOTY International Marketplace – global sourcing and product discovery">
+  <img class="site-hero-img" src="assets/port-hero.png" alt="AMATOTY International Marketplace &ndash; global sourcing">
   <div class="site-hero-overlay"></div>
   <div class="site-hero-content">
     <span class="site-hero-eyebrow">International Marketplace</span>
     <h1>Productos reales,<br>analizados con criterio</h1>
-    <p>Encontramos los mejores productos del mercado global &mdash; probados, comparados y verificados. Sin publicidad enga&ntilde;osa, solo lo que realmente vale la pena.</p>
+    <p>Encontramos los mejores productos del mercado global &mdash; probados, comparados y verificados. Sin publicidad enga&ntilde;osa.</p>
     <a href="smart-search.html" class="site-hero-cta">&#128269; Buscar con Smart Search</a>
     <p class="site-hero-sub">M&aacute;s de 500 productos evaluados &middot; Env&iacute;o internacional disponible</p>
   </div>
 </div>
 
-<!-- STATS BAR -->
+<!-- ═══════════ STATS ═══════════ -->
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-num">500+</div><div class="stat-lbl">Productos evaluados</div></div>
   <div class="stat-item"><div class="stat-num">3</div><div class="stat-lbl">Idiomas</div></div>
@@ -162,76 +182,305 @@
 
 <div id="catalogBannerCarousel" data-banner-carousel data-banner-fallback="assets/productos.json" data-banner-max="8" style="display:none"></div>
 
-<!-- CAROUSEL VERTICAL 3D -->
-<div class="site-section">
-  <div class="sec-header">
-    <span class="sec-label">Selecci&oacute;n del mes</span>
-    <h2 class="sec-title">Productos destacados</h2>
-    <p class="sec-sub">Curados por nuestro equipo. Cambia la selecci&oacute;n desde el panel Admin &rarr; Productos &rarr; Carruseles por P&aacute;gina.</p>
+<!-- ═══════════ 4-CARRUSEL LAYOUT ═══════════ -->
+<div class="dual-section site-section">
+
+  <!-- ── ROW 1: EMPRESAS ── -->
+  <div class="duo-row">
+    <!-- LEFT: Carrusel horizontal EMPRESAS -->
+    <div>
+      <div class="duo-row-label">EMPRESAS</div>
+      <div class="hcar-wrap" id="hcar-emp">
+        <div class="hcar-viewport">
+          <div class="hcar-track" id="hcar-emp-track"></div>
+        </div>
+        <button class="hcar-prev" id="hcar-emp-prev" aria-label="Anterior">&#10094;</button>
+        <button class="hcar-next" id="hcar-emp-next" aria-label="Siguiente">&#10095;</button>
+        <div class="hcar-dots" id="hcar-emp-dots"></div>
+      </div>
+    </div>
+    <!-- RIGHT: Carrusel vertical EMPRESAS -->
+    <div>
+      <div class="duo-row-label">Productos B2B</div>
+      <div class="vcar-wrap" id="vcar-emp">
+        <div class="vcar-viewport">
+          <div class="vcar-track" id="vcar-emp-track"></div>
+        </div>
+        <div class="vcar-nav">
+          <button class="vcar-btn" id="vcar-emp-prev" aria-label="Anterior">&#9650;</button>
+          <div class="vcar-dots" id="vcar-emp-dots"></div>
+          <button class="vcar-btn" id="vcar-emp-next" aria-label="Siguiente">&#9660;</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="vc3d-wrap" id="vc3d">
-    <div class="vc3d-scene" id="vc3dScene" aria-label="Carrusel de productos destacados" role="region">
-      <div class="vc3d-track" id="vc3dTrack"></div>
+
+  <!-- ── ROW 2: PERSONAS ── -->
+  <div class="duo-row">
+    <!-- LEFT: Carrusel horizontal PERSONAS -->
+    <div>
+      <div class="duo-row-label">PERSONAS</div>
+      <div class="hcar-wrap" id="hcar-per">
+        <div class="hcar-viewport">
+          <div class="hcar-track" id="hcar-per-track"></div>
+        </div>
+        <button class="hcar-prev" id="hcar-per-prev" aria-label="Anterior">&#10094;</button>
+        <button class="hcar-next" id="hcar-per-next" aria-label="Siguiente">&#10095;</button>
+        <div class="hcar-dots" id="hcar-per-dots"></div>
+      </div>
     </div>
-    <div class="vc3d-nav">
-      <button class="vc3d-btn" id="vc3dPrev" aria-label="Anterior">&#9650;</button>
-      <button class="vc3d-btn" id="vc3dNext" aria-label="Siguiente">&#9660;</button>
+    <!-- RIGHT: Carrusel vertical PERSONAS -->
+    <div>
+      <div class="duo-row-label">Productos para ti</div>
+      <div class="vcar-wrap" id="vcar-per">
+        <div class="vcar-viewport">
+          <div class="vcar-track" id="vcar-per-track"></div>
+        </div>
+        <div class="vcar-nav">
+          <button class="vcar-btn" id="vcar-per-prev" aria-label="Anterior">&#9650;</button>
+          <div class="vcar-dots" id="vcar-per-dots"></div>
+          <button class="vcar-btn" id="vcar-per-next" aria-label="Siguiente">&#9660;</button>
+        </div>
+      </div>
     </div>
-    <div class="vc3d-dots" id="vc3dDots"></div>
+  </div>
+
+</div><!-- /dual-section -->
+
+<!-- ═══════════ PRODUCT DESCRIPTION MODAL ═══════════ -->
+<div class="pmodal-overlay" id="pmodal" style="display:none" role="dialog" aria-modal="true">
+  <div class="pmodal-box">
+    <button class="pmodal-close" id="pmodalClose" aria-label="Cerrar">&times;</button>
+    <img class="pmodal-img" id="pmodalImg" src="" alt="">
+    <div class="pmodal-body">
+      <h3 id="pmodalTitle"></h3>
+      <p id="pmodalDesc"></p>
+      <a id="pmodalLink" href="#" class="pmodal-btn" target="_blank" rel="noopener noreferrer">Ver producto &rarr;</a>
+    </div>
   </div>
 </div>
+
 <script>
+/* ============================================================
+   CAROUSEL ENGINE
+   ============================================================ */
 (function(){
-  var F=[
-    {img:"assets/home.jpg",title:"Oye Bonita – Diagnóstico Facial",text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",href:"oye-bonita.html"},
-    {img:"assets/placeholder.png",title:"Smart Search con IA",text:"Busca cualquier producto con imagen, voz o texto. Resultados globales.",href:"smart-search.html"},
-    {img:"assets/kitchen.jpg",title:"Mini Blender Portátil",text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",href:"blog/portable-mini-blender-review.html"},
-    {img:"assets/placeholder.png",title:"Car Seat Gap Organizer",text:"Nunca más pierdas nada entre los asientos. Diseño universal.",href:"blog/car-seat-gap-organizer-review.html"},
-    {img:"assets/placeholder.png",title:"Kitchen Food Saver",text:"Conserva alimentos frescos más tiempo. Ahorra dinero.",href:"blog/kitchen-food-saver-gadget-review.html"},
-    {img:"assets/placeholder.png",title:"Mini Aspiradora de Escritorio",text:"Limpia teclado y espacios pequeños al instante. Sin cables.",href:"blog/mini-vacuum-cleaner-review.html"}
-  ];
-  var AM=3800,tr=document.getElementById("vc3dTrack"),do_=document.getElementById("vc3dDots"),sc=document.getElementById("vc3dScene"),cu=0,ti=null,ty=null;
-  function build(C){
-    tr.innerHTML="";do_.innerHTML="";
-    C.forEach(function(c,i){
-      var e=document.createElement("div");e.className="vc3d-card";e.dataset.idx=i;
-      e.innerHTML="<img src='"+c.img+"' alt='"+c.title+"' loading='lazy' onerror="this.src='assets/placeholder.png'">"
-        +"<div class='vc3d-card-body'><h3>"+c.title+"</h3><p>"+c.text+"</p><a href='"+c.href+"'>Ver más &rarr;</a></div>";
-      e.addEventListener("click",function(){goTo(i);});tr.appendChild(e);
-      var d=document.createElement("span");d.className="vc3d-dot"+(i===0?" active":"");
-      d.addEventListener("click",function(){goTo(i);});do_.appendChild(d);
-    });
-    var aC=tr.querySelectorAll(".vc3d-card"),aD=do_.querySelectorAll(".vc3d-dot"),tot=C.length;
-    function lay(){
-      var h=sc.offsetHeight,g=h/2.6;
-      aC.forEach(function(card,i){
-        var d=i-cu;if(d>tot/2)d-=tot;if(d<-tot/2)d+=tot;
-        var a=Math.abs(d),act=d===0;
-        card.style.transform="translateX(-50%) translateY("+(h/2-110+d*g)+"px) translateZ("+(act?0:-a*90)+"px) scale("+(act?1:Math.max(.62,1-a*.18))+") rotateY("+(act?0:(d>0?6:-6))+"deg)";
-        card.style.opacity=act?1:Math.max(.15,1-a*.35);
-        card.style.zIndex=100-a*10;
-        card.style.boxShadow=act?"0 16px 48px rgba(11,37,69,.28)":"0 2px 12px rgba(0,0,0,.07)";
-      });
-      aD.forEach(function(dot,i){dot.classList.toggle("active",i===cu);});
-    }
-    function goTo(i){cu=((i%tot)+tot)%tot;lay();}
-    function nxt(){goTo(cu+1);}function prv(){goTo(cu-1);}
-    document.getElementById("vc3dNext").onclick=function(){nxt();rst();};
-    document.getElementById("vc3dPrev").onclick=function(){prv();rst();};
-    sc.addEventListener("touchstart",function(e){ty=e.touches[0].clientY;},{passive:true});
-    sc.addEventListener("touchend",function(e){if(ty===null)return;var dy=e.changedTouches[0].clientY-ty;if(Math.abs(dy)>40){dy<0?nxt():prv();rst();}ty=null;},{passive:true});
-    document.addEventListener("keydown",function(e){if(e.key==="ArrowDown"){nxt();rst();}if(e.key==="ArrowUp"){prv();rst();}});
-    function strt(){ti=setInterval(nxt,AM);}function rst(){clearInterval(ti);strt();}
-    lay();strt();window.addEventListener("resize",lay);
+  "use strict";
+
+  /* ── Open / close modal ── */
+  var overlay = document.getElementById("pmodal");
+  var pImg    = document.getElementById("pmodalImg");
+  var pTitle  = document.getElementById("pmodalTitle");
+  var pDesc   = document.getElementById("pmodalDesc");
+  var pLink   = document.getElementById("pmodalLink");
+
+  function showModal(img, title, desc, href){
+    pImg.src   = img   || "assets/placeholder.png";
+    pImg.alt   = title || "";
+    pTitle.textContent = title || "";
+    pDesc.textContent  = desc  || "";
+    pLink.href = href  || "#";
+    pLink.style.display = href && href !== "#" ? "" : "none";
+    overlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
   }
+  function closeModal(){
+    overlay.style.display = "none";
+    document.body.style.overflow = "";
+  }
+  document.getElementById("pmodalClose").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if(e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeModal(); });
+
+  /* ── Build HORIZONTAL carousel ── */
+  function buildHCar(trackId, prevId, nextId, dotsId, slides, autoMs){
+    var track = document.getElementById(trackId);
+    var dotsEl= document.getElementById(dotsId);
+    var cur   = 0;
+    var total = slides.length;
+    var timer = null;
+
+    slides.forEach(function(s, i){
+      var slide = document.createElement("div");
+      slide.className = "hcar-slide";
+      slide.innerHTML =
+        "<img src='" + s.img + "' alt='" + (s.title||"") + "' loading='lazy' onerror="this.src='assets/placeholder.png'">" +
+        "<div class='hcar-overlay'>" +
+          "<h3>" + (s.title||"") + "</h3>" +
+          "<p>" + (s.text||"") + "</p>" +
+        "</div>";
+      slide.addEventListener("click", function(){
+        showModal(s.img, s.title, s.desc || s.text, s.href);
+      });
+      track.appendChild(slide);
+
+      var dot = document.createElement("button");
+      dot.className = "hcar-dot" + (i===0 ? " active" : "");
+      dot.addEventListener("click", function(){ goTo(i); rst(); });
+      dotsEl.appendChild(dot);
+    });
+
+    function layout(){
+      track.style.transform = "translateX(-" + (cur * 100) + "%)";
+      var allDots = dotsEl.querySelectorAll(".hcar-dot");
+      allDots.forEach(function(d,i){ d.classList.toggle("active", i===cur); });
+    }
+    function goTo(i){ cur = ((i % total) + total) % total; layout(); }
+    function nxt(){ goTo(cur+1); }
+    function prv(){ goTo(cur-1); }
+    function strt(){ timer = setInterval(nxt, autoMs || 4200); }
+    function rst(){ clearInterval(timer); strt(); }
+
+    document.getElementById(prevId).addEventListener("click", function(){ prv(); rst(); });
+    document.getElementById(nextId).addEventListener("click", function(){ nxt(); rst(); });
+
+    layout();
+    strt();
+  }
+
+  /* ── Build VERTICAL carousel (2 cards visible) ── */
+  function buildVCar(trackId, prevId, nextId, dotsId, cards, autoMs){
+    var track  = document.getElementById(trackId);
+    var dotsEl = document.getElementById(dotsId);
+    var VISIBLE = 2;
+    var cur    = 0;
+    var total  = cards.length;
+    var timer  = null;
+    var CARD_H = 140; // px
+
+    cards.forEach(function(c, i){
+      var card = document.createElement("div");
+      card.className = "vcar-card";
+      card.innerHTML =
+        "<img src='" + (c.img||"assets/placeholder.png") + "' alt='" + (c.title||"") + "' loading='lazy' onerror="this.src='assets/placeholder.png'">" +
+        "<div class='vcar-card-body'>" +
+          "<h3>" + (c.title||"") + "</h3>" +
+          "<p>" + (c.text||"") + "</p>" +
+          "<span class='vcar-hint'>Ver descripci&oacute;n &rarr;</span>" +
+        "</div>";
+      card.addEventListener("click", function(){
+        showModal(c.img, c.title, c.desc || c.text, c.href);
+      });
+      track.appendChild(card);
+
+      var dot = document.createElement("button");
+      dot.className = "vcar-dot" + (i===0 ? " active" : "");
+      dot.addEventListener("click", function(){ goTo(i); rst(); });
+      dotsEl.appendChild(dot);
+    });
+
+    function layout(){
+      var offset = cur * (CARD_H + 10);
+      track.style.transform = "translateY(-" + offset + "px)";
+      var allDots = dotsEl.querySelectorAll(".vcar-dot");
+      allDots.forEach(function(d,i){ d.classList.toggle("active", i===cur); });
+    }
+    function goTo(i){ cur = ((i % total) + total) % total; layout(); }
+    function nxt(){ goTo(cur+1); }
+    function prv(){ goTo(cur-1); }
+    function strt(){ timer = setInterval(nxt, autoMs || 3600); }
+    function rst(){ clearInterval(timer); strt(); }
+
+    document.getElementById(prevId).addEventListener("click", function(){ prv(); rst(); });
+    document.getElementById(nextId).addEventListener("click", function(){ nxt(); rst(); });
+
+    layout();
+    strt();
+  }
+
+  /* ── DATA ── */
+  var EMP_SLIDES = [
+    {
+      img:"assets/EMPRESAS.png",
+      title:"Simplificamos tu cadena de suministro",
+      text:"Logística internacional para empresas de todos los tamaños.",
+      desc:"Nos encargamos de todo el proceso logístico para que tu empresa reciba lo que necesita, cuando lo necesita. Destinatarios seguros, envío eficiente, entrega garantizada. Tú enfócate en crecer, nosotros movemos tu operación.",
+      href:"contact.html"
+    },
+    {
+      img:"assets/EMPRESAS.png",
+      title:"Aprovisionamiento global",
+      text:"Encontramos los productos que tu empresa necesita.",
+      desc:"Accede a proveedores verificados de todo el mundo. Optimiza tus costos de abastecimiento con análisis comparativo y sin intermediarios innecesarios.",
+      href:"category/index.html"
+    },
+    {
+      img:"assets/EMPRESAS.png",
+      title:"Entrega garantizada",
+      text:"Cumplimiento en tiempos, calidad y documentación.",
+      desc:"Cada envío cuenta con seguimiento en tiempo real, documentación completa y soporte post-entrega. Tu operación nunca se detiene.",
+      href:"contact.html"
+    }
+  ];
+
+  var PER_SLIDES = [
+    {
+      img:"assets/PERSONAS.png",
+      title:"Los sabores, marcas y productos de Sudamérica",
+      text:"Más cerca de ti — productos auténticos de tu país.",
+      desc:"Productos originales de Sudamérica disponibles para todo el mundo. Pide hoy y recibe donde estés. Compra segura, envío a todo el mundo, atención personalizada.",
+      href:"category/index.html"
+    },
+    {
+      img:"assets/PERSONAS.png",
+      title:"Los mejores gadgets para tu hogar",
+      text:"Probados por expertos, recomendados con criterio.",
+      desc:"Desde mini blenders portátiles hasta organizadores inteligentes, seleccionamos solo lo que realmente vale la pena. Envío a todo el mundo.",
+      href:"category/kitchen.html"
+    },
+    {
+      img:"assets/PERSONAS.png",
+      title:"Oye Bonita &mdash; Diagnóstico Facial IA",
+      text:"Cuidado personal con inteligencia artificial.",
+      desc:"Sube tu foto y recibe un diagnóstico facial personalizado. Tipo de piel, rutina de mañana y noche, y productos recomendados. Completamente gratis.",
+      href:"oye-bonita.html"
+    }
+  ];
+
+  var EMP_VCARDS = [
+    {img:"assets/placeholder.png", title:"Home Cable Organizer",  text:"Organiza cables en tu empresa u oficina. Diseño profesional.",  desc:"El Home Cable Organizer mantiene tu espacio de trabajo libre de enredos. Compatible con cables de hasta 10mm. Material de alta durabilidad.", href:"blog/home-cable-organizer-review.html"},
+    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Aspira residuos en teclados y equipos de oficina.",               desc:"Potente aspiradora de escritorio sin cables. Ideal para mantener limpios los equipos de cómputo y áreas de trabajo. Incluye accesorios.", href:"blog/mini-vacuum-cleaner-review.html"},
+    {img:"assets/placeholder.png", title:"Car Seat Gap Organizer",text:"Mantiene el vehículo corporativo organizado.",                  desc:"Soluciona el espacio entre asientos de cualquier vehículo. Diseño universal, fácil instalación, sin herramientas. Ideal para flotas.", href:"blog/car-seat-gap-organizer-review.html"},
+    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos frescos en la cocina corporativa.",            desc:"Reduce el desperdicio de alimentos hasta un 30%. Apto para refrigerador, fácil de limpiar, compatible con contenedores estándar.", href:"blog/kitchen-food-saver-gadget-review.html"}
+  ];
+
+  var PER_VCARDS = [
+    {img:"assets/placeholder.png", title:"Portable Mini Blender", text:"Batidos en cualquier lugar. USB recargable, 300ml.", desc:"El Mini Blender portátil es compacto, recargable vía USB y silencioso. Perfecto para smoothies, batidos de proteína y jugos en cualquier lugar. Capacidad 300ml, cuchillas de acero inox.", href:"blog/portable-mini-blender-review.html"},
+    {img:"assets/home.jpg",        title:"Oye Bonita IA",         text:"Diagnóstico facial personalizado con inteligencia artificial.", desc:"Sube tu foto, descubre tu tipo de piel y recibe una rutina de belleza completa. Ingredientes recomendados, maquillaje sugerido y productos específicos para ti. Completamente gratis.", href:"oye-bonita.html"},
+    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Limpia teclado y escritorio al instante, sin cables.", desc:"Potente aspiradora de escritorio portátil. Sin cables, batería recargable, accesorios incluidos. Ideal para laptop, teclado y espacios pequeños.", href:"blog/mini-vacuum-cleaner-review.html"},
+    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos más tiempo y ahorra dinero.",   desc:"El Kitchen Food Saver mantiene tus alimentos frescos hasta 3 veces más tiempo. Compatible con la mayoría de contenedores. Fácil de usar y limpiar.", href:"blog/kitchen-food-saver-gadget-review.html"}
+  ];
+
+  /* ── Init horizontal carousels ── */
+  buildHCar("hcar-emp-track","hcar-emp-prev","hcar-emp-next","hcar-emp-dots", EMP_SLIDES, 5000);
+  buildHCar("hcar-per-track","hcar-per-prev","hcar-per-next","hcar-per-dots", PER_SLIDES, 4500);
+
+  /* ── Init vertical carousels — load from carousels.json or use defaults ── */
+  function initVerticals(remoteData){
+    var homeCards = [];
+    if(remoteData && Array.isArray(remoteData.home) && remoteData.home.length){
+      homeCards = remoteData.home.map(function(c){
+        return {img:c.img||"assets/placeholder.png", title:c.title||"", text:c.text||"", desc:c.text||"", href:c.href||"#"};
+      });
+    }
+    var empV = homeCards.length ? homeCards.slice(0, Math.ceil(homeCards.length/2)) : EMP_VCARDS;
+    var perV = homeCards.length ? homeCards.slice(Math.ceil(homeCards.length/2))   : PER_VCARDS;
+    if(!perV.length) perV = PER_VCARDS;
+    if(!empV.length) empV = EMP_VCARDS;
+
+    buildVCar("vcar-emp-track","vcar-emp-prev","vcar-emp-next","vcar-emp-dots", empV, 4000);
+    buildVCar("vcar-per-track","vcar-per-prev","vcar-per-next","vcar-per-dots", perV, 3800);
+  }
+
   fetch("assets/carousels.json")
-    .then(function(r){return r.ok?r.json():Promise.reject();})
-    .then(function(data){var h=(data.home||[]).map(function(c){return{img:c.img||"assets/placeholder.png",title:c.title||"",text:c.text||"",href:c.href||"#"};});build(h.length?h:F);})
-    .catch(function(){build(F);});
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(data){ initVerticals(data); })
+    .catch(function(){ initVerticals(null); });
+
 })();
 </script>
 
-<!-- COMO EVALUAMOS -->
+<!-- ═══════════ CÓMO EVALUAMOS ═══════════ -->
 <div class="site-section">
   <div class="sec-header">
     <span class="sec-label">Nuestro m&eacute;todo</span>
@@ -247,17 +496,7 @@
   </div>
 </div>
 
-<!-- TOP PICKS -->
-<div class="site-section">
-  <div class="sec-header">
-    <span class="sec-label">Top del mes</span>
-    <h2 class="sec-title">Top picks del mes</h2>
-    <p class="sec-sub">Los productos m&aacute;s valorados por nuestra comunidad.</p>
-  </div>
-  <div id="top-picks-list" class="grid"></div>
-</div>
-
-<!-- OYE BONITA -->
+<!-- ═══════════ OYE BONITA ═══════════ -->
 <div class="site-section">
   <div class="ob-banner">
     <div class="ob-banner-text">
@@ -271,39 +510,7 @@
   </div>
 </div>
 
-<!-- PRO RECOMMENDATION -->
-<div class="site-section" style="display:none" id="pro-section">
-  <div class="sec-header">
-    <span class="sec-label">Recomendaci&oacute;n PRO</span>
-    <h2 class="sec-title">Soluci&oacute;n real a un problema actual</h2>
-  </div>
-  <div id="pro-recommendation" class="producto-recomendado" style="max-width:480px;margin:0 auto;"></div>
-</div>
-<script>
-PlatformCatalog.hydrateHome({fallbackUrl:"assets/trending_products.json",limit:24});
-document.getElementById("pro-recommendation").addEventListener("DOMSubtreeModified",function(){
-  if(this.children.length>0)document.getElementById("pro-section").style.display="";
-},{once:true});
-</script>
-
-<!-- COMPARADOR -->
-<div class="site-section">
-  <div class="sec-header">
-    <span class="sec-label">Comparativa r&aacute;pida</span>
-    <h2 class="sec-title">&iquest;Cu&aacute;l producto es para ti?</h2>
-  </div>
-  <table class="comparador">
-    <thead><tr><th>Producto</th><th>Mejor para</th><th>Problema que resuelve</th><th>Categor&iacute;a</th></tr></thead>
-    <tbody>
-      <tr class="highlight"><td><strong>Portable Mini Blender</strong></td><td>Salud y practicidad</td><td>Batidos en cualquier lugar</td><td>Cocina</td></tr>
-      <tr><td>Car Seat Gap Organizer</td><td>Organizaci&oacute;n en el auto</td><td>Objetos que caen entre asientos</td><td>Autom&oacute;vil</td></tr>
-      <tr><td>Kitchen Food Saver Gadget</td><td>Ahorro y orden</td><td>Desperdicio de comida</td><td>Cocina</td></tr>
-      <tr><td>Home Cable Organizer</td><td>Escritorio limpio</td><td>Cables sueltos y desorden</td><td>Hogar</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- BLOG -->
+<!-- ═══════════ BLOG ═══════════ -->
 <div class="site-section">
   <div class="sec-header">
     <span class="sec-label">Blog</span>
@@ -332,18 +539,7 @@ document.getElementById("pro-recommendation").addEventListener("DOMSubtreeModifi
   </div>
 </div>
 
-<!-- GALLERY -->
-<div class="site-section" id="gallery-section" style="display:none">
-  <div class="sec-header"><span class="sec-label">Galer&iacute;a</span><h2 class="sec-title">Galer&iacute;a verificada de productos</h2></div>
-  <div id="product-gallery" class="grid"></div>
-</div>
-<script>
-document.getElementById("product-gallery").addEventListener("DOMSubtreeModified",function(){
-  if(this.children.length>0)document.getElementById("gallery-section").style.display="";
-},{once:true});
-</script>
-
-<!-- TESTIMONIAL -->
+<!-- ═══════════ TESTIMONIAL ═══════════ -->
 <div class="site-section">
   <div class="testimonial-card">
     &ldquo;Probamos el organizador de cables y realmente mi escritorio se ve m&aacute;s limpio. Las comparativas son honestas y el an&aacute;lisis es detallado. &iexcl;Recomendado!&rdquo;
@@ -351,7 +547,7 @@ document.getElementById("product-gallery").addEventListener("DOMSubtreeModified"
   </div>
 </div>
 
-<!-- TRUST -->
+<!-- ═══════════ TRUST ═══════════ -->
 <div class="site-section">
   <div class="sec-header">
     <span class="sec-label">Transparencia</span>
@@ -365,7 +561,7 @@ document.getElementById("product-gallery").addEventListener("DOMSubtreeModified"
   </div>
 </div>
 
-<!-- CTA FINAL -->
+<!-- ═══════════ CTA FINAL ═══════════ -->
 <div class="site-section">
   <div class="cta-final">
     <h2>&iquest;Listo para comprar mejor?</h2>
