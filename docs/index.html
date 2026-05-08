@@ -504,10 +504,6 @@
 
   var PER_VCARDS = [];
 
-  /* ── Init horizontal carousels ── */
-  buildHCar("hcar-emp-track","hcar-emp-prev","hcar-emp-next","hcar-emp-dots", EMP_SLIDES, 5000);
-  buildHCar("hcar-per-track","hcar-per-prev","hcar-per-next","hcar-per-dots", PER_SLIDES, 4500);
-
   /* ── Init vertical carousels — load from carousels.json or use defaults ── */
   function mapCards(arr){
     return arr.map(function(c){
@@ -557,17 +553,38 @@
     return {img:img, title:title, text:desc, desc:desc, href:href||"#"};
   }
 
+  /* Convert a platform product to a HORIZONTAL slide (full-bleed image + overlay) */
+  function productToSlide(p){
+    var card = productToCard(p);
+    return {img:card.img, title:card.title, text:card.text, desc:card.desc, href:card.href};
+  }
+
   Promise.all([
+    fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_01&limit=8")
+      .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
     fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_02&limit=8")
+      .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
+    fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_03&limit=8")
       .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
     fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_04&limit=8")
       .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
     fetch("assets/carousels.json")
       .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
   ]).then(function(res){
-    var empApi = (res[0].products||[]).map(productToCard);
-    var perApi = (res[1].products||[]).map(productToCard);
-    var sd = res[2];
+    var hEmpApi = (res[0].products||[]).map(productToSlide);
+    var empApi  = (res[1].products||[]).map(productToCard);
+    var hPerApi = (res[2].products||[]).map(productToSlide);
+    var perApi  = (res[3].products||[]).map(productToCard);
+    var sd = res[4];
+
+    /* Horizontal carousel 1 (Empresas) */
+    var hEmpSlides = hEmpApi.length ? hEmpApi : EMP_SLIDES;
+    buildHCar("hcar-emp-track","hcar-emp-prev","hcar-emp-next","hcar-emp-dots", hEmpSlides, 5000);
+
+    /* Horizontal carousel 3 (Personas) */
+    var hPerSlides = hPerApi.length ? hPerApi : PER_SLIDES;
+    buildHCar("hcar-per-track","hcar-per-prev","hcar-per-next","hcar-per-dots", hPerSlides, 4500);
+
     initVerticals({
       home_car02: empApi.length ? empApi : ((sd&&sd.home_car02)||[]),
       home_car04: perApi.length ? perApi : ((sd&&sd.home_car04)||[]),
