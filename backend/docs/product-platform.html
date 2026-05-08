@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -177,6 +177,14 @@ tbody tr:hover{background:#eff6ff}
 .modal-close{background:transparent;border:0;font-size:20px;color:var(--ink2);cursor:pointer;line-height:1;padding:2px 6px}
 .modal-body{padding:18px}
 
+/* ── CAROUSEL TABS ── */
+.car-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.car-tab{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel2);color:var(--ink2);padding:10px 16px;font-weight:700;font-size:13px;transition:all .18s}
+.car-tab:hover{border-color:var(--accent);color:var(--accent)}
+.car-tab.active.c01,.car-tab.active.c03{background:linear-gradient(135deg,#1e40af,#2563eb);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.car-tab.active.c02,.car-tab.active.c04{background:linear-gradient(135deg,#92400e,#d97706);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(217,119,6,.3)}
+.car-type-pill{display:inline-block;font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}
+.pill-h{background:#dbeafe;color:#1e40af}.pill-v{background:#fef9c3;color:#92400e}
 /* ── UTILIDADES ── */
 .toast{position:fixed;right:18px;bottom:18px;background:var(--nav);color:white;padding:14px 18px;border-radius:var(--radius);box-shadow:var(--shadow);max-width:360px;z-index:200;font-weight:600}
 .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:22px;color:var(--ink2);background:var(--panel2);text-align:center;font-size:14px}
@@ -448,25 +456,32 @@ tbody tr:hover{background:#eff6ff}
       </section>
 
       <section id="carouselView" class="view hidden">
-        <div style="display:grid;gap:18px">
-          <!-- En el carrusel -->
+        <!-- 4 CAROUSEL TABS -->
+        <div class="car-tabs">
+          <button class="car-tab active c01" data-car="01" type="button">🔵 CARRUSEL 01 — EMPRESAS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
+          <button class="car-tab c02" data-car="02" type="button">🟡 CARRUSEL 02 — B2B <span class="car-type-pill pill-v">VERTICAL</span></button>
+          <button class="car-tab c03" data-car="03" type="button">🔵 CARRUSEL 03 — PERSONAS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
+          <button class="car-tab c04" data-car="04" type="button">🟡 CARRUSEL 04 — Para ti <span class="car-type-pill pill-v">VERTICAL</span></button>
+        </div>
+        <div style="display:grid;gap:18px;margin-top:14px">
+          <!-- Productos en el carrusel activo -->
           <section class="panel">
             <div class="panel-head">
-              <h3>🎠 En el carrusel</h3>
+              <h3 id="carouselActiveTitle">🎠 CARRUSEL 01 — EMPRESAS · Horizontal (izquierda, fila 1)</h3>
               <button id="refreshCarouselBtn" class="plain-btn" type="button">Actualizar</button>
             </div>
             <div class="panel-body">
-              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos que aparecen en el banner principal. Haz clic en <strong>Editar</strong> para personalizar título, imagen y enlace de cada tarjeta.</p>
+              <p id="carouselActiveDesc" style="color:var(--ink2);font-size:13px;margin:0 0 14px">Slides horizontales del banner EMPRESAS. Haz clic en <strong>Editar</strong> para personalizar imagen, título y enlace de cada slide.</p>
               <div id="carouselActiveGrid" class="carousel-grid"></div>
             </div>
           </section>
-          <!-- Todos los productos disponibles -->
+          <!-- Agregar productos al carrusel activo -->
           <section class="panel">
             <div class="panel-head">
-              <h3>📦 Agregar al carrusel</h3>
+              <h3>📦 Agregar a este carrusel</h3>
             </div>
             <div class="panel-body">
-              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos publicados disponibles. Activa el interruptor para añadirlos al carrusel.</p>
+              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos publicados disponibles. Haz clic en <strong>+ Añadir</strong> para incluirlos en el carrusel seleccionado arriba.</p>
               <div id="carouselAvailableGrid" class="carousel-grid"></div>
             </div>
           </section>
@@ -553,7 +568,15 @@ const state = {
   organizationId: localStorage.getItem("platformOrganizationId") || "",
   products: [],
   promotions: [],
-  selectedProduct: null
+  selectedProduct: null,
+  activeCarousel: "01"
+};
+
+const CAR_INFO = {
+  "01": {title:"🎠 CARRUSEL 01 — EMPRESAS · Horizontal (izquierda, fila 1)", desc:"Slides horizontales del banner EMPRESAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_01"},
+  "02": {title:"🎠 CARRUSEL 02 — Productos B2B · Vertical (derecha, fila 1)", desc:"Tarjetas verticales de productos B2B. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_02"},
+  "03": {title:"🎠 CARRUSEL 03 — PERSONAS · Horizontal (izquierda, fila 2)", desc:"Slides horizontales del banner PERSONAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_03"},
+  "04": {title:"🎠 CARRUSEL 04 — Productos para ti · Vertical (derecha, fila 2)", desc:"Tarjetas verticales de productos personales. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_04"}
 };
 
 const $ = selector => document.querySelector(selector);
@@ -1030,10 +1053,9 @@ function showView(id) {
   $("#viewTitle").textContent = labels[id] || "Panel";
 }
 
-// ─── CARRUSEL ────────────────────────────────────────────────────────────────
+// ─── CARRUSEL (4 PANELES) ─────────────────────────────────────────────────────
 
 async function loadCarousel() {
-  // Reutilizamos la lista de productos ya cargada; si aún no está, la cargamos
   if (!state.products || !state.products.length) {
     await loadProducts();
   }
@@ -1041,7 +1063,8 @@ async function loadCarousel() {
 }
 
 function carouselCardHtml(product, inCarousel) {
-  const img = product.metadata?.banner_image || product.metadata?.image || product.metadata?.imagen || "";
+  const meta = product.metadata || {};
+  const img = meta.banner_image || meta.image || meta.imagen || "";
   const mediaImg = (product.media || []).find(m => m.media_type === "image");
   const imgSrc = img || (mediaImg ? mediaAbsUrl(mediaImg.url) : "");
   const imgHtml = imgSrc
@@ -1051,7 +1074,7 @@ function carouselCardHtml(product, inCarousel) {
     <div class="carousel-card${inCarousel ? " in-carousel" : ""}">
       ${imgHtml}
       <div class="carousel-card-body">
-        ${inCarousel ? '<span class="carousel-badge">✔ En carrusel</span>' : ""}
+        ${inCarousel ? '<span class="carousel-badge">✔ En este carrusel</span>' : ""}
         <p class="carousel-card-name" title="${escapeHtml(product.name)}">${escapeHtml(product.name)}</p>
         <p class="carousel-card-cat">${escapeHtml(product.category || "-")} · <span class="status ${escapeHtml(product.status)}">${escapeHtml(product.status)}</span></p>
         <div class="carousel-card-actions">
@@ -1065,23 +1088,28 @@ function carouselCardHtml(product, inCarousel) {
 }
 
 function renderCarousel() {
-  const active = state.products.filter(p => asBool(p.metadata?.mostrar_en_banner ?? p.metadata?.show_in_banner));
-  const available = state.products.filter(p => !asBool(p.metadata?.mostrar_en_banner ?? p.metadata?.show_in_banner));
+  const info = CAR_INFO[state.activeCarousel];
+  const key  = info.key;
+  $("#carouselActiveTitle").textContent = info.title;
+  $("#carouselActiveDesc").textContent  = info.desc;
+  const active    = state.products.filter(p => asBool(p.metadata?.[key]));
+  const available = state.products.filter(p => !asBool(p.metadata?.[key]) && p.status !== "archived");
   $("#carouselActiveGrid").innerHTML = active.length
     ? active.map(p => carouselCardHtml(p, true)).join("")
-    : `<div class="empty">Ningún producto en el carrusel. Añade uno desde la sección de abajo.</div>`;
-  $("#carouselAvailableGrid").innerHTML = available.filter(p => p.status !== "archived").length
-    ? available.filter(p => p.status !== "archived").map(p => carouselCardHtml(p, false)).join("")
-    : `<div class="empty">Todos los productos publicados ya están en el carrusel.</div>`;
+    : `<div class="empty">Ningún producto en este carrusel. Añádelo desde la sección de abajo.</div>`;
+  $("#carouselAvailableGrid").innerHTML = available.length
+    ? available.map(p => carouselCardHtml(p, false)).join("")
+    : `<div class="empty">Todos los productos publicados ya están en este carrusel.</div>`;
 }
 
 function openCarouselEdit(productId) {
   const product = state.products.find(p => p.id === productId);
   if (!product) return;
   const meta = product.metadata || {};
+  const key  = CAR_INFO[state.activeCarousel].key;
   $("#carouselEditProductId").value = product.id;
-  $("#carouselModalTitle").textContent = `Editar: ${product.name}`;
-  $("#carouselEditShow").checked = asBool(meta.mostrar_en_banner ?? meta.show_in_banner);
+  $("#carouselModalTitle").textContent = `Editar — Carrusel ${state.activeCarousel}: ${product.name}`;
+  $("#carouselEditShow").checked = asBool(meta[key]);
   $("#carouselEditTitle").value = meta.banner_title || meta.title || "";
   $("#carouselEditCategory").value = meta.banner_category || product.category || "";
   $("#carouselEditDescription").value = meta.banner_description || meta.descripcion_corta || meta.short_desc || "";
@@ -1113,18 +1141,19 @@ async function saveCarouselBanner(event) {
   event.preventDefault();
   const productId = $("#carouselEditProductId").value;
   if (!productId) return;
+  const key = CAR_INFO[state.activeCarousel].key;
   const payload = {
-    mostrar_en_banner: $("#carouselEditShow").checked,
-    banner_title: $("#carouselEditTitle").value.trim(),
-    banner_category: $("#carouselEditCategory").value.trim(),
+    [key]: $("#carouselEditShow").checked,
+    banner_title:       $("#carouselEditTitle").value.trim(),
+    banner_category:    $("#carouselEditCategory").value.trim(),
     banner_description: $("#carouselEditDescription").value.trim(),
-    banner_image: $("#carouselEditImage").value.trim(),
+    banner_image:       $("#carouselEditImage").value.trim(),
     banner_button_text: $("#carouselEditButton").value.trim(),
-    banner_link: $("#carouselEditLink").value.trim()
+    banner_link:        $("#carouselEditLink").value.trim()
   };
   try {
     await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
-    toast("Carrusel actualizado.");
+    toast(`Carrusel ${state.activeCarousel} actualizado.`);
     closeCarouselModal();
     await loadProducts();
     renderCarousel();
@@ -1134,10 +1163,11 @@ async function saveCarouselBanner(event) {
 }
 
 async function toggleCarouselEntry(productId, addToCarousel) {
-  const payload = {mostrar_en_banner: addToCarousel};
+  const key = CAR_INFO[state.activeCarousel].key;
+  const payload = {[key]: addToCarousel};
   try {
     await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
-    toast(addToCarousel ? "Añadido al carrusel." : "Quitado del carrusel.");
+    toast(addToCarousel ? `Añadido al carrusel ${state.activeCarousel}.` : `Quitado del carrusel ${state.activeCarousel}.`);
     await loadProducts();
     renderCarousel();
   } catch (err) {
@@ -1233,7 +1263,15 @@ $("#promotionsList").addEventListener("click", event => {
 });
 $("#companyForm").addEventListener("submit", event => saveCompany(event).catch(err => toast(err.message)));
 
-// Carrusel
+// Carrusel — tabs
+$$(".car-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.activeCarousel = btn.dataset.car;
+    $$(".car-tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderCarousel();
+  });
+});
 $("#refreshCarouselBtn").addEventListener("click", () => loadCarousel().then(() => toast("Carrusel actualizado.")).catch(err => toast(err.message)));
 $("#carouselModalClose").addEventListener("click", closeCarouselModal);
 $("#carouselModalCancelBtn").addEventListener("click", closeCarouselModal);
@@ -1261,5 +1299,6 @@ if (state.token) {
   });
 }
 </script>
+<script src="assets/ai_chat.js" defer></script>
 </body>
 </html>
