@@ -1,4 +1,4 @@
-
+﻿
 import csv
 import json
 import re
@@ -130,7 +130,7 @@ def seed_files():
         CONFIG_PATH.write_text(json.dumps({
             "site_name": "Smart Finds Review",
             "site_base_url": "https://tudominio.com",
-            "amazon_tag": "TU-TAG-20",
+            "amazon_tag": "amatotyshop-20",
             "author_name": "Edwin Sumaran",
             "author_full_name": "Edwin Ramon Sumaran Ojeda",
             "author_email": "edwinsumaran3@gmail.com",
