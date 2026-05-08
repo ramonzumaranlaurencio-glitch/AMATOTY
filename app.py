@@ -1066,10 +1066,11 @@ ESTADO_OPTS   = ["Publicado", "Borrador", "Archivado"]
 CURRENCY_OPTS = ["USD", "PEN", "EUR", "MXN", "ARS", "CLP", "COP", "BRL"]
 
 PAGES_CAROUSEL = {
-    "home":       {"label": "🏠 Inicio (index.html)",        "file": "docs/index.html"},
-    "blog":       {"label": "📝 Blog (blog/index.html)",     "file": "docs/blog/index.html"},
-    "category":   {"label": "🗂️ Categorías",                 "file": "docs/category/index.html"},
-    "oye_bonita": {"label": "💄 Oye Bonita",                 "file": "docs/oye-bonita.html"},
+    "home":         {"label": "🏠 Inicio (index.html)",              "file": "docs/index.html"},
+    "blog":         {"label": "📝 Blog (blog/index.html)",           "file": "docs/blog/index.html"},
+    "category":     {"label": "🗂️ Categorías",                       "file": "docs/category/index.html"},
+    "oye_bonita":   {"label": "💄 Oye Bonita (oye-bonita.html)",     "file": "docs/oye-bonita.html"},
+    "smart_search": {"label": "🔍 Búsqueda Inteligente (smart-search.html)", "file": "docs/smart-search.html"},
 }
 
 def _init_store_products():
@@ -1411,11 +1412,50 @@ def store_products_page():
             else:
                 st.warning("Sin productos seleccionados — el carrusel 04 usará datos por defecto.")
 
-        # ─── Otras páginas ─────────────────────────────────────────────────────
+        # ─── CARRUSEL 05: Oye Bonita ───────────────────────────────────────────
         st.divider()
-        with st.expander("📄 Otras páginas — Blog · Categorías · Oye Bonita"):
+        st.markdown("### 🎠 Carruseles de páginas secundarias")
+        with st.expander("🌸 CARRUSEL 05 — Oye Bonita  ·  Página de diagnóstico facial", expanded=False):
+            st.caption("Productos de belleza que aparecen en la página Oye Bonita (oye-bonita.html).")
+            car05_current = [n for n in carousels.get("oye_bonita", []) if n in pnames]
+            new_vcards_05 = st.multiselect(
+                "Productos Carrusel 05 — Oye Bonita",
+                options=pnames,
+                default=car05_current,
+                key="car05_sel",
+                placeholder="Selecciona productos de belleza...",
+                label_visibility="collapsed",
+            )
+            if new_vcards_05:
+                for n in new_vcards_05:
+                    p = prod_map.get(n, {})
+                    st.markdown(f"&nbsp;&nbsp;▸ **{n}** — {p.get('category','')} · {p.get('currency','USD')} {float(p.get('price',0)):.2f}")
+            else:
+                st.warning("Sin productos seleccionados para Oye Bonita.")
+
+        # ─── CARRUSEL 06: Búsqueda Inteligente ────────────────────────────────
+        with st.expander("🔍 CARRUSEL 06 — Búsqueda Inteligente  ·  Panel de Smart Search", expanded=False):
+            st.caption("Productos destacados que aparecen en la página smart-search.html.")
+            car06_current = [n for n in carousels.get("smart_search", []) if n in pnames]
+            new_vcards_06 = st.multiselect(
+                "Productos Carrusel 06 — Smart Search",
+                options=pnames,
+                default=car06_current,
+                key="car06_sel",
+                placeholder="Selecciona productos destacados...",
+                label_visibility="collapsed",
+            )
+            if new_vcards_06:
+                for n in new_vcards_06:
+                    p = prod_map.get(n, {})
+                    st.markdown(f"&nbsp;&nbsp;▸ **{n}** — {p.get('category','')} · {p.get('currency','USD')} {float(p.get('price',0)):.2f}")
+            else:
+                st.warning("Sin productos seleccionados para Smart Search.")
+
+        # ─── Otras páginas ─────────────────────────────────────────────────────
+        with st.expander("📄 Otras páginas — Blog · Categorías"):
             updated_other = {}
-            for page_key in ["blog", "category", "oye_bonita"]:
+            for page_key in ["blog", "category"]:
                 pinfo = PAGES_CAROUSEL[page_key]
                 current = [n for n in carousels.get(page_key, []) if n in pnames]
                 sel = st.multiselect(
@@ -1434,19 +1474,20 @@ def store_products_page():
             if st.button("💾 Guardar y Exportar todo", type="primary",
                          use_container_width=True, key="car_save"):
                 updated = {
-                    "home":       list({*new_vcards_02, *new_vcards_04}),
-                    "home_car01": new_slides_01,
-                    "home_car02": new_vcards_02,
-                    "home_car03": new_slides_03,
-                    "home_car04": new_vcards_04,
-                    "blog":       updated_other.get("blog", []),
-                    "category":   updated_other.get("category", []),
-                    "oye_bonita": updated_other.get("oye_bonita", []),
+                    "home":         list({*new_vcards_02, *new_vcards_04}),
+                    "home_car01":   new_slides_01,
+                    "home_car02":   new_vcards_02,
+                    "home_car03":   new_slides_03,
+                    "home_car04":   new_vcards_04,
+                    "oye_bonita":   new_vcards_05,
+                    "smart_search": new_vcards_06,
+                    "blog":         updated_other.get("blog", []),
+                    "category":     updated_other.get("category", []),
                 }
                 save_carousels(updated)
                 export_carousels_to_docs(updated, products)
                 st.success("✅ `data/carousels.json` y `docs/assets/carousels.json` actualizados.")
-                st.info("💡 Los carruseles verticales se actualizan solos. Los horizontales requieren regenerar el HTML con `write_index2.py`.")
+                st.info("💡 C01/C03 horizontales requieren regenerar HTML con `write_index2.py`. El resto se actualiza solo.")
         with cc2:
             if st.button("🔄 Recargar", use_container_width=True, key="car_reload"):
                 st.rerun()

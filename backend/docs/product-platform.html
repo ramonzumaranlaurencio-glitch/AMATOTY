@@ -183,6 +183,8 @@ tbody tr:hover{background:#eff6ff}
 .car-tab:hover{border-color:var(--accent);color:var(--accent)}
 .car-tab.active.c01,.car-tab.active.c03{background:linear-gradient(135deg,#1e40af,#2563eb);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(37,99,235,.3)}
 .car-tab.active.c02,.car-tab.active.c04{background:linear-gradient(135deg,#92400e,#d97706);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(217,119,6,.3)}
+.car-tab.active.c05{background:linear-gradient(135deg,#9d174d,#db2777);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(219,39,119,.3)}
+.car-tab.active.c06{background:linear-gradient(135deg,#065f46,#059669);color:white;border-color:transparent;box-shadow:0 4px 12px rgba(5,150,105,.3)}
 .car-type-pill{display:inline-block;font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}
 .pill-h{background:#dbeafe;color:#1e40af}.pill-v{background:#fef9c3;color:#92400e}
 /* ── UTILIDADES ── */
@@ -462,6 +464,8 @@ tbody tr:hover{background:#eff6ff}
           <button class="car-tab c02" data-car="02" type="button">🟡 CARRUSEL 02 — B2B <span class="car-type-pill pill-v">VERTICAL</span></button>
           <button class="car-tab c03" data-car="03" type="button">🔵 CARRUSEL 03 — PERSONAS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
           <button class="car-tab c04" data-car="04" type="button">🟡 CARRUSEL 04 — Para ti <span class="car-type-pill pill-v">VERTICAL</span></button>
+          <button class="car-tab c05" data-car="05" type="button">🌸 CARRUSEL 05 — Oye Bonita <span class="car-type-pill pill-v">BELLEZA</span></button>
+          <button class="car-tab c06" data-car="06" type="button">🔍 CARRUSEL 06 — Smart Search <span class="car-type-pill pill-v">BÚSqueda</span></button>
         </div>
         <div style="display:grid;gap:18px;margin-top:14px">
           <!-- Productos en el carrusel activo -->
@@ -576,7 +580,9 @@ const CAR_INFO = {
   "01": {title:"🎠 CARRUSEL 01 — EMPRESAS · Horizontal (izquierda, fila 1)", desc:"Slides horizontales del banner EMPRESAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_01"},
   "02": {title:"🎠 CARRUSEL 02 — Productos B2B · Vertical (derecha, fila 1)", desc:"Tarjetas verticales de productos B2B. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_02"},
   "03": {title:"🎠 CARRUSEL 03 — PERSONAS · Horizontal (izquierda, fila 2)", desc:"Slides horizontales del banner PERSONAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_03"},
-  "04": {title:"🎠 CARRUSEL 04 — Productos para ti · Vertical (derecha, fila 2)", desc:"Tarjetas verticales de productos personales. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_04"}
+  "04": {title:"🎠 CARRUSEL 04 — Productos para ti · Vertical (derecha, fila 2)", desc:"Tarjetas verticales de productos personales. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_04"},
+  "05": {title:"🌸 CARRUSEL 05 — Oye Bonita · Página de diagnóstico facial", desc:"Productos de belleza que se muestran en la página Oye Bonita. Usa + Añadir para incluir productos de belleza.", key:"carousel_05"},
+  "06": {title:"🔍 CARRUSEL 06 — Smart Search · Panel de búsqueda inteligente", desc:"Productos destacados que aparecen en la página de búsqueda inteligente. Usa + Añadir para seleccionar productos.", key:"carousel_06"}
 };
 
 const $ = selector => document.querySelector(selector);
