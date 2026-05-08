@@ -18,6 +18,30 @@
 .comparador th,.comparador td{border:1px solid #e5e7eb;padding:10px 8px;text-align:left;}
 .comparador th{background:#f3f3f3;color:#b12704;}
 .comparador .highlight{background:#fef9c3;font-weight:bold;}
+
+/* ── VERTICAL 3D CAROUSEL ─────────────────────────────────────────── */
+.vc3d-wrap{position:relative;width:100%;max-width:860px;margin:40px auto;padding:0 16px;box-sizing:border-box;}
+.vc3d-title{text-align:center;font-size:1.5em;font-weight:700;color:#b12704;margin-bottom:24px;}
+.vc3d-scene{perspective:1100px;height:420px;position:relative;overflow:hidden;}
+.vc3d-track{position:absolute;inset:0;transform-style:preserve-3d;transition:none;}
+.vc3d-card{position:absolute;left:50%;width:min(460px,88vw);transform:translateX(-50%);
+  border-radius:18px;overflow:hidden;cursor:pointer;user-select:none;
+  transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .45s,box-shadow .3s;
+  background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.10);}
+.vc3d-card img{width:100%;height:200px;object-fit:cover;display:block;}
+.vc3d-card-body{padding:14px 18px 16px;}
+.vc3d-card-body h3{margin:0 0 6px;font-size:1.05em;color:#111;}
+.vc3d-card-body p{margin:0;font-size:.9em;color:#555;line-height:1.4;}
+.vc3d-card-body a{display:inline-block;margin-top:10px;background:#ff9900;color:#fff;
+  padding:6px 18px;border-radius:8px;font-size:.88em;font-weight:600;text-decoration:none;}
+.vc3d-nav{display:flex;justify-content:center;gap:16px;margin-top:18px;}
+.vc3d-btn{background:#ff9900;color:#fff;border:none;border-radius:50%;width:42px;height:42px;
+  font-size:1.3em;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;}
+.vc3d-btn:hover{background:#b12704;}
+.vc3d-dots{display:flex;justify-content:center;gap:8px;margin-top:12px;}
+.vc3d-dot{width:9px;height:9px;border-radius:50%;background:#d1d5db;cursor:pointer;transition:background .2s;}
+.vc3d-dot.active{background:#ff9900;}
+@media(max-width:600px){.vc3d-scene{height:370px;}.vc3d-card img{height:160px;}}
 </style>
 <script src="assets/product_ai_guard.js"></script>
 <script src="assets/platform_catalog.js"></script>
@@ -32,6 +56,125 @@
     <div style="font-size:1em;color:#ff9900;margin-top:8px;">¡Descubre tu tipo de piel y recibe productos recomendados!</div>
   </div>
 </div>
+
+<!-- ── VERTICAL 3D CAROUSEL ──────────────────────────────────────────── -->
+<div class="vc3d-wrap" id="vc3d">
+  <div class="vc3d-title">🔥 Productos destacados</div>
+  <div class="vc3d-scene" id="vc3dScene"
+       aria-label="Carrusel de productos destacados" role="region">
+    <div class="vc3d-track" id="vc3dTrack"></div>
+  </div>
+  <div class="vc3d-nav">
+    <button class="vc3d-btn" id="vc3dPrev" aria-label="Anterior">▲</button>
+    <button class="vc3d-btn" id="vc3dNext" aria-label="Siguiente">▼</button>
+  </div>
+  <div class="vc3d-dots" id="vc3dDots"></div>
+</div>
+
+<script>
+(function(){
+  const CARDS = [
+    { img:"assets/home.jpg",          title:"Oye Bonita – Diagnóstico Facial",  text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",       href:"oye-bonita.html" },
+    { img:"assets/placeholder.png",   title:"Smart Search con IA",              text:"Busca cualquier producto con imagen, voz o texto. Resultados globales.", href:"smart-search.html" },
+    { img:"assets/placeholder.png",   title:"Mini Blender Portátil",            text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",          href:"blog/portable-mini-blender-review.html" },
+    { img:"assets/placeholder.png",   title:"Organizador Asiento de Auto",      text:"Nunca más pierdas nada entre los asientos. Diseño universal.",           href:"blog/car-seat-gap-organizer-review.html" },
+    { img:"assets/placeholder.png",   title:"Kitchen Food Saver",               text:"Conserva alimentos frescos más tiempo. Ahorra dinero y reduce residuos.", href:"blog/kitchen-food-saver-gadget-review.html" },
+    { img:"assets/placeholder.png",   title:"Mini Aspiradora de Escritorio",    text:"Limpia teclado y espacios pequeños al instante. Sin cables.",             href:"blog/mini-vacuum-cleaner-review.html" },
+  ];
+
+  const AUTOPLAY_MS = 3800;
+  const track  = document.getElementById('vc3dTrack');
+  const dots   = document.getElementById('vc3dDots');
+  const scene  = document.getElementById('vc3dScene');
+  let   cur    = 0;
+  let   timer  = null;
+  let   touchY = null;
+
+  // Build cards
+  CARDS.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'vc3d-card';
+    el.dataset.idx = i;
+    el.innerHTML = `<img src="${c.img}" alt="${c.title}" loading="lazy" onerror="this.src='assets/placeholder.png'">
+      <div class="vc3d-card-body">
+        <h3>${c.title}</h3><p>${c.text}</p>
+        <a href="${c.href}">Ver más →</a>
+      </div>`;
+    el.addEventListener('click', () => goTo(i));
+    track.appendChild(el);
+
+    const dot = document.createElement('span');
+    dot.className = 'vc3d-dot' + (i===0?' active':'');
+    dot.addEventListener('click', () => goTo(i));
+    dots.appendChild(dot);
+  });
+
+  const allCards = track.querySelectorAll('.vc3d-card');
+  const allDots  = dots.querySelectorAll('.vc3d-dot');
+  const total    = CARDS.length;
+
+  function layout() {
+    const h    = scene.offsetHeight;
+    const gap  = h / 2.6;
+    allCards.forEach((card, i) => {
+      const delta = i - cur;
+      const wrap  = total;
+      let   d     = delta;
+      if (d >  wrap/2) d -= wrap;
+      if (d < -wrap/2) d += wrap;
+
+      const absD   = Math.abs(d);
+      const isActive = d === 0;
+      const scale  = isActive ? 1 : Math.max(0.62, 1 - absD * 0.18);
+      const tz     = isActive ? 0 : -absD * 90;
+      const ry     = isActive ? 0 : (d > 0 ? 6 : -6);
+      const op     = isActive ? 1 : Math.max(0.15, 1 - absD * 0.35);
+      const ty     = h/2 - 110 + d * gap;  // center offset
+      const z      = isActive ? 20 : -absD * 5;
+
+      card.style.transform = `translateX(-50%) translateY(${ty}px) translateZ(${tz}px) scale(${scale}) rotateY(${ry}deg)`;
+      card.style.opacity   = op;
+      card.style.zIndex    = 100 - absD * 10;
+      card.style.boxShadow = isActive ? '0 16px 48px rgba(0,0,0,.22)' : '0 2px 12px rgba(0,0,0,.08)';
+    });
+    allDots.forEach((dot, i) => dot.classList.toggle('active', i === cur));
+  }
+
+  function goTo(idx) {
+    cur = ((idx % total) + total) % total;
+    layout();
+  }
+
+  function next() { goTo(cur + 1); }
+  function prev() { goTo(cur - 1); }
+
+  document.getElementById('vc3dNext').addEventListener('click', () => { next(); resetTimer(); });
+  document.getElementById('vc3dPrev').addEventListener('click', () => { prev(); resetTimer(); });
+
+  // Touch support
+  scene.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, {passive:true});
+  scene.addEventListener('touchend',   e => {
+    if (touchY === null) return;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if (Math.abs(dy) > 40) { dy < 0 ? next() : prev(); resetTimer(); }
+    touchY = null;
+  }, {passive:true});
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { next(); resetTimer(); }
+    if (e.key === 'ArrowUp')   { prev(); resetTimer(); }
+  });
+
+  function startTimer() { timer = setInterval(next, AUTOPLAY_MS); }
+  function resetTimer() { clearInterval(timer); startTimer(); }
+
+  layout();
+  startTimer();
+  window.addEventListener('resize', layout);
+})();
+</script>
+
 <section class="card" style="background:#eaeded;margin-top:32px;">
   <h2 style="text-align:center;color:#b12704;">¿Cómo evaluamos los productos?</h2>
   <ul style="max-width:700px;margin:auto;list-style:disc inside;">
