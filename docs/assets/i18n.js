@@ -151,6 +151,13 @@
       rate_updated:       'Rates updated',
       rate_source:        'Source: open.er-api.com',
       price_original:     'Original price',
+      // Product grid
+      no_results:         'No results',
+      no_results_hint:    'Try another search or clear the filters.',
+      new_badge:          'NEW',
+      available:          '✓ Available',
+      best_price:         '💡 Best price:',
+      region_showing:     'Showing results for: {region}',
       // Page titles
       page_title_smart:   'Smart Search – AMATOTY',
       page_title_home:    'AMATOTY – International Marketplace',
@@ -252,6 +259,13 @@
       rate_updated:       'Tipo de cambio actualizado',
       rate_source:        'Fuente: open.er-api.com',
       price_original:     'Precio original',
+      // Cuadrícula de productos
+      no_results:         'Sin resultados',
+      no_results_hint:    'Prueba con otra búsqueda o limpia los filtros.',
+      new_badge:          'NUEVO',
+      available:          '✓ Disponible',
+      best_price:         '💡 Mejor precio:',
+      region_showing:     'Mostrando resultados para: {region}',
       page_title_smart:   'Busca Inteligente – AMATOTY',
       page_title_home:    'AMATOTY – Marketplace Internacional',
       page_title_oye:     'Oye Bonita – Diagnóstico Facial',
@@ -356,6 +370,13 @@
       page_title_home:    'AMATOTY – Marketplace Internacional',
       page_title_oye:     'Oye Bonita – Diagnóstico Facial',
       page_title_cat:     'Categorias – AMATOTY',
+      // Product grid
+      no_results:         'Sem resultados',
+      no_results_hint:    'Tente outra busca ou limpe os filtros.',
+      new_badge:          'NOVO',
+      available:          '✓ Disponível',
+      best_price:         '💡 Melhor preço:',
+      region_showing:     'Mostrando resultados para: {region}',
       // Seção afiliado Amazon
       amz_title:          '🛒 Buscar na Amazon',
       amz_close_title:    'Fechar',
@@ -377,6 +398,12 @@
       amz_card_prime_d:   'Elegíveis para entrega rápida com Amazon Prime',
     },
   };
+
+  // ── REGION GROUPS ─────────────────────────────────────────────────────────
+  const REGION_US    = new Set(['US','CA','GB','AU','NZ','IE','ZA','IN','SG','PH','NG']);
+  const REGION_BR    = new Set(['BR']);
+  const REGION_LATAM = new Set(['PE','CO','MX','CL','AR','EC','BO','PY','UY','VE',
+                                 'CR','PA','GT','SV','HN','NI','CU','DO','PR']);
 
   // ── STATE ────────────────────────────────────────────────────────────────
   let _lang     = 'en';
@@ -526,6 +553,35 @@
 
     // Sync page country/currency dropdowns if present
     syncSelectors();
+  }
+
+  // ── GET REGION ───────────────────────────────────────────────────────────
+  function getRegion() {
+    if (REGION_BR.has(_country))    return 'BR';
+    if (REGION_US.has(_country))    return 'US';
+    if (REGION_LATAM.has(_country)) return 'LATAM';
+    return 'ALL';
+  }
+
+  // ── LANG SWITCHER WIDGET ─────────────────────────────────────────────────
+  function renderLangSwitcher() {
+    const targets = document.querySelectorAll('#lang-switcher');
+    if (!targets.length) return;
+    const LANGS = [
+      { code:'en', label:'EN', title:'English' },
+      { code:'es', label:'ES', title:'Español' },
+      { code:'pt', label:'PT', title:'Português' },
+    ];
+    targets.forEach(el => {
+      el.innerHTML = LANGS.map(l =>
+        `<button
+           class="lang-pill${_lang === l.code ? ' active' : ''}"
+           onclick="window.I18N.setLocale('${l.code}',null,null,true)"
+           title="${l.title}"
+           aria-pressed="${_lang === l.code}"
+         >${l.label}</button>`
+      ).join('');
+    });
   }
 
   function syncSelectors() {
@@ -689,6 +745,7 @@
 
     applyTranslations();
     renderBanner();
+    renderLangSwitcher();
 
     // Dispatch event for other scripts (smart-search fx, cart, etc.)
     window.dispatchEvent(new CustomEvent('i18n:change', {
@@ -722,6 +779,7 @@
     await Promise.all([detectGeo(), loadRates()]);
     applyTranslations();
     renderBanner();
+    renderLangSwitcher();
     injectHreflang();
   }
 
@@ -739,6 +797,8 @@
     getLang:     () => _lang,
     getCountry:  () => _country,
     getCurrency: () => _currency,
+    getRegion,
+    renderLangSwitcher,
     getRates:    () => _rates,
     getRatesDate:() => _ratesDate,
     getSymbol:   (cur) => CURRENCY_SYMBOLS[cur || _currency] || (cur || _currency),

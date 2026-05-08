@@ -247,6 +247,8 @@ button{cursor:pointer}
       <button id="runSearch" type="button" data-i18n="btn_search">🔍 Search</button>
     </div>
     <div class="header-actions">
+      <!-- Language Switcher: populated by i18n.js -->
+      <div id="lang-switcher" role="group" aria-label="Language"></div>
       <button class="header-icon-btn" data-i18n="location_title" data-i18n-attr="title" title="My location">📍</button>
       <button class="header-icon-btn" id="cartBtn" data-i18n="cart_title" data-i18n-attr="title" title="Cart" onclick="openCart()">
         🛒<span class="badge" id="cartBadge" style="display:none">0</span>
@@ -681,7 +683,15 @@ window.addEventListener('i18n:change', function(e) {
   const currencyEl = document.getElementById('currency');
   if (countryEl  && countryEl.querySelector(`option[value="${country}"]`))   { countryEl.value  = country;  }
   if (currencyEl && currencyEl.querySelector(`option[value="${currency}"]`)) { currencyEl.value = currency; }
+  // Rebuild category strip with new language labels
+  if (typeof buildCatStrip === 'function' && products.length) buildCatStrip();
   if (typeof renderResults === 'function') renderResults();
+  // Re-render Amazon section if visible
+  const amzSec = document.getElementById('amazonSection');
+  const amzPill = document.getElementById('amzQueryPill');
+  if (amzSec && amzSec.style.display !== 'none' && amzPill && amzPill.textContent) {
+    if (typeof renderAmazonSection === 'function') renderAmazonSection(amzPill.textContent);
+  }
 });
 
 function money(val){
@@ -712,10 +722,24 @@ function firstImage(p){
   return "";
 }
 
+// Returns product name/title in the active language (supports title_en, title_es, title_pt etc.)
+function getProductFieldForLang(flat,fallback){
+  if(typeof flat!=='string'){
+    const lang=(window.I18N&&window.I18N.getLang)?window.I18N.getLang():'en';
+    const langKey=`name_${lang}`;
+    const titleKey=`title_${lang}`;
+    const catKey=`category_${lang}`;
+    return flat[langKey]||flat[titleKey]||flat[catKey]||fallback||'';
+  }
+  return flat||fallback||'';
+}
+
 function normalize(p){
   const flat = ProductAIGuard.flattenProduct(p);
+  const rawName = flat.name||flat.nombre||flat.title||flat.titulo||"Product";
+  const localName = getProductFieldForLang(flat, rawName);
   return Object.assign(flat,{
-    name: flat.name||flat.nombre||flat.title||flat.titulo||"Producto",
+    name: localName,
     brand: flat.brand||flat.marca||"",
     category: flat.category||flat.categoria||flat.categoria||"General",
     image: firstImage(flat),
@@ -760,17 +784,21 @@ async function postForm(path,fd){
 
 // ── CATEGORÍAS RÁPIDAS ─────────────────────────────────────────────────────
 const CAT_ICONS={"belleza":"💄","cocina":"🍳","hogar":"🏠","automocion":"🚗","tecnologia":"💻","deporte":"🏋️","salud":"💊","moda":"👗","peruanos":"🌽","general":"📦","":"🏷️"};
+function _t(key,vars){return (window.I18N&&window.I18N.t)?window.I18N.t(key,vars):key;}
 function buildCatStrip(){
   const cats=[...new Set(products.map(p=>p.category).filter(Boolean))].sort();
   const strip=document.getElementById("catStrip");
-  strip.innerHTML=`<a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span>${(window.I18N&&window.I18N.t('view_all'))||'View all'}</span></a>`
-    +cats.map(c=>`<a class="cat-chip" data-cat="${esc(c)}" href="#" onclick="filterCat(event,'${esc(c)}')"><div class="icon">${CAT_ICONS[c.toLowerCase()]||"📦"}</div><span>${esc(c)}</span></a>`).join("");
+  strip.innerHTML=`<a class="cat-chip active" data-cat="" href="#" onclick="filterCat(event,'')"><div class="icon">🏷️</div><span>${esc(_t('view_all'))}</span></a>`
+    +cats.map(c=>{
+      const label=getProductFieldForLang(c,c);
+      return `<a class="cat-chip" data-cat="${esc(c)}" href="#" onclick="filterCat(event,'${esc(c)}')"><div class="icon">${CAT_ICONS[c.toLowerCase()]||"📦"}</div><span>${esc(label)}</span></a>`;
+    }).join("");
   // Fill category select
   const sel=document.getElementById("categoryFilter");
-  sel.innerHTML=`<option value="">Todas las categorías</option>`+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  sel.innerHTML=`<option value="">${esc(_t('all_categories'))}</option>`+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
   // Fill brand filter
   const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort();
-  document.getElementById("brandFilter").innerHTML=`<option value="">Todas</option>`+brands.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
+  document.getElementById("brandFilter").innerHTML=`<option value="">${esc(_t('opt_all'))}</option>`+brands.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join("");
 }
 
 function filterCat(event,cat){
@@ -793,7 +821,13 @@ function applyFilters(){
   const minP=Number(document.getElementById("minPrice").value||0);
   const maxP=Number(document.getElementById("maxPrice").value||0);
 
+  const userRegion=(window.I18N&&window.I18N.getRegion)?window.I18N.getRegion():'ALL';
   filtered=products.filter(p=>{
+    // Region filter: if product declares country targets, only show relevant ones
+    const pc=p.country;
+    if(pc&&Array.isArray(pc)&&pc.length>0){
+      if(!pc.includes(userRegion)&&!pc.includes('ALL'))return false;
+    }
     const blob=normalizeText([p.name,p.brand,p.category,p.specs_list?.map(s=>s.valor).join(" "),p.compatibility,p.material,p.provider,p.description,p.reason].join(" "));
     const words=q.split(" ").filter(Boolean);
     const price=basePrice(p);
@@ -834,7 +868,7 @@ function renderGrid(){
   rotated=[...filtered.slice(offset),...filtered.slice(0,offset)];
 
   if(!rotated.length){
-    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Sin resultados</h3><p style="color:var(--ink2)">Prueba con otra búsqueda o limpia los filtros.</p></div>`;
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>${esc(_t('no_results'))}</h3><p style="color:var(--ink2)">${esc(_t('no_results_hint'))}</p></div>`;
     return;
   }
   grid.innerHTML=rotated.map((p,i)=>{
@@ -844,15 +878,16 @@ function renderGrid(){
     const discPct=hasDiscount?Math.round((1-price/p.price_original)*100):0;
     const isNew=i<3&&offset===0;
     const isHot=p.featured||p.mostrar_en_banner||p.destacado;
-    const badge=isHot?`<span class="prod-badge hot">HOT</span>`:isNew?`<span class="prod-badge new">NUEVO</span>`:(hasDiscount?`<span class="prod-badge sale">-${discPct}%</span>`:"");
+    const badge=isHot?`<span class="prod-badge hot">HOT</span>`:isNew?`<span class="prod-badge new">${esc(_t('new_badge'))}</span>`:(hasDiscount?`<span class="prod-badge sale">-${discPct}%</span>`:"");
     const stars="★".repeat(Math.round(p.rating||4))+"☆".repeat(Math.max(0,5-Math.round(p.rating||4)));
-    const shipText=Number(p.stock||0)>0?"✓ Disponible":"📋 A cotizar";
-    const providerLinks=(p.source_links||[]).slice(0,1).map(l=>`<a class="btn-see-offer" href="${esc(l.url)}" target="_blank" rel="nofollow noopener">Ver oferta en ${esc(l.name)}</a>`).join("")||`<a class="btn-see-offer" href="https://www.amazon.com/s?k=${encodeURIComponent(p.name)}" target="_blank" rel="nofollow noopener">Ver oferta</a>`;
+    const shipText=Number(p.stock||0)>0?_t('available'):`📋 ${_t('quote_only')}`;
+    const seeLabel=_t('see_offer');
+    const providerLinks=(p.source_links||[]).slice(0,1).map(l=>`<a class="btn-see-offer" href="${esc(l.url)}" target="_blank" rel="nofollow noopener">${esc(seeLabel)} ${esc(l.name)}</a>`).join("")||`<a class="btn-see-offer" href="https://www.amazon.com/s?k=${encodeURIComponent(p.name)}&tag=amatotyshop-20" target="_blank" rel="nofollow noopener">${esc(seeLabel)}</a>`;
     return `<div class="prod-card">
       <div class="prod-card-img" onclick="openDetail(${i})">
         ${badge}
         <img src="${esc(img)}" alt="${esc(p.name)}" onerror="this.src='assets/placeholder.png'" loading="lazy">
-        <button class="prod-fav" title="Guardar" onclick="event.stopPropagation()">♡</button>
+        <button class="prod-fav" title="Save" onclick="event.stopPropagation()">♡</button>
       </div>
       <div class="prod-card-body">
         <div class="prod-provider">${esc(p.brand||p.provider||"AMATOTY")}</div>
@@ -865,7 +900,7 @@ function renderGrid(){
         </div>
         <div class="prod-ship">${shipText}</div>
         <div class="prod-actions">
-          <button class="btn-add-cart" onclick="addToCart(${i})">🛒 Agregar al carrito</button>
+          <button class="btn-add-cart" onclick="addToCart(${i})">🛒 ${esc(_t('add_to_cart'))}</button>
           ${providerLinks}
         </div>
       </div>
@@ -876,7 +911,7 @@ function renderGrid(){
   if(filtered.length){
     const cheapest=filtered.reduce((w,p)=>basePrice(p)<basePrice(w)?p:w,filtered[0]);
     const adv=document.getElementById("expertAdviceInline");
-    if(adv){adv.style.display="block";adv.innerHTML=`💡 Mejor precio: <strong>${esc(cheapest.name)}</strong> – ${money(basePrice(cheapest))}`;}
+    if(adv){adv.style.display="block";adv.innerHTML=`${esc(_t('best_price'))} <strong>${esc(cheapest.name)}</strong> – ${money(basePrice(cheapest))}`;}
   }
 }
 
