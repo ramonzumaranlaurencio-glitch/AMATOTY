@@ -1,0 +1,58 @@
+[
+  {
+    "sku": "001",
+    "name": "Portable Mini Blender",
+    "description": "Licuadora compacta para smoothies, proteinas y jugos rapidos fuera de casa.",
+    "category": "cocina",
+    "image": "",
+    "link": "https://www.amazon.com/s?k=portable+mini+blender+rechargeable&tag=lcapro-20",
+    "price": 0.0,
+    "currency": "USD",
+    "stock": 10,
+    "priority": "Baja",
+    "state": "Publicado",
+    "specs": "Capacidad: 300-500ml, Energia: recargable USB, Uso: smoothies y proteinas"
+  },
+  {
+    "sku": "002",
+    "name": "Home Cable Organizer",
+    "description": "Organizador simple para mantener cables visibles, cargadores y escritorio bajo control.",
+    "category": "hogar",
+    "image": "",
+    "link": "https://www.amazon.com/s?k=home+cable+organizer+desk+cable+management&tag=lcapro-20",
+    "price": 0.0,
+    "currency": "USD",
+    "stock": 10,
+    "priority": "Baja",
+    "state": "Publicado",
+    "specs": "Uso: cables y cargadores, Instalacion: adhesiva o de escritorio"
+  },
+  {
+    "sku": "003",
+    "name": "Car Seat Gap Organizer",
+    "description": "Accesorio para guardar celular, llaves y objetos pequenos al alcance del conductor.",
+    "category": "automocion",
+    "image": "",
+    "link": "https://www.amazon.com/s?k=car+seat+gap+organizer&tag=lcapro-20",
+    "price": 0.0,
+    "currency": "USD",
+    "stock": 10,
+    "priority": "Baja",
+    "state": "Publicado",
+    "specs": "Uso: auto, Ubicacion: espacio entre asientos, Funcion: guardar objetos pequenos"
+  },
+  {
+    "sku": "004",
+    "name": "Protector Solar Facial SPF50",
+    "description": "Protector facial de uso diario para quienes buscan textura ligera y alta proteccion.",
+    "category": "belleza",
+    "image": "",
+    "link": "https://www.amazon.com/s?k=protector+solar+facial+spf+50+textura+ligera&tag=lcapro-20",
+    "price": 0.0,
+    "currency": "USD",
+    "stock": 10,
+    "priority": "Baja",
+    "state": "Publicado",
+    "specs": "SPF: 50, Uso: facial diario, Acabado: ligero"
+  }
+]

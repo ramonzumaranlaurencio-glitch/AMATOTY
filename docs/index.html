@@ -73,13 +73,13 @@
 
 <script>
 (function(){
-  const CARDS = [
-    { img:"assets/home.jpg",          title:"Oye Bonita – Diagnóstico Facial",  text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",       href:"oye-bonita.html" },
-    { img:"assets/placeholder.png",   title:"Smart Search con IA",              text:"Busca cualquier producto con imagen, voz o texto. Resultados globales.", href:"smart-search.html" },
-    { img:"assets/placeholder.png",   title:"Mini Blender Portátil",            text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",          href:"blog/portable-mini-blender-review.html" },
-    { img:"assets/placeholder.png",   title:"Organizador Asiento de Auto",      text:"Nunca más pierdas nada entre los asientos. Diseño universal.",           href:"blog/car-seat-gap-organizer-review.html" },
-    { img:"assets/placeholder.png",   title:"Kitchen Food Saver",               text:"Conserva alimentos frescos más tiempo. Ahorra dinero y reduce residuos.", href:"blog/kitchen-food-saver-gadget-review.html" },
-    { img:"assets/placeholder.png",   title:"Mini Aspiradora de Escritorio",    text:"Limpia teclado y espacios pequeños al instante. Sin cables.",             href:"blog/mini-vacuum-cleaner-review.html" },
+  const FALLBACK_CARDS = [
+    { img:"assets/home.jpg",        title:"Oye Bonita – Diagnóstico Facial",  text:"IA facial: conoce tu tipo de piel y recibe rutina personalizada.",       href:"oye-bonita.html" },
+    { img:"assets/placeholder.png", title:"Smart Search con IA",              text:"Busca cualquier producto con imagen, voz o texto. Resultados globales.", href:"smart-search.html" },
+    { img:"assets/placeholder.png", title:"Mini Blender Portátil",            text:"Batidos en cualquier lugar. Compacto, recargable y silencioso.",          href:"blog/portable-mini-blender-review.html" },
+    { img:"assets/placeholder.png", title:"Organizador Asiento de Auto",      text:"Nunca más pierdas nada entre los asientos. Diseño universal.",           href:"blog/car-seat-gap-organizer-review.html" },
+    { img:"assets/placeholder.png", title:"Kitchen Food Saver",               text:"Conserva alimentos frescos más tiempo. Ahorra dinero y reduce residuos.", href:"blog/kitchen-food-saver-gadget-review.html" },
+    { img:"assets/placeholder.png", title:"Mini Aspiradora de Escritorio",    text:"Limpia teclado y espacios pequeños al instante. Sin cables.",             href:"blog/mini-vacuum-cleaner-review.html" },
   ];
 
   const AUTOPLAY_MS = 3800;
@@ -90,88 +90,95 @@
   let   timer  = null;
   let   touchY = null;
 
-  // Build cards
-  CARDS.forEach((c, i) => {
-    const el = document.createElement('div');
-    el.className = 'vc3d-card';
-    el.dataset.idx = i;
-    el.innerHTML = `<img src="${c.img}" alt="${c.title}" loading="lazy" onerror="this.src='assets/placeholder.png'">
-      <div class="vc3d-card-body">
-        <h3>${c.title}</h3><p>${c.text}</p>
-        <a href="${c.href}">Ver más →</a>
-      </div>`;
-    el.addEventListener('click', () => goTo(i));
-    track.appendChild(el);
+  function buildCarousel(CARDS) {
+    track.innerHTML = '';
+    dots.innerHTML  = '';
 
-    const dot = document.createElement('span');
-    dot.className = 'vc3d-dot' + (i===0?' active':'');
-    dot.addEventListener('click', () => goTo(i));
-    dots.appendChild(dot);
-  });
+    CARDS.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'vc3d-card';
+      el.dataset.idx = i;
+      el.innerHTML = `<img src="${c.img}" alt="${c.title}" loading="lazy" onerror="this.src='assets/placeholder.png'">
+        <div class="vc3d-card-body">
+          <h3>${c.title}</h3><p>${c.text}</p>
+          <a href="${c.href}">Ver más →</a>
+        </div>`;
+      el.addEventListener('click', () => goTo(i));
+      track.appendChild(el);
 
-  const allCards = track.querySelectorAll('.vc3d-card');
-  const allDots  = dots.querySelectorAll('.vc3d-dot');
-  const total    = CARDS.length;
-
-  function layout() {
-    const h    = scene.offsetHeight;
-    const gap  = h / 2.6;
-    allCards.forEach((card, i) => {
-      const delta = i - cur;
-      const wrap  = total;
-      let   d     = delta;
-      if (d >  wrap/2) d -= wrap;
-      if (d < -wrap/2) d += wrap;
-
-      const absD   = Math.abs(d);
-      const isActive = d === 0;
-      const scale  = isActive ? 1 : Math.max(0.62, 1 - absD * 0.18);
-      const tz     = isActive ? 0 : -absD * 90;
-      const ry     = isActive ? 0 : (d > 0 ? 6 : -6);
-      const op     = isActive ? 1 : Math.max(0.15, 1 - absD * 0.35);
-      const ty     = h/2 - 110 + d * gap;  // center offset
-      const z      = isActive ? 20 : -absD * 5;
-
-      card.style.transform = `translateX(-50%) translateY(${ty}px) translateZ(${tz}px) scale(${scale}) rotateY(${ry}deg)`;
-      card.style.opacity   = op;
-      card.style.zIndex    = 100 - absD * 10;
-      card.style.boxShadow = isActive ? '0 16px 48px rgba(0,0,0,.22)' : '0 2px 12px rgba(0,0,0,.08)';
+      const dot = document.createElement('span');
+      dot.className = 'vc3d-dot' + (i===0?' active':'');
+      dot.addEventListener('click', () => goTo(i));
+      dots.appendChild(dot);
     });
-    allDots.forEach((dot, i) => dot.classList.toggle('active', i === cur));
-  }
 
-  function goTo(idx) {
-    cur = ((idx % total) + total) % total;
+    const allCards = track.querySelectorAll('.vc3d-card');
+    const allDots  = dots.querySelectorAll('.vc3d-dot');
+    const total    = CARDS.length;
+
+    function layout() {
+      const h   = scene.offsetHeight;
+      const gap = h / 2.6;
+      allCards.forEach((card, i) => {
+        let d = i - cur;
+        if (d >  total/2) d -= total;
+        if (d < -total/2) d += total;
+        const absD    = Math.abs(d);
+        const isActive = d === 0;
+        const scale   = isActive ? 1 : Math.max(0.62, 1 - absD * 0.18);
+        const tz      = isActive ? 0 : -absD * 90;
+        const ry      = isActive ? 0 : (d > 0 ? 6 : -6);
+        const op      = isActive ? 1 : Math.max(0.15, 1 - absD * 0.35);
+        const ty      = h/2 - 110 + d * gap;
+        card.style.transform  = `translateX(-50%) translateY(${ty}px) translateZ(${tz}px) scale(${scale}) rotateY(${ry}deg)`;
+        card.style.opacity    = op;
+        card.style.zIndex     = 100 - absD * 10;
+        card.style.boxShadow  = isActive ? '0 16px 48px rgba(0,0,0,.22)' : '0 2px 12px rgba(0,0,0,.08)';
+      });
+      allDots.forEach((dot, i) => dot.classList.toggle('active', i === cur));
+    }
+
+    function goTo(idx) { cur = ((idx % total) + total) % total; layout(); }
+    function next() { goTo(cur + 1); }
+    function prev() { goTo(cur - 1); }
+
+    document.getElementById('vc3dNext').onclick = () => { next(); resetTimer(); };
+    document.getElementById('vc3dPrev').onclick = () => { prev(); resetTimer(); };
+
+    scene.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, {passive:true});
+    scene.addEventListener('touchend',   e => {
+      if (touchY === null) return;
+      const dy = e.changedTouches[0].clientY - touchY;
+      if (Math.abs(dy) > 40) { dy < 0 ? next() : prev(); resetTimer(); }
+      touchY = null;
+    }, {passive:true});
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { next(); resetTimer(); }
+      if (e.key === 'ArrowUp')   { prev(); resetTimer(); }
+    });
+
+    function startTimer() { timer = setInterval(next, AUTOPLAY_MS); }
+    function resetTimer() { clearInterval(timer); startTimer(); }
+
     layout();
+    startTimer();
+    window.addEventListener('resize', layout);
   }
 
-  function next() { goTo(cur + 1); }
-  function prev() { goTo(cur - 1); }
-
-  document.getElementById('vc3dNext').addEventListener('click', () => { next(); resetTimer(); });
-  document.getElementById('vc3dPrev').addEventListener('click', () => { prev(); resetTimer(); });
-
-  // Touch support
-  scene.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, {passive:true});
-  scene.addEventListener('touchend',   e => {
-    if (touchY === null) return;
-    const dy = e.changedTouches[0].clientY - touchY;
-    if (Math.abs(dy) > 40) { dy < 0 ? next() : prev(); resetTimer(); }
-    touchY = null;
-  }, {passive:true});
-
-  // Keyboard
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowDown') { next(); resetTimer(); }
-    if (e.key === 'ArrowUp')   { prev(); resetTimer(); }
-  });
-
-  function startTimer() { timer = setInterval(next, AUTOPLAY_MS); }
-  function resetTimer() { clearInterval(timer); startTimer(); }
-
-  layout();
-  startTimer();
-  window.addEventListener('resize', layout);
+  // Load from carousels.json (generated by admin panel), fallback to hardcoded
+  fetch('assets/carousels.json')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      const homeCards = (data.home || []).map(c => ({
+        img:   c.img   || 'assets/placeholder.png',
+        title: c.title || '',
+        text:  c.text  || '',
+        href:  c.href  || '#',
+      }));
+      buildCarousel(homeCards.length ? homeCards : FALLBACK_CARDS);
+    })
+    .catch(() => buildCarousel(FALLBACK_CARDS));
 })();
 </script>
 

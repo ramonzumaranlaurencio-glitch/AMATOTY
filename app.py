@@ -77,6 +77,16 @@ def inject_css():
 .alert-good{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534;padding:14px;border-radius:14px}
 .alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:14px;border-radius:14px}
 .stButton>button{border-radius:12px;font-weight:800;min-height:42px;}
+/* ── Products inventory layout ── */
+.inv-panel{background:#fff;border:1px solid #dbe3ef;border-radius:18px;padding:16px 14px;min-height:520px;}
+.inv-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#2563eb;margin-bottom:10px;}
+.inv-row-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid #e5e7eb;border-radius:10px;margin:5px 0;cursor:pointer;transition:background .15s;}
+.inv-row-item:hover{background:#f0f7ff;}
+.inv-row-item.active{background:#eff6ff;border-color:#3b82f6;}
+.inv-row-item b{font-size:.93em;color:#111;}
+.inv-row-item small{color:#6b7280;font-size:.8em;}
+.detail-section{background:#f8fafc;border:1px solid #dbe3ef;border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+.detail-section-title{font-size:11px;font-weight:900;letter-spacing:.07em;color:#ea580c;margin-bottom:8px;text-transform:uppercase;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1047,6 +1057,273 @@ def products_page():
         except Exception as e:
             st.error(str(e))
 
+# ─── Store / Carousel helpers ──────────────────────────────────────────────────
+STORE_PATH    = DATA / "store_products.json"
+CAROUSELS_PATH = DATA / "carousels.json"
+
+PRIORITY_OPTS = ["Baja", "Media", "Alta"]
+ESTADO_OPTS   = ["Publicado", "Borrador", "Archivado"]
+CURRENCY_OPTS = ["USD", "PEN", "EUR", "MXN", "ARS", "CLP", "COP", "BRL"]
+
+PAGES_CAROUSEL = {
+    "home":       {"label": "🏠 Inicio (index.html)",        "file": "docs/index.html"},
+    "blog":       {"label": "📝 Blog (blog/index.html)",     "file": "docs/blog/index.html"},
+    "category":   {"label": "🗂️ Categorías",                 "file": "docs/category/index.html"},
+    "oye_bonita": {"label": "💄 Oye Bonita",                 "file": "docs/oye-bonita.html"},
+}
+
+def _init_store_products():
+    tp_path = Path("docs/assets/trending_products.json")
+    prods = []
+    if tp_path.exists():
+        tp = json.loads(tp_path.read_text(encoding="utf-8"))
+        prods = tp.get("products", [])
+    result = []
+    for i, p in enumerate(prods):
+        cfg = config()
+        kw  = (p.get("search_query") or p.get("name","")).replace(" ","+")
+        result.append({
+            "sku":         str(i+1).zfill(3),
+            "name":        p.get("name",""),
+            "description": p.get("short_desc",""),
+            "category":    p.get("category",""),
+            "image":       p.get("image",""),
+            "link":        f"https://www.amazon.com/s?k={kw}&tag={cfg.get('amazon_tag','tag-20')}",
+            "price":       0.0,
+            "currency":    "USD",
+            "stock":       10,
+            "priority":    "Baja",
+            "state":       "Publicado",
+            "specs":       p.get("specs",""),
+        })
+    return result
+
+def load_store_products():
+    if not STORE_PATH.exists():
+        data = _init_store_products()
+        STORE_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    return json.loads(STORE_PATH.read_text(encoding="utf-8"))
+
+def save_store_products(data):
+    STORE_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+def load_carousels():
+    if not CAROUSELS_PATH.exists():
+        return {k: [] for k in PAGES_CAROUSEL}
+    return json.loads(CAROUSELS_PATH.read_text(encoding="utf-8"))
+
+def save_carousels(data):
+    CAROUSELS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+def export_carousels_to_docs(carousels, products):
+    prod_map = {p["name"]: p for p in products}
+    output = {}
+    for page, names in carousels.items():
+        output[page] = []
+        for name in names:
+            p = prod_map.get(name)
+            if p:
+                output[page].append({
+                    "title": p["name"],
+                    "text":  p.get("description",""),
+                    "img":   p.get("image","") or "assets/placeholder.png",
+                    "href":  p.get("link",""),
+                })
+    out_path = Path("docs/assets/carousels.json")
+    out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
+
+# ─── Página Productos (rediseñada) ─────────────────────────────────────────────
+def store_products_page():
+    header("🛒 Productos", "Inventario · Editor · Carruseles por página")
+
+    if "sp_idx" not in st.session_state:
+        st.session_state.sp_idx = 0
+
+    tab_inv, tab_car = st.tabs(["📦 Inventario", "🎠 Carruseles por Página"])
+
+    # ── Tab 1: Inventario ─────────────────────────────────────────────────────
+    with tab_inv:
+        products = load_store_products()
+
+        # Filter bar
+        fc1, fc2, fc3 = st.columns([3, 2, 2])
+        with fc1:
+            q = st.text_input("Buscar", placeholder="Nombre del producto...",
+                              label_visibility="collapsed", key="sp_q")
+        with fc2:
+            f_estado = st.selectbox("Estado", ["Todos"] + ESTADO_OPTS,
+                                    label_visibility="collapsed", key="sp_fest")
+        with fc3:
+            cats = ["Todas"] + sorted({p.get("category","") for p in products if p.get("category","")})
+            f_cat = st.selectbox("Categoría", cats,
+                                 label_visibility="collapsed", key="sp_fcat")
+
+        # Apply filters
+        filtered = products
+        if q:
+            filtered = [p for p in filtered if q.lower() in p.get("name","").lower()]
+        if f_estado != "Todos":
+            filtered = [p for p in filtered if p.get("state","") == f_estado]
+        if f_cat != "Todas":
+            filtered = [p for p in filtered if p.get("category","") == f_cat]
+
+        # Two-column layout
+        col_list, col_detail = st.columns([4, 6], gap="large")
+
+        with col_list:
+            st.markdown('<div class="inv-label">INVENTARIO</div>', unsafe_allow_html=True)
+
+            if st.button("＋ Nuevo producto", use_container_width=True, type="secondary", key="sp_new_btn"):
+                new_p = {
+                    "sku": str(len(products)+1).zfill(3),
+                    "name": "Nuevo producto", "description": "", "category": "",
+                    "image": "", "link": "", "price": 0.0, "currency": "USD",
+                    "stock": 10, "priority": "Baja", "state": "Borrador", "specs": "",
+                }
+                products.append(new_p)
+                save_store_products(products)
+                st.session_state.sp_idx = len(products) - 1
+                st.rerun()
+
+            st.divider()
+
+            for p in filtered:
+                real_idx = products.index(p)
+                sc = {"Publicado": "🟢", "Borrador": "🟡", "Archivado": "🔴"}.get(p.get("state",""), "⚪")
+                label = f"{sc} **{p['name']}**\n{p.get('category','')} · {p.get('currency','USD')} {float(p.get('price',0)):.2f} · Stock {p.get('stock',0)}"
+                btn_type = "primary" if real_idx == st.session_state.sp_idx else "secondary"
+                if st.button(label, key=f"sp_sel_{real_idx}", use_container_width=True, type=btn_type):
+                    st.session_state.sp_idx = real_idx
+                    st.rerun()
+
+            if not filtered:
+                st.info("Sin resultados.")
+
+        with col_detail:
+            if st.session_state.sp_idx < len(products):
+                p   = products[st.session_state.sp_idx]
+                idx = st.session_state.sp_idx
+
+                st.markdown(f'<div class="inv-label">🏷️ {escape(p.get("name","")).upper()}</div>',
+                            unsafe_allow_html=True)
+
+                with st.form(key="sp_form"):
+                    st.markdown('<div class="detail-section-title">ℹ️ INFORMACIÓN BÁSICA</div>',
+                                unsafe_allow_html=True)
+                    r1c1, r1c2 = st.columns([3, 1])
+                    with r1c1:
+                        name = st.text_input("NOMBRE DEL PRODUCTO", value=p.get("name",""))
+                    with r1c2:
+                        sku  = st.text_input("SKU / CÓDIGO", value=p.get("sku",""))
+
+                    desc = st.text_area("DESCRIPCIÓN", value=p.get("description",""), height=80)
+
+                    r2c1, r2c2 = st.columns(2)
+                    with r2c1:
+                        cat  = st.text_input("CATEGORÍA", value=p.get("category",""))
+                    with r2c2:
+                        link = st.text_input("ENLACE DEL PRODUCTO", value=p.get("link",""),
+                                             placeholder="https://...")
+
+                    img = st.text_input("IMAGEN (URL o ruta local)", value=p.get("image",""),
+                                       placeholder="assets/placeholder.png")
+
+                    st.divider()
+                    st.markdown('<div class="detail-section-title">💰 PRECIO, STOCK Y ESTADO</div>',
+                                unsafe_allow_html=True)
+                    r3c1, r3c2 = st.columns(2)
+                    with r3c1:
+                        price    = st.number_input("PRECIO", value=float(p.get("price",0)),
+                                                   step=0.5, format="%.2f")
+                    with r3c2:
+                        cur_idx  = CURRENCY_OPTS.index(p.get("currency","USD")) if p.get("currency","USD") in CURRENCY_OPTS else 0
+                        currency = st.selectbox("MONEDA", CURRENCY_OPTS, index=cur_idx)
+
+                    r4c1, r4c2, r4c3 = st.columns(3)
+                    with r4c1:
+                        stock = st.number_input("STOCK", value=int(p.get("stock",10)), step=1)
+                    with r4c2:
+                        pri_idx  = PRIORITY_OPTS.index(p.get("priority","Baja")) if p.get("priority","Baja") in PRIORITY_OPTS else 0
+                        priority = st.selectbox("PRIORIDAD", PRIORITY_OPTS, index=pri_idx)
+                    with r4c3:
+                        est_idx = ESTADO_OPTS.index(p.get("state","Publicado")) if p.get("state","Publicado") in ESTADO_OPTS else 0
+                        state   = st.selectbox("ESTADO", ESTADO_OPTS, index=est_idx)
+
+                    st.divider()
+                    st.markdown('<div class="detail-section-title">📋 FICHA TÉCNICA</div>',
+                                unsafe_allow_html=True)
+                    specs = st.text_area("ESPECIFICACIONES (una por línea)",
+                                        value=p.get("specs",""), height=70)
+
+                    bc1, bc2, bc3, bc4 = st.columns(4)
+                    with bc1:
+                        save_btn = st.form_submit_button("💾 Guardar", type="primary", use_container_width=True)
+                    with bc2:
+                        pub_btn  = st.form_submit_button("📢 Publicar", use_container_width=True)
+                    with bc3:
+                        arch_btn = st.form_submit_button("🗃️ Archivar", use_container_width=True)
+                    with bc4:
+                        del_btn  = st.form_submit_button("🗑️ Eliminar", use_container_width=True)
+
+                    if save_btn or pub_btn or arch_btn:
+                        products[idx] = {
+                            "sku": sku, "name": name, "description": desc,
+                            "category": cat, "image": img, "link": link,
+                            "price": float(price), "currency": currency,
+                            "stock": int(stock), "priority": priority,
+                            "state": "Publicado" if pub_btn else ("Archivado" if arch_btn else state),
+                            "specs": specs,
+                        }
+                        save_store_products(products)
+                        st.success("✅ Guardado.")
+                        st.rerun()
+
+                    if del_btn:
+                        products.pop(idx)
+                        save_store_products(products)
+                        st.session_state.sp_idx = max(0, idx - 1)
+                        st.warning("Producto eliminado.")
+                        st.rerun()
+            else:
+                st.info("Selecciona un producto de la lista para editarlo.")
+
+    # ── Tab 2: Carruseles ─────────────────────────────────────────────────────
+    with tab_car:
+        products  = load_store_products()
+        carousels = load_carousels()
+        pnames    = [p["name"] for p in products]
+
+        st.markdown("#### Asigna productos a cada carrusel de página")
+        st.info("Selecciona los productos para cada página y pulsa **Guardar y Exportar**.")
+
+        updated = {}
+        for page_key, pinfo in PAGES_CAROUSEL.items():
+            st.markdown(f"**{pinfo['label']}**")
+            current = [n for n in carousels.get(page_key, []) if n in pnames]
+            selected = st.multiselect(
+                pinfo["label"],
+                options=pnames,
+                default=current,
+                key=f"car_{page_key}",
+                label_visibility="collapsed",
+                placeholder="Elige los productos que aparecerán en este carrusel...",
+            )
+            updated[page_key] = selected
+            st.caption(f"→ {len(selected)} producto(s) · {pinfo['file']}")
+            st.divider()
+
+        cc1, cc2 = st.columns([2, 1])
+        with cc1:
+            if st.button("💾 Guardar y Exportar carousels.json", type="primary",
+                         use_container_width=True, key="car_save"):
+                save_carousels(updated)
+                export_carousels_to_docs(updated, products)
+                st.success("✅ `data/carousels.json` y `docs/assets/carousels.json` actualizados.")
+                st.info("💡 Recarga las páginas del sitio para ver los cambios.")
+        with cc2:
+            if st.button("🔄 Recargar config", use_container_width=True, key="car_reload"):
+                st.rerun()
+
 
 def accounts_page():
     header("👥 Cuentas")
@@ -1110,7 +1387,7 @@ def main():
     elif page == "Crecimiento Viral":
         growth_page()
     elif page == "Productos":
-        products_page()
+        store_products_page()
     elif page == "Cuentas":
         accounts_page()
     elif page == "Configuración":
