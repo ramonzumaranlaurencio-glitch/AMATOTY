@@ -1086,11 +1086,59 @@ def _serpapi_key():
     ).strip()
 
 
+def _google_cse_credentials():
+    """Retorna (api_key, cse_id) para Google Custom Search. Vacío si no configurado."""
+    api_key = (
+        os.environ.get("GOOGLE_CSE_API_KEY")
+        or os.environ.get("GOOGLE_API_KEY")
+        or ""
+    ).strip()
+    cse_id = (
+        os.environ.get("GOOGLE_CSE_ID")
+        or os.environ.get("GOOGLE_CX")
+        or ""
+    ).strip()
+    return api_key, cse_id
+
+
 def _serpapi_image_lookup_limit():
     try:
         return max(0, int(os.environ.get("SERPAPI_IMAGE_LOOKUPS", "10")))
     except (TypeError, ValueError):
         return 10
+
+
+def _google_cse_image_for_query(query):
+    """Busca imagen via Google Custom Search API como fallback a SerpAPI."""
+    api_key, cse_id = _google_cse_credentials()
+    query = _clean_search_text(query)
+    if not api_key or not cse_id or not query:
+        return ""
+    params = urllib.parse.urlencode(
+        {
+            "q": query,
+            "cx": cse_id,
+            "key": api_key,
+            "searchType": "image",
+            "num": "3",
+            "safe": "active",
+            "imgType": "photo",
+        }
+    )
+    url = f"https://www.googleapis.com/customsearch/v1?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "AMATOTY-Product-Advisor/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return ""
+    blocked = ("placeholder", "source.unsplash.com", "picsum.photos")
+    for item in payload.get("items", []) or []:
+        image_url = _secure_image_url(item.get("link") or "")
+        lowered = image_url.lower()
+        if _is_web_image_url(image_url) and not any(b in lowered for b in blocked):
+            return image_url
+    return ""
 
 
 def _serpapi_image_for_query(query):
@@ -1156,7 +1204,7 @@ def _enrich_products_with_serpapi_images(products, fallback_query=""):
                 continue
             query = _product_image_query(item, fallback_query)
             image_url = ""
-            # Solo SerpApi
+            # Prioridad 1: SerpAPI
             if _serpapi_key() and query and lookups < max_lookups:
                 if query not in cache:
                     cache[query] = _serpapi_image_for_query(query)
@@ -1170,6 +1218,21 @@ def _enrich_products_with_serpapi_images(products, fallback_query=""):
                         item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.82)
                     except (TypeError, ValueError):
                         item["image_match_score"] = 0.82
+            # Prioridad 2: Google Custom Search (fallback cuando no hay SerpAPI)
+            if not image_url and query and lookups < max_lookups:
+                cse_cache_key = f"cse:{query}"
+                if cse_cache_key not in cache:
+                    cache[cse_cache_key] = _google_cse_image_for_query(query)
+                    lookups += 1
+                image_url = cache.get(cse_cache_key) or ""
+                if image_url:
+                    item["image"] = image_url
+                    item["image_source"] = "google_cse"
+                    item["image_verified"] = True
+                    try:
+                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.80)
+                    except (TypeError, ValueError):
+                        item["image_match_score"] = 0.80
             enriched.append(item)
         return enriched
 
