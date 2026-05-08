@@ -1063,9 +1063,10 @@ function showView(id) {
 // ─── CARRUSEL (4 PANELES) ─────────────────────────────────────────────────────
 
 async function loadCarousel() {
-  if (!state.products || !state.products.length) {
-    await loadProducts();
-  }
+  // Always fetch all non-archived products for the carousel (ignore status filter)
+  const params = new URLSearchParams({organization_id: state.organizationId});
+  const data = await api(`/products?${params.toString()}`);
+  state.products = data.products || [];
   renderCarousel();
 }
 
@@ -1159,11 +1160,19 @@ async function saveCarouselBanner(event) {
     banner_link:        $("#carouselEditLink").value.trim()
   };
   try {
-    await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    const resp = await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    // Update the product in state directly from PATCH response
+    if (resp && resp.product) {
+      const idx = state.products.findIndex(p => p.id === productId);
+      if (idx >= 0) state.products[idx] = resp.product;
+      else state.products.push(resp.product);
+    } else {
+      await loadProducts();
+    }
     toast(`Carrusel ${state.activeCarousel} actualizado.`);
     closeCarouselModal();
-    await loadProducts();
     renderCarousel();
+    renderProducts();
   } catch (err) {
     toast(err.message);
   }
@@ -1173,10 +1182,18 @@ async function toggleCarouselEntry(productId, addToCarousel) {
   const key = CAR_INFO[state.activeCarousel].key;
   const payload = {[key]: addToCarousel};
   try {
-    await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    const resp = await api(`/products/${encodeURIComponent(productId)}/banner`, {method:"PATCH", body:JSON.stringify(payload)});
+    // Update the product in state directly from PATCH response (avoids status-filter re-fetch issue)
+    if (resp && resp.product) {
+      const idx = state.products.findIndex(p => p.id === productId);
+      if (idx >= 0) state.products[idx] = resp.product;
+      else state.products.push(resp.product);
+    } else {
+      await loadProducts();
+    }
     toast(addToCarousel ? `Añadido al carrusel ${state.activeCarousel}.` : `Quitado del carrusel ${state.activeCarousel}.`);
-    await loadProducts();
     renderCarousel();
+    renderProducts();
   } catch (err) {
     toast(err.message);
   }

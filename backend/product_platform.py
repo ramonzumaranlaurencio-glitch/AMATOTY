@@ -1227,6 +1227,7 @@ def public_products():
     organization_id = request.args.get("organization_id")
     q = str(request.args.get("q") or "").strip().lower()
     limit = max(1, min(100, int(request.args.get("limit") or 48)))
+    carousel_key = str(request.args.get("carousel_key") or "").strip()
     conn = get_db()
     try:
         clauses = ["p.status = 'published'", "o.status = 'active'"]
@@ -1237,6 +1238,10 @@ def public_products():
         if q:
             clauses.append("(LOWER(p.name) LIKE ? OR LOWER(p.description) LIKE ? OR LOWER(p.category) LIKE ? OR LOWER(p.sku) LIKE ?)")
             params.extend([f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"])
+        # carousel_key filter: only allow carousel_01 through carousel_06 (security: strict regex)
+        if carousel_key and re.match(r'^carousel_0[1-6]$', carousel_key):
+            clauses.append("json_extract(p.metadata_json, '$.' || ?) = 1")
+            params.append(carousel_key)
         rows = conn.execute(
             f"""
             SELECT p.*, o.name AS organization_name
