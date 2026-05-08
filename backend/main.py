@@ -978,7 +978,7 @@ def _official_brand_source(brand, product_name=""):
 def _provider_source_links(item):
     query = urllib.parse.quote_plus(_clean_link_query(item))
     links = [
-        {"name": "Amazon", "url": f"https://www.amazon.com/s?k={query}", "type": "marketplace"},
+        {"name": "Amazon", "url": f"https://www.amazon.com/s?k={query}&tag=amatotyshop-20", "type": "marketplace"},
         {"name": "AliExpress", "url": f"https://www.aliexpress.com/wholesale?SearchText={query}", "type": "marketplace"},
         {"name": "Mercado Libre", "url": f"https://listado.mercadolibre.com/{query}", "type": "marketplace"},
     ]

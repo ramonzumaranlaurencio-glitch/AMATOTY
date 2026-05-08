@@ -196,7 +196,44 @@ button{cursor:pointer}
   .top-header-inner{height:54px}
   .brand-name{font-size:16px}
 }
+
+/* ── SUGGESTIONS AUTOCOMPLETE ── */
+.suggestions-dropdown{position:fixed;background:#fff;border:1px solid var(--line);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:8000;max-height:320px;overflow-y:auto;display:none;min-width:300px}
+.suggestions-dropdown.show{display:block}
+.suggestion-group-label{padding:6px 14px;font-size:10px;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;background:#fff8f0;border-bottom:1px solid var(--line);position:sticky;top:0}
+.suggestion-item{padding:9px 14px;cursor:pointer;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid #fafafa}
+.suggestion-item:hover,.suggestion-item.active{background:#fff8f0}
+.suggestion-item .s-icon{color:var(--ink2);font-size:14px;flex-shrink:0;width:18px;text-align:center}
+
+/* ── AMAZON AFFILIATE SECTION ── */
+.amz-section{background:linear-gradient(135deg,#fff8f0 0%,#fffef7 100%);border:1.5px solid #fcd34d;border-radius:var(--radius);padding:16px;margin-bottom:16px;animation:amzIn .35s ease}
+@keyframes amzIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.amz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.amz-head-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.amz-head-title{font-size:15px;font-weight:900;color:#92400e;display:flex;align-items:center;gap:6px}
+.amz-query-pill{background:linear-gradient(135deg,#ff9900,#f59e0b);color:#fff;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:800;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+.amz-close{background:none;border:none;color:#b45309;font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;font-weight:900;transition:background .15s;line-height:1}
+.amz-close:hover{background:#fde68a}
+.amz-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+.amz-card{background:#fff;border:1.5px solid #fde68a;border-radius:var(--radius-sm);padding:14px 12px;display:flex;flex-direction:column;gap:6px;transition:all .2s;position:relative;overflow:hidden;cursor:default}
+.amz-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,#ff9900)}
+.amz-card:hover{border-color:var(--accent);box-shadow:0 6px 20px rgba(255,153,0,.22);transform:translateY(-2px)}
+.amz-card-icon{font-size:28px;line-height:1}
+.amz-card-label{font-size:13px;font-weight:900;color:var(--ink);line-height:1.3}
+.amz-card-desc{font-size:11px;color:var(--ink2);line-height:1.5;flex:1}
+.amz-btn{background:linear-gradient(135deg,#ff9900,#f59e0b);color:#fff;border:none;border-radius:6px;padding:9px 10px;font-weight:900;font-size:12px;width:100%;cursor:pointer;display:block;text-align:center;text-decoration:none;transition:all .15s;margin-top:4px}
+.amz-btn:hover{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 4px 14px rgba(255,153,0,.38);transform:translateY(-1px);color:#fff}
+.amz-disclaimer{font-size:10px;color:var(--ink2);border-top:1px solid #fde68a;padding-top:10px;margin-bottom:10px;line-height:1.5}
+.amz-history-wrap{margin-top:4px}
+.amz-history-title{font-size:10px;font-weight:900;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.amz-history-title button{font-size:10px;color:#dc2626;background:none;border:none;cursor:pointer;font-weight:700;margin-left:auto;padding:0}
+.amz-chips{display:flex;flex-wrap:wrap;gap:6px}
+.amz-chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+.amz-chip:hover{border-color:var(--accent);color:var(--accent);background:#fff8f0}
+.amz-chip-del{color:#dc2626;font-size:15px;line-height:1;border:none;background:none;cursor:pointer;padding:0;flex-shrink:0}
+@media(max-width:600px){.amz-cards{grid-template-columns:repeat(2,1fr)}}
 </style>
+
 </head>
 <body data-page-title="page_title_smart">
 
@@ -350,6 +387,26 @@ button{cursor:pointer}
       </div>
     </div>
 
+    <!-- AMAZON AFFILIATE SEARCH SECTION -->
+    <div id="amazonSection" class="amz-section" style="display:none">
+      <div class="amz-head">
+        <div class="amz-head-left">
+          <span class="amz-head-title">🛒 Buscar en Amazon</span>
+          <span class="amz-query-pill" id="amzQueryPill"></span>
+        </div>
+        <button class="amz-close" onclick="closeAmazonSection()" title="Cerrar">✕</button>
+      </div>
+      <div id="amzCards" class="amz-cards"></div>
+      <p class="amz-disclaimer">📢 <strong>Aviso de afiliado:</strong> Como Asociado de Amazon, ganamos una comisión por compras que califiquen. El precio y la disponibilidad son responsabilidad de Amazon y pueden variar.</p>
+      <div class="amz-history-wrap" id="amzHistoryBlock" style="display:none">
+        <div class="amz-history-title">
+          🕐 Búsquedas recientes
+          <button onclick="clearAmazonHistory()">Borrar todo</button>
+        </div>
+        <div class="amz-chips" id="amzHistoryChips"></div>
+      </div>
+    </div>
+
     <!-- GRID -->
     <div class="product-grid" id="productGrid"></div>
 
@@ -400,6 +457,162 @@ if (!window.ProductAIGuard) {
 
 const esc = s => ProductAIGuard.escapeHtml(s);
 const fx = {USD:1,PEN:3.75,COP:3900,MXN:17,CLP:930,ARS:1050,BOB:6.9,PYG:7300,UYU:39,BRL:5};
+
+// ── AMAZON AFFILIATE SEARCH ────────────────────────────────────────────────
+const AMAZON_TAG = "amatotyshop-20";
+const AMZ_HISTORY_KEY = "amz_srch_v1";
+const POPULAR_SEARCHES = [
+  "audífonos bluetooth gamer","cámara seguridad wifi","cafetera espresso",
+  "smartwatch samsung","iphone 15","laptop gaming","zapatillas running",
+  "aspiradora robot","plancha cabello profesional","licuadora portátil",
+  "televisor 4k smart","tablet android","cargador rápido inalámbrico",
+  "altavoz bluetooth waterproof","silla gaming ergonómica","teclado mecánico rgb",
+  "drone con cámara 4k","monitor 27 pulgadas","auriculares cancelación ruido",
+  "freidora de aire","impresora láser","bicicleta eléctrica","proyector portátil",
+  "robot limpiador","cámara acción","power bank 20000mah","mouse inalámbrico"
+];
+
+function amzUrl(query, extra){
+  const k = encodeURIComponent((query||"").trim().replace(/\s+/g," "));
+  return "https://www.amazon.com/s?k="+k+"&tag="+AMAZON_TAG+(extra?"&"+extra:"");
+}
+
+function getAmazonHistory(){
+  try{return JSON.parse(localStorage.getItem(AMZ_HISTORY_KEY)||"[]");}catch{return [];}
+}
+function addAmazonHistory(q){
+  if(!q||!q.trim())return;
+  const h=getAmazonHistory().filter(x=>x.toLowerCase()!==q.toLowerCase()).slice(0,14);
+  h.unshift(q.trim());
+  localStorage.setItem(AMZ_HISTORY_KEY,JSON.stringify(h));
+}
+function clearAmazonHistory(){
+  localStorage.removeItem(AMZ_HISTORY_KEY);
+  const b=document.getElementById("amzHistoryBlock");
+  if(b)b.style.display="none";
+}
+function removeAmazonHistoryItem(idx){
+  const h=getAmazonHistory();h.splice(idx,1);
+  localStorage.setItem(AMZ_HISTORY_KEY,JSON.stringify(h));
+  renderAmazonHistory();
+}
+function renderAmazonHistory(){
+  const chips=document.getElementById("amzHistoryChips");
+  const block=document.getElementById("amzHistoryBlock");
+  if(!chips||!block)return;
+  const h=getAmazonHistory();
+  if(!h.length){block.style.display="none";return;}
+  block.style.display="block";
+  chips.innerHTML=h.map((q,i)=>`
+    <div class="amz-chip" onclick="pickAmazonHistory('${esc(q.replace(/'/g,"\\'"))}')">
+      🕐 ${esc(q)}
+      <button class="amz-chip-del" onclick="event.stopPropagation();removeAmazonHistoryItem(${i})" title="Eliminar">×</button>
+    </div>`).join("");
+}
+function pickAmazonHistory(q){
+  document.getElementById("query").value=q;
+  renderAmazonSection(q);
+}
+
+function renderAmazonSection(query){
+  if(!query||!query.trim())return;
+  const section=document.getElementById("amazonSection");
+  const pill=document.getElementById("amzQueryPill");
+  const cards=document.getElementById("amzCards");
+  if(!section||!cards)return;
+  const q=query.trim();
+  if(pill)pill.textContent=q;
+
+  const CARD_DEFS=[
+    {icon:"🔍",label:"Todos los resultados",desc:`Todos los productos de "${q}" disponibles en Amazon`,url:amzUrl(q),cc:"#ff9900"},
+    {icon:"⭐",label:"Mejor valorados",desc:"Los más valorados por compradores verificados",url:amzUrl(q,"s=review-rank"),cc:"#f59e0b"},
+    {icon:"💰",label:"Precio más bajo",desc:"Ordenados de menor a mayor precio",url:amzUrl(q,"s=price-asc-rank"),cc:"#10b981"},
+    {icon:"🆕",label:"Últimas llegadas",desc:"Modelos y lanzamientos más recientes",url:amzUrl(q,"s=date-desc-rank"),cc:"#3b82f6"},
+    {icon:"🏆",label:"Amazon's Choice",desc:"Alta calificación, buen precio y envío confiable",url:amzUrl(q+"+amazon+choice"),cc:"#8b5cf6"},
+    {icon:"📦",label:"Envío Prime",desc:"Elegibles para entrega rápida con Amazon Prime",url:amzUrl(q,"rh=p_85%3A2470955011"),cc:"#ec4899"},
+  ];
+
+  cards.innerHTML=CARD_DEFS.map(c=>`
+    <div class="amz-card" style="--cc:${c.cc}">
+      <div class="amz-card-icon">${c.icon}</div>
+      <div class="amz-card-label">${esc(c.label)}</div>
+      <div class="amz-card-desc">${esc(c.desc)}</div>
+      <a class="amz-btn" href="${esc(c.url)}" target="_blank" rel="nofollow sponsored noopener noreferrer">Ver en Amazon →</a>
+    </div>`).join("");
+
+  section.style.display="block";
+  renderAmazonHistory();
+}
+function closeAmazonSection(){
+  const s=document.getElementById("amazonSection");
+  if(s)s.style.display="none";
+}
+
+// ── AUTOCOMPLETE / SUGERENCIAS ─────────────────────────────────────────────
+let _suggActiveIdx=-1;
+function _getSuggestionsEl(){
+  let el=document.getElementById("suggestionsDropdown");
+  if(!el){el=document.createElement("div");el.id="suggestionsDropdown";el.className="suggestions-dropdown";document.body.appendChild(el);}
+  return el;
+}
+function _positionSuggestions(){
+  const input=document.getElementById("query");const el=document.getElementById("suggestionsDropdown");
+  if(!input||!el)return;
+  const r=input.getBoundingClientRect();
+  el.style.top=(r.bottom+window.scrollY)+"px";
+  el.style.left=r.left+"px";
+  el.style.width=Math.max(r.width,300)+"px";
+}
+function showSuggestions(q){
+  const el=_getSuggestionsEl();
+  const hist=getAmazonHistory();
+  const qn=normalizeText(q);
+  const mHist=hist.filter(h=>normalizeText(h).includes(qn)&&h.toLowerCase()!==q.toLowerCase()).slice(0,4);
+  const mPop=POPULAR_SEARCHES.filter(s=>normalizeText(s).includes(qn)&&!mHist.some(h=>h.toLowerCase()===s.toLowerCase())).slice(0,5);
+  const all=[...mHist,...mPop];
+  if(!all.length){hideSuggestions();return;}
+  _suggActiveIdx=-1;
+  let html="";
+  if(mHist.length)html+=`<div class="suggestion-group-label">Recientes</div>`;
+  mHist.forEach((h,i)=>html+=`<div class="suggestion-item" data-idx="${i}" onclick="pickSuggestion('${esc(h.replace(/'/g,"\\'"))}')"><span class="s-icon">🕐</span>${esc(h)}</div>`);
+  if(mPop.length)html+=`<div class="suggestion-group-label">Sugerencias</div>`;
+  mPop.forEach((s,i)=>html+=`<div class="suggestion-item" data-idx="${mHist.length+i}" onclick="pickSuggestion('${esc(s.replace(/'/g,"\\'"))}')"><span class="s-icon">🔍</span>${esc(s)}</div>`);
+  el.innerHTML=html;
+  _positionSuggestions();
+  el.classList.add("show");
+}
+function showRecentSuggestions(){
+  const hist=getAmazonHistory().slice(0,6);
+  if(!hist.length)return;
+  const el=_getSuggestionsEl();
+  _suggActiveIdx=-1;
+  let html=`<div class="suggestion-group-label">Recientes</div>`;
+  hist.forEach(h=>html+=`<div class="suggestion-item" onclick="pickSuggestion('${esc(h.replace(/'/g,"\\'"))}')"><span class="s-icon">🕐</span>${esc(h)}</div>`);
+  el.innerHTML=html;
+  _positionSuggestions();
+  el.classList.add("show");
+}
+function hideSuggestions(){
+  const el=document.getElementById("suggestionsDropdown");
+  if(el){el.classList.remove("show");_suggActiveIdx=-1;}
+}
+function pickSuggestion(val){
+  document.getElementById("query").value=val;
+  hideSuggestions();
+  executeSearch();
+}
+function navigateSuggestions(dir){
+  const el=document.getElementById("suggestionsDropdown");
+  if(!el||!el.classList.contains("show"))return false;
+  const items=el.querySelectorAll(".suggestion-item");
+  if(!items.length)return false;
+  if(_suggActiveIdx>=0)items[_suggActiveIdx].classList.remove("active");
+  _suggActiveIdx=(_suggActiveIdx+dir+items.length)%items.length;
+  items[_suggActiveIdx].classList.add("active");
+  document.getElementById("query").value=items[_suggActiveIdx].textContent.replace(/^[🕐🔍]\s*/u,"").trim();
+  return true;
+}
+function renderResults(){applyFilters();}
 const countryCurrency = {PE:"PEN",US:"USD",MX:"MXN",CO:"COP",CL:"CLP",AR:"ARS",EC:"USD",BO:"BOB",BR:"BRL",UY:"UYU"};
 
 const API_ORIGIN = window.location.hostname.includes("github.io") ? "https://amatoty.onrender.com" : "";
@@ -745,6 +958,9 @@ document.getElementById("checkoutBtn").addEventListener("click",async()=>{
 
 // ── BÚSQUEDA IA ────────────────────────────────────────────────────────────
 async function executeSearch(){
+  const q=document.getElementById("query").value.trim();
+  hideSuggestions();
+  if(q){addAmazonHistory(q);renderAmazonSection(q);}
   const runBtn=document.getElementById("runSearch");
   const sideBtn=document.getElementById("searchSideBtn");
   [runBtn,sideBtn].forEach(b=>{b.disabled=true;});
@@ -800,8 +1016,31 @@ function onCountryChange(){
 
 // ── EVENTOS ──────────────────────────────────────────────────────────────
 document.getElementById("runSearch").addEventListener("click",executeSearch);
-document.getElementById("query").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();executeSearch();}});
-document.getElementById("query").addEventListener("input",applyFilters);
+document.getElementById("query").addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown"){e.preventDefault();navigateSuggestions(1);return;}
+  if(e.key==="ArrowUp"){e.preventDefault();navigateSuggestions(-1);return;}
+  if(e.key==="Escape"){hideSuggestions();return;}
+  if(e.key==="Tab"){hideSuggestions();}
+  if(e.key==="Enter"){e.preventDefault();hideSuggestions();executeSearch();}
+});
+document.getElementById("query").addEventListener("input",e=>{
+  const q=e.target.value.trim();
+  if(q.length>=2)showSuggestions(q);else hideSuggestions();
+  applyFilters();
+});
+document.getElementById("query").addEventListener("focus",e=>{
+  const q=e.target.value.trim();
+  if(q.length>=2)showSuggestions(q);else showRecentSuggestions();
+});
+document.addEventListener("click",e=>{
+  if(!e.target.closest("#query")&&!e.target.closest("#suggestionsDropdown"))hideSuggestions();
+});
+window.addEventListener("scroll",()=>{
+  if(document.getElementById("suggestionsDropdown")?.classList.contains("show"))_positionSuggestions();
+},true);
+window.addEventListener("resize",()=>{
+  if(document.getElementById("suggestionsDropdown")?.classList.contains("show"))_positionSuggestions();
+});
 document.getElementById("categoryFilter").addEventListener("change",e=>{
   document.querySelectorAll(".cat-chip").forEach(el=>el.classList.toggle("active",el.dataset.cat===e.target.value));
   applyFilters();
