@@ -391,17 +391,17 @@ button{cursor:pointer}
     <div id="amazonSection" class="amz-section" style="display:none">
       <div class="amz-head">
         <div class="amz-head-left">
-          <span class="amz-head-title">🛒 Buscar en Amazon</span>
+          <span class="amz-head-title" data-i18n="amz_title">🛒 Search on Amazon</span>
           <span class="amz-query-pill" id="amzQueryPill"></span>
         </div>
-        <button class="amz-close" onclick="closeAmazonSection()" title="Cerrar">✕</button>
+        <button class="amz-close" onclick="closeAmazonSection()" data-i18n="amz_close_title" data-i18n-attr="title" title="Close">✕</button>
       </div>
       <div id="amzCards" class="amz-cards"></div>
-      <p class="amz-disclaimer">📢 <strong>Aviso de afiliado:</strong> Como Asociado de Amazon, ganamos una comisión por compras que califiquen. El precio y la disponibilidad son responsabilidad de Amazon y pueden variar.</p>
+      <p class="amz-disclaimer" data-i18n="amz_disclaimer">📢 <strong>Affiliate notice:</strong> As an Amazon Associate we earn from qualifying purchases. Prices and availability are set by Amazon and may vary.</p>
       <div class="amz-history-wrap" id="amzHistoryBlock" style="display:none">
         <div class="amz-history-title">
-          🕐 Búsquedas recientes
-          <button onclick="clearAmazonHistory()">Borrar todo</button>
+          <span data-i18n="amz_recent">🕐 Recent searches</span>
+          <button onclick="clearAmazonHistory()" data-i18n="amz_clear_all">Clear all</button>
         </div>
         <div class="amz-chips" id="amzHistoryChips"></div>
       </div>
@@ -461,16 +461,45 @@ const fx = {USD:1,PEN:3.75,COP:3900,MXN:17,CLP:930,ARS:1050,BOB:6.9,PYG:7300,UYU
 // ── AMAZON AFFILIATE SEARCH ────────────────────────────────────────────────
 const AMAZON_TAG = "amatotyshop-20";
 const AMZ_HISTORY_KEY = "amz_srch_v1";
-const POPULAR_SEARCHES = [
-  "audífonos bluetooth gamer","cámara seguridad wifi","cafetera espresso",
-  "smartwatch samsung","iphone 15","laptop gaming","zapatillas running",
-  "aspiradora robot","plancha cabello profesional","licuadora portátil",
-  "televisor 4k smart","tablet android","cargador rápido inalámbrico",
-  "altavoz bluetooth waterproof","silla gaming ergonómica","teclado mecánico rgb",
-  "drone con cámara 4k","monitor 27 pulgadas","auriculares cancelación ruido",
-  "freidora de aire","impresora láser","bicicleta eléctrica","proyector portátil",
-  "robot limpiador","cámara acción","power bank 20000mah","mouse inalámbrico"
-];
+const POPULAR_SEARCHES_BY_LANG = {
+  en: [
+    "bluetooth gaming headphones","wifi security camera","espresso coffee maker",
+    "samsung smartwatch","iphone 15","gaming laptop","running shoes",
+    "robot vacuum cleaner","professional hair straightener","portable blender",
+    "4k smart tv","android tablet","fast wireless charger",
+    "waterproof bluetooth speaker","ergonomic gaming chair","rgb mechanical keyboard",
+    "4k drone camera","27 inch monitor","noise cancelling headphones",
+    "air fryer","laser printer","electric bicycle","portable projector",
+    "robot mop","action camera","power bank 20000mah","wireless mouse"
+  ],
+  es: [
+    "audífonos bluetooth gamer","cámara seguridad wifi","cafetera espresso",
+    "smartwatch samsung","iphone 15","laptop gaming","zapatillas running",
+    "aspiradora robot","plancha cabello profesional","licuadora portátil",
+    "televisor 4k smart","tablet android","cargador rápido inalámbrico",
+    "altavoz bluetooth waterproof","silla gaming ergonómica","teclado mecánico rgb",
+    "drone con cámara 4k","monitor 27 pulgadas","auriculares cancelación ruido",
+    "freidora de aire","impresora láser","bicicleta eléctrica","proyector portátil",
+    "robot limpiador","cámara acción","power bank 20000mah","mouse inalámbrico"
+  ],
+  pt: [
+    "fone de ouvido bluetooth gamer","câmera segurança wifi","cafeteira espresso",
+    "smartwatch samsung","iphone 15","notebook gamer","tênis corrida",
+    "aspirador robô","chapinha profissional","liquidificador portátil",
+    "smart tv 4k","tablet android","carregador rápido sem fio",
+    "caixa de som bluetooth","cadeira gamer ergonômica","teclado mecânico rgb",
+    "drone câmera 4k","monitor 27 polegadas","fone cancelamento de ruído",
+    "fritadeira air fryer","impressora laser","bicicleta elétrica","projetor portátil",
+    "robô limpador","câmera de ação","power bank 20000mah","mouse sem fio"
+  ]
+};
+// Returns popular searches for the current language
+function getPopularSearches(){
+  const lang = (window.I18N && window.I18N.getLang) ? window.I18N.getLang() : 'en';
+  return POPULAR_SEARCHES_BY_LANG[lang] || POPULAR_SEARCHES_BY_LANG.en;
+}
+// Legacy alias so existing references still work
+const POPULAR_SEARCHES = POPULAR_SEARCHES_BY_LANG.en;
 
 function amzUrl(query, extra){
   const k = encodeURIComponent((query||"").trim().replace(/\s+/g," "));
@@ -523,21 +552,39 @@ function renderAmazonSection(query){
   const q=query.trim();
   if(pill)pill.textContent=q;
 
+  // Use i18n translations if available, otherwise fall back to English
+  const _t = (key, vars) => {
+    if (window.I18N && window.I18N.t) return window.I18N.t(key, vars);
+    const fallback = {
+      amz_card_all:"All results", amz_card_all_d:'All "{q}" products available on Amazon',
+      amz_card_top:"Top rated", amz_card_top_d:"Highest rated by verified buyers",
+      amz_card_low:"Lowest price", amz_card_low_d:"Sorted from lowest to highest price",
+      amz_card_new:"New arrivals", amz_card_new_d:"Latest models and recent releases",
+      amz_card_choice:"Amazon's Choice", amz_card_choice_d:"High rating, great price and reliable shipping",
+      amz_card_prime:"Prime shipping", amz_card_prime_d:"Eligible for fast delivery with Amazon Prime",
+      amz_view_on:"View on Amazon →"
+    };
+    let s = fallback[key] || key;
+    if (vars) Object.keys(vars).forEach(k => { s = s.replace(new RegExp('\\{'+k+'\\}','g'), vars[k]); });
+    return s;
+  };
+
   const CARD_DEFS=[
-    {icon:"🔍",label:"Todos los resultados",desc:`Todos los productos de "${q}" disponibles en Amazon`,url:amzUrl(q),cc:"#ff9900"},
-    {icon:"⭐",label:"Mejor valorados",desc:"Los más valorados por compradores verificados",url:amzUrl(q,"s=review-rank"),cc:"#f59e0b"},
-    {icon:"💰",label:"Precio más bajo",desc:"Ordenados de menor a mayor precio",url:amzUrl(q,"s=price-asc-rank"),cc:"#10b981"},
-    {icon:"🆕",label:"Últimas llegadas",desc:"Modelos y lanzamientos más recientes",url:amzUrl(q,"s=date-desc-rank"),cc:"#3b82f6"},
-    {icon:"🏆",label:"Amazon's Choice",desc:"Alta calificación, buen precio y envío confiable",url:amzUrl(q+"+amazon+choice"),cc:"#8b5cf6"},
-    {icon:"📦",label:"Envío Prime",desc:"Elegibles para entrega rápida con Amazon Prime",url:amzUrl(q,"rh=p_85%3A2470955011"),cc:"#ec4899"},
+    {icon:"🔍",label:_t("amz_card_all"),     desc:_t("amz_card_all_d",{q}),    url:amzUrl(q),                              cc:"#ff9900"},
+    {icon:"⭐",label:_t("amz_card_top"),     desc:_t("amz_card_top_d"),         url:amzUrl(q,"s=review-rank"),              cc:"#f59e0b"},
+    {icon:"💰",label:_t("amz_card_low"),     desc:_t("amz_card_low_d"),         url:amzUrl(q,"s=price-asc-rank"),           cc:"#10b981"},
+    {icon:"🆕",label:_t("amz_card_new"),     desc:_t("amz_card_new_d"),         url:amzUrl(q,"s=date-desc-rank"),           cc:"#3b82f6"},
+    {icon:"🏆",label:_t("amz_card_choice"),  desc:_t("amz_card_choice_d"),      url:amzUrl(q+"+amazon+choice"),             cc:"#8b5cf6"},
+    {icon:"📦",label:_t("amz_card_prime"),   desc:_t("amz_card_prime_d"),       url:amzUrl(q,"rh=p_85%3A2470955011"),      cc:"#ec4899"},
   ];
+  const viewLabel = _t("amz_view_on");
 
   cards.innerHTML=CARD_DEFS.map(c=>`
     <div class="amz-card" style="--cc:${c.cc}">
       <div class="amz-card-icon">${c.icon}</div>
       <div class="amz-card-label">${esc(c.label)}</div>
       <div class="amz-card-desc">${esc(c.desc)}</div>
-      <a class="amz-btn" href="${esc(c.url)}" target="_blank" rel="nofollow sponsored noopener noreferrer">Ver en Amazon →</a>
+      <a class="amz-btn" href="${esc(c.url)}" target="_blank" rel="nofollow sponsored noopener noreferrer">${esc(viewLabel)}</a>
     </div>`).join("");
 
   section.style.display="block";
@@ -568,14 +615,15 @@ function showSuggestions(q){
   const hist=getAmazonHistory();
   const qn=normalizeText(q);
   const mHist=hist.filter(h=>normalizeText(h).includes(qn)&&h.toLowerCase()!==q.toLowerCase()).slice(0,4);
-  const mPop=POPULAR_SEARCHES.filter(s=>normalizeText(s).includes(qn)&&!mHist.some(h=>h.toLowerCase()===s.toLowerCase())).slice(0,5);
+  const mPop=getPopularSearches().filter(s=>normalizeText(s).includes(qn)&&!mHist.some(h=>h.toLowerCase()===s.toLowerCase())).slice(0,5);
   const all=[...mHist,...mPop];
   if(!all.length){hideSuggestions();return;}
   _suggActiveIdx=-1;
+  const _t = (key) => (window.I18N && window.I18N.t) ? window.I18N.t(key) : key;
   let html="";
-  if(mHist.length)html+=`<div class="suggestion-group-label">Recientes</div>`;
+  if(mHist.length)html+=`<div class="suggestion-group-label">${esc(_t("amz_recent"))}</div>`;
   mHist.forEach((h,i)=>html+=`<div class="suggestion-item" data-idx="${i}" onclick="pickSuggestion('${esc(h.replace(/'/g,"\\'"))}')"><span class="s-icon">🕐</span>${esc(h)}</div>`);
-  if(mPop.length)html+=`<div class="suggestion-group-label">Sugerencias</div>`;
+  if(mPop.length)html+=`<div class="suggestion-group-label">${esc(_t("amz_card_all"))}</div>`;
   mPop.forEach((s,i)=>html+=`<div class="suggestion-item" data-idx="${mHist.length+i}" onclick="pickSuggestion('${esc(s.replace(/'/g,"\\'"))}')"><span class="s-icon">🔍</span>${esc(s)}</div>`);
   el.innerHTML=html;
   _positionSuggestions();
@@ -586,7 +634,8 @@ function showRecentSuggestions(){
   if(!hist.length)return;
   const el=_getSuggestionsEl();
   _suggActiveIdx=-1;
-  let html=`<div class="suggestion-group-label">Recientes</div>`;
+  const _t = (key) => (window.I18N && window.I18N.t) ? window.I18N.t(key) : key;
+  let html=`<div class="suggestion-group-label">${esc(_t("amz_recent"))}</div>`;
   hist.forEach(h=>html+=`<div class="suggestion-item" onclick="pickSuggestion('${esc(h.replace(/'/g,"\\'"))}')"><span class="s-icon">🕐</span>${esc(h)}</div>`);
   el.innerHTML=html;
   _positionSuggestions();
