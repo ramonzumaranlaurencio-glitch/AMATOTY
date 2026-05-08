@@ -1118,17 +1118,24 @@ def save_carousels(data):
 def export_carousels_to_docs(carousels, products):
     prod_map = {p["name"]: p for p in products}
     output = {}
-    for page, names in carousels.items():
-        output[page] = []
-        for name in names:
-            p = prod_map.get(name)
-            if p:
-                output[page].append({
-                    "title": p["name"],
-                    "text":  p.get("description",""),
-                    "img":   p.get("image","") or "assets/placeholder.png",
-                    "href":  p.get("link",""),
-                })
+    # Slide-based keys (horizontal carousels) — copy as-is
+    slide_keys = {"home_car01", "home_car03"}
+    # Product-name keys — convert to full objects
+    for page, value in carousels.items():
+        if page in slide_keys:
+            output[page] = value  # already list of slide dicts
+        else:
+            names = value if isinstance(value, list) else []
+            output[page] = []
+            for name in names:
+                p = prod_map.get(name)
+                if p:
+                    output[page].append({
+                        "title": p["name"],
+                        "text":  p.get("description", ""),
+                        "img":   p.get("image", "") or "assets/placeholder.png",
+                        "href":  p.get("link", ""),
+                    })
     out_path = Path("docs/assets/carousels.json")
     out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -1292,36 +1299,156 @@ def store_products_page():
         products  = load_store_products()
         carousels = load_carousels()
         pnames    = [p["name"] for p in products]
+        prod_map  = {p["name"]: p for p in products}
 
-        st.markdown("#### Asigna productos a cada carrusel de página")
-        st.info("Selecciona los productos para cada página y pulsa **Guardar y Exportar**.")
+        # Imágenes disponibles
+        _asset_dir = Path("docs/assets")
+        _prod_dir  = Path("Productos")
+        _img_exts  = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+        assets_imgs = sorted([f"assets/{f.name}" for f in sorted(_asset_dir.iterdir()) if f.suffix.lower() in _img_exts]) if _asset_dir.exists() else []
+        prod_imgs   = sorted([f"Productos/{f.name}" for f in sorted(_prod_dir.iterdir()) if f.suffix.lower() in _img_exts]) if _prod_dir.exists() else []
+        all_imgs_list = assets_imgs + prod_imgs
 
-        updated = {}
-        for page_key, pinfo in PAGES_CAROUSEL.items():
-            st.markdown(f"**{pinfo['label']}**")
-            current = [n for n in carousels.get(page_key, []) if n in pnames]
-            selected = st.multiselect(
-                pinfo["label"],
-                options=pnames,
-                default=current,
-                key=f"car_{page_key}",
-                label_visibility="collapsed",
-                placeholder="Elige los productos que aparecerán en este carrusel...",
+        DEFAULT_EMP_SLIDES = [
+            {"img": "assets/EMPRESAS.png", "title": "Simplificamos tu cadena de suministro", "text": "Logística internacional para empresas.", "desc": "Nos encargamos de todo el proceso logístico para que tu empresa reciba lo que necesita.", "href": "contact.html"},
+            {"img": "assets/EMPRESAS.png", "title": "Aprovisionamiento global",               "text": "Encontramos los productos que tu empresa necesita.", "desc": "Accede a proveedores verificados de todo el mundo.", "href": "category/index.html"},
+            {"img": "assets/EMPRESAS.png", "title": "Entrega garantizada",                    "text": "Cumplimiento en tiempos, calidad y documentación.", "desc": "Cada envío con seguimiento en tiempo real.", "href": "contact.html"},
+        ]
+        DEFAULT_PER_SLIDES = [
+            {"img": "assets/PERSONAS.png", "title": "Los sabores de Sudamérica, más cerca de ti", "text": "Productos auténticos de tu país.", "desc": "Productos originales de Sudamérica disponibles para todo el mundo.", "href": "category/index.html"},
+            {"img": "assets/PERSONAS.png", "title": "Los mejores gadgets para tu hogar",          "text": "Probados por expertos, recomendados con criterio.", "desc": "Seleccionamos solo lo que realmente vale la pena.", "href": "category/kitchen.html"},
+            {"img": "assets/PERSONAS.png", "title": "Oye Bonita — Diagnóstico Facial IA",         "text": "Cuidado personal con inteligencia artificial.", "desc": "Sube tu foto y recibe diagnóstico facial personalizado.", "href": "oye-bonita.html"},
+        ]
+
+        slides_car01 = carousels.get("home_car01", DEFAULT_EMP_SLIDES)
+        vcards_car02 = [n for n in carousels.get("home_car02", []) if n in pnames]
+        slides_car03 = carousels.get("home_car03", DEFAULT_PER_SLIDES)
+        vcards_car04 = [n for n in carousels.get("home_car04", []) if n in pnames]
+
+        st.markdown("### 🎠 Gestión de los 4 Carruseles — Inicio (index.html)")
+        st.info("**Diseño:** Fila 1 = EMPRESAS (C01 horizontal izq + C02 vertical der) · Fila 2 = PERSONAS (C03 horizontal izq + C04 vertical der)")
+
+        # ─── CARRUSEL 01: EMPRESAS Horizontal ─────────────────────────────────
+        with st.expander("🔵 CARRUSEL 01 — EMPRESAS  ·  Horizontal (izquierda, fila 1)", expanded=True):
+            st.caption("Slides con imagen de banner. Cada fila = 1 slide. Puedes agregar o eliminar slides con los botones + / 🗑️.")
+            df01 = pd.DataFrame(
+                slides_car01 if slides_car01 else [{"img": "", "title": "", "text": "", "desc": "", "href": ""}],
+                columns=["img", "title", "text", "desc", "href"],
             )
-            updated[page_key] = selected
-            st.caption(f"→ {len(selected)} producto(s) · {pinfo['file']}")
-            st.divider()
+            ed01 = st.data_editor(
+                df01,
+                column_config={
+                    "img":   st.column_config.SelectboxColumn("📷 Imagen", options=all_imgs_list, width="medium"),
+                    "title": st.column_config.TextColumn("Título (visible en slide)", width="medium"),
+                    "text":  st.column_config.TextColumn("Subtítulo (visible en slide)", width="medium"),
+                    "desc":  st.column_config.TextColumn("Descripción completa (modal al hacer clic)", width="large"),
+                    "href":  st.column_config.TextColumn("Enlace (href)", width="medium"),
+                },
+                num_rows="dynamic",
+                use_container_width=True,
+                key="ed_car01",
+            )
+            new_slides_01 = [r for r in ed01.to_dict("records") if r.get("title") or r.get("img")]
 
+        # ─── CARRUSEL 02: B2B Vertical ────────────────────────────────────────
+        with st.expander("🟡 CARRUSEL 02 — Productos B2B  ·  Vertical (derecha, fila 1)", expanded=True):
+            st.caption("Tarjetas de producto del inventario. Selecciona los productos que aparecerán aquí.")
+            new_vcards_02 = st.multiselect(
+                "Productos Carrusel 02",
+                options=pnames,
+                default=vcards_car02,
+                key="car02_sel",
+                placeholder="Selecciona productos del inventario...",
+                label_visibility="collapsed",
+            )
+            if new_vcards_02:
+                st.markdown("**Vista previa de tarjetas:**")
+                for n in new_vcards_02:
+                    p = prod_map.get(n, {})
+                    img_tag = f"![img]({p.get('image','')})" if p.get("image") else "📦"
+                    st.markdown(f"&nbsp;&nbsp;▸ **{n}** — {p.get('category','')} · {p.get('currency','USD')} {float(p.get('price',0)):.2f}")
+            else:
+                st.warning("Sin productos seleccionados — el carrusel 02 usará datos por defecto.")
+
+        # ─── CARRUSEL 03: PERSONAS Horizontal ─────────────────────────────────
+        with st.expander("🔵 CARRUSEL 03 — PERSONAS  ·  Horizontal (izquierda, fila 2)", expanded=True):
+            st.caption("Slides con imagen de banner. Cada fila = 1 slide. Puedes agregar o eliminar slides con los botones + / 🗑️.")
+            df03 = pd.DataFrame(
+                slides_car03 if slides_car03 else [{"img": "", "title": "", "text": "", "desc": "", "href": ""}],
+                columns=["img", "title", "text", "desc", "href"],
+            )
+            ed03 = st.data_editor(
+                df03,
+                column_config={
+                    "img":   st.column_config.SelectboxColumn("📷 Imagen", options=all_imgs_list, width="medium"),
+                    "title": st.column_config.TextColumn("Título (visible en slide)", width="medium"),
+                    "text":  st.column_config.TextColumn("Subtítulo (visible en slide)", width="medium"),
+                    "desc":  st.column_config.TextColumn("Descripción completa (modal al hacer clic)", width="large"),
+                    "href":  st.column_config.TextColumn("Enlace (href)", width="medium"),
+                },
+                num_rows="dynamic",
+                use_container_width=True,
+                key="ed_car03",
+            )
+            new_slides_03 = [r for r in ed03.to_dict("records") if r.get("title") or r.get("img")]
+
+        # ─── CARRUSEL 04: PERSONAS Vertical ───────────────────────────────────
+        with st.expander("🟡 CARRUSEL 04 — Productos para ti  ·  Vertical (derecha, fila 2)", expanded=True):
+            st.caption("Tarjetas de producto del inventario. Selecciona los productos que aparecerán aquí.")
+            new_vcards_04 = st.multiselect(
+                "Productos Carrusel 04",
+                options=pnames,
+                default=vcards_car04,
+                key="car04_sel",
+                placeholder="Selecciona productos del inventario...",
+                label_visibility="collapsed",
+            )
+            if new_vcards_04:
+                st.markdown("**Vista previa de tarjetas:**")
+                for n in new_vcards_04:
+                    p = prod_map.get(n, {})
+                    st.markdown(f"&nbsp;&nbsp;▸ **{n}** — {p.get('category','')} · {p.get('currency','USD')} {float(p.get('price',0)):.2f}")
+            else:
+                st.warning("Sin productos seleccionados — el carrusel 04 usará datos por defecto.")
+
+        # ─── Otras páginas ─────────────────────────────────────────────────────
+        st.divider()
+        with st.expander("📄 Otras páginas — Blog · Categorías · Oye Bonita"):
+            updated_other = {}
+            for page_key in ["blog", "category", "oye_bonita"]:
+                pinfo = PAGES_CAROUSEL[page_key]
+                current = [n for n in carousels.get(page_key, []) if n in pnames]
+                sel = st.multiselect(
+                    pinfo["label"],
+                    options=pnames,
+                    default=current,
+                    key=f"car_{page_key}",
+                    placeholder=f"Productos para {pinfo['label']}...",
+                )
+                updated_other[page_key] = sel
+                st.caption(f"→ {len(sel)} producto(s) · {pinfo['file']}")
+
+        st.divider()
         cc1, cc2 = st.columns([2, 1])
         with cc1:
-            if st.button("💾 Guardar y Exportar carousels.json", type="primary",
+            if st.button("💾 Guardar y Exportar todo", type="primary",
                          use_container_width=True, key="car_save"):
+                updated = {
+                    "home":       list({*new_vcards_02, *new_vcards_04}),
+                    "home_car01": new_slides_01,
+                    "home_car02": new_vcards_02,
+                    "home_car03": new_slides_03,
+                    "home_car04": new_vcards_04,
+                    "blog":       updated_other.get("blog", []),
+                    "category":   updated_other.get("category", []),
+                    "oye_bonita": updated_other.get("oye_bonita", []),
+                }
                 save_carousels(updated)
                 export_carousels_to_docs(updated, products)
                 st.success("✅ `data/carousels.json` y `docs/assets/carousels.json` actualizados.")
-                st.info("💡 Recarga las páginas del sitio para ver los cambios.")
+                st.info("💡 Los carruseles verticales se actualizan solos. Los horizontales requieren regenerar el HTML con `write_index2.py`.")
         with cc2:
-            if st.button("🔄 Recargar config", use_container_width=True, key="car_reload"):
+            if st.button("🔄 Recargar", use_container_width=True, key="car_reload"):
                 st.rerun()
 
 
