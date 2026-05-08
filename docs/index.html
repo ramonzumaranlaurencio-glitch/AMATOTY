@@ -473,10 +473,39 @@
     buildVCar("vcar-per-track","vcar-per-prev","vcar-per-next","vcar-per-dots", perV, 3800);
   }
 
-  fetch("assets/carousels.json")
-    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-    .then(function(data){ initVerticals(data); })
-    .catch(function(){ initVerticals(null); });
+  /* ── Detect API origin (GitHub Pages → Render, local dev → 127.0.0.1:5050) ── */
+  var _apiBase = (function(){
+    var h = window.location.hostname;
+    if(h.endsWith("github.io") || h.endsWith("amatoty.onrender.com")) return "https://amatoty.onrender.com";
+    if(h === "localhost" || h === "127.0.0.1" || h === "") return "http://127.0.0.1:5050";
+    return window.location.origin;
+  })();
+
+  function productToCard(p){
+    var meta = p.metadata || {};
+    var media = p.media || [];
+    var img = meta.banner_image || (media.find(function(m){ return m.media_type==="image"; })||{}).url || p.image || p.imagen || "assets/placeholder.png";
+    if(img && !/^https?:\/\//.test(img)) img = _apiBase + "/" + img.replace(/^\//, "");
+    return {img:img, title:meta.banner_title||p.name||"", text:meta.banner_description||p.description||"", desc:meta.banner_description||p.description||"", href:meta.banner_link||p.product_url||"#"};
+  }
+
+  Promise.all([
+    fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_02&limit=8")
+      .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
+    fetch(_apiBase+"/api/platform/public-products?carousel_key=carousel_04&limit=8")
+      .then(function(r){ return r.ok?r.json():{products:[]}; }).catch(function(){ return {products:[]}; }),
+    fetch("assets/carousels.json")
+      .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+  ]).then(function(res){
+    var empApi = (res[0].products||[]).map(productToCard);
+    var perApi = (res[1].products||[]).map(productToCard);
+    var sd = res[2];
+    initVerticals({
+      home_car02: empApi.length ? empApi : ((sd&&sd.home_car02)||[]),
+      home_car04: perApi.length ? perApi : ((sd&&sd.home_car04)||[]),
+      home: (sd&&sd.home)||[]
+    });
+  });
 
 })();
 </script>
