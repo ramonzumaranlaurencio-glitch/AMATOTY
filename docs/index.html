@@ -304,7 +304,7 @@
       var slide = document.createElement("div");
       slide.className = "hcar-slide";
       slide.innerHTML =
-        "<img src='" + s.img + "' alt='" + (s.title||"") + "' loading='lazy' onerror="this.src='assets/placeholder.png'">" +
+        "<img src='" + s.img + "' alt='" + (s.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\"assets/placeholder.png\"'>" +
         "<div class='hcar-overlay'>" +
           "<h3>" + (s.title||"") + "</h3>" +
           "<p>" + (s.text||"") + "</p>" +
@@ -352,7 +352,7 @@
       var card = document.createElement("div");
       card.className = "vcar-card";
       card.innerHTML =
-        "<img src='" + (c.img||"assets/placeholder.png") + "' alt='" + (c.title||"") + "' loading='lazy' onerror="this.src='assets/placeholder.png'">" +
+        "<img src='" + (c.img||"assets/placeholder.png") + "' alt='" + (c.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\"assets/placeholder.png\"'>" +
         "<div class='vcar-card-body'>" +
           "<h3>" + (c.title||"") + "</h3>" +
           "<p>" + (c.text||"") + "</p>" +
