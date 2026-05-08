@@ -1141,6 +1141,45 @@ def _google_cse_image_for_query(query):
     return ""
 
 
+def _gemini_image_for_query(query):
+    """Usa Gemini con Google Search grounding para encontrar imagen real de producto."""
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    query = _clean_search_text(query)
+    if not api_key or not query:
+        return ""
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=(
+                f"Find a real product image URL for: {query}. "
+                "Return ONLY one valid HTTPS image URL ending in .jpg, .jpeg, .png or .webp "
+                "from a real product page (Amazon, AliExpress, MercadoLibre, manufacturer). "
+                "No text, no explanation, just the URL."
+            ),
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                temperature=0.1,
+            ),
+        )
+        text = (response.text or "").strip()
+        blocked = ("placeholder", "source.unsplash.com", "picsum.photos")
+        # Try to extract a direct image URL from the response
+        for pattern in [
+            r"https://[^\s\"'<>]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s\"'<>]*)?",
+        ]:
+            for url in re.findall(pattern, text, re.I):
+                url = _secure_image_url(url)
+                if _is_web_image_url(url) and not any(b in url.lower() for b in blocked):
+                    return url
+    except Exception:
+        pass
+    return ""
+
+
 def _serpapi_image_for_query(query):
     api_key = _serpapi_key()
     query = _clean_search_text(query)
@@ -1233,6 +1272,21 @@ def _enrich_products_with_serpapi_images(products, fallback_query=""):
                         item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.80)
                     except (TypeError, ValueError):
                         item["image_match_score"] = 0.80
+            # Prioridad 3: Gemini Flash con Google Search grounding
+            if not image_url and query and lookups < max_lookups:
+                gem_cache_key = f"gem:{query}"
+                if gem_cache_key not in cache:
+                    cache[gem_cache_key] = _gemini_image_for_query(query)
+                    lookups += 1
+                image_url = cache.get(gem_cache_key) or ""
+                if image_url:
+                    item["image"] = image_url
+                    item["image_source"] = "gemini_search"
+                    item["image_verified"] = True
+                    try:
+                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.78)
+                    except (TypeError, ValueError):
+                        item["image_match_score"] = 0.78
             enriched.append(item)
         return enriched
 
