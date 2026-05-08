@@ -2644,6 +2644,11 @@ def safepay_checkout():
       { "ok": true, "pay_url": "https://...", "payment_id": "SP-..." }
     """
     data = request.get_json(silent=True) or {}
+
+    # Warmup ping from frontend — just return ok without hitting SafePay
+    if data.get("warmup"):
+        return jsonify({"ok": True, "warmup": True}), 200
+
     print(f"[safepay] request body: {data}", flush=True)
     print(f"[safepay] SAFEPAY_API_URL = {SAFEPAY_API_URL!r}", flush=True)
 
