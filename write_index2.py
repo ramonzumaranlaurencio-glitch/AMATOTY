@@ -442,19 +442,9 @@ HTML = '''\
     }
   ];
 
-  var EMP_VCARDS = [
-    {img:"assets/placeholder.png", title:"Home Cable Organizer",  text:"Organiza cables en tu empresa u oficina. Dise\u00f1o profesional.",  desc:"El Home Cable Organizer mantiene tu espacio de trabajo libre de enredos. Compatible con cables de hasta 10mm. Material de alta durabilidad.", href:"blog/home-cable-organizer-review.html"},
-    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Aspira residuos en teclados y equipos de oficina.",               desc:"Potente aspiradora de escritorio sin cables. Ideal para mantener limpios los equipos de c\u00f3mputo y \u00e1reas de trabajo. Incluye accesorios.", href:"blog/mini-vacuum-cleaner-review.html"},
-    {img:"assets/placeholder.png", title:"Car Seat Gap Organizer",text:"Mantiene el veh\u00edculo corporativo organizado.",                  desc:"Soluciona el espacio entre asientos de cualquier veh\u00edculo. Dise\u00f1o universal, f\u00e1cil instalaci\u00f3n, sin herramientas. Ideal para flotas.", href:"blog/car-seat-gap-organizer-review.html"},
-    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos frescos en la cocina corporativa.",            desc:"Reduce el desperdicio de alimentos hasta un 30%. Apto para refrigerador, f\u00e1cil de limpiar, compatible con contenedores est\u00e1ndar.", href:"blog/kitchen-food-saver-gadget-review.html"}
-  ];
+  var EMP_VCARDS = [];
 
-  var PER_VCARDS = [
-    {img:"assets/placeholder.png", title:"Portable Mini Blender", text:"Batidos en cualquier lugar. USB recargable, 300ml.", desc:"El Mini Blender port\u00e1til es compacto, recargable v\u00eda USB y silencioso. Perfecto para smoothies, batidos de prote\u00edna y jugos en cualquier lugar. Capacidad 300ml, cuchillas de acero inox.", href:"blog/portable-mini-blender-review.html"},
-    {img:"assets/home.jpg",        title:"Oye Bonita IA",         text:"Diagn\u00f3stico facial personalizado con inteligencia artificial.", desc:"Sube tu foto, descubre tu tipo de piel y recibe una rutina de belleza completa. Ingredientes recomendados, maquillaje sugerido y productos espec\u00edficos para ti. Completamente gratis.", href:"oye-bonita.html"},
-    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Limpia teclado y escritorio al instante, sin cables.", desc:"Potente aspiradora de escritorio port\u00e1til. Sin cables, bater\u00eda recargable, accesorios incluidos. Ideal para laptop, teclado y espacios peque\u00f1os.", href:"blog/mini-vacuum-cleaner-review.html"},
-    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos m\u00e1s tiempo y ahorra dinero.",   desc:"El Kitchen Food Saver mantiene tus alimentos frescos hasta 3 veces m\u00e1s tiempo. Compatible con la mayor\u00eda de contenedores. F\u00e1cil de usar y limpiar.", href:"blog/kitchen-food-saver-gadget-review.html"}
-  ];
+  var PER_VCARDS = [];
 
   /* ── Init horizontal carousels ── */
   buildHCar("hcar-emp-track","hcar-emp-prev","hcar-emp-next","hcar-emp-dots", EMP_SLIDES, 5000);
