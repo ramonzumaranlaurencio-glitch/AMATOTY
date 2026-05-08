@@ -415,7 +415,7 @@ tbody tr:hover{background:#eff6ff}
                 <!-- Sección 4: Imagen -->
                 <fieldset class="form-section">
                   <legend>🖼️ Imagen pública</legend>
-                  <div class="field"><label for="productImageUrl">URL de la imagen</label><input id="productImageUrl" type="url" placeholder="https://... o assets/imagen.jpg"></div>
+                  <div class="field"><label for="productImageUrl">URL de la imagen</label><input id="productImageUrl" type="text" placeholder="https://... o Productos/imagen.jpg"></div>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                     <div class="field"><label for="productImageSource">Fuente</label><select id="productImageSource"><option value="">Sin fuente</option><option value="oye_bonita_assets">Oye Bonita</option><option value="amazon_verified">Amazon verificado</option><option value="amazon_candidate">Amazon por verificar</option><option value="official">Oficial</option><option value="local_verified">Local verificado</option></select></div>
                     <div class="field"><label for="productImageScore">Coincidencia (0–1)</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
@@ -439,7 +439,7 @@ tbody tr:hover{background:#eff6ff}
                   </div>
                   <div class="field"><label for="bannerDescription">Descripción corta</label><textarea id="bannerDescription" placeholder="Texto breve que aparecerá en el banner..." style="min-height:60px"></textarea></div>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div class="field"><label for="bannerImage">URL imagen del banner</label><input id="bannerImage" type="url" placeholder="https://..."></div>
+                    <div class="field"><label for="bannerImage">URL imagen del banner</label><input id="bannerImage" type="text" placeholder="https://... o Productos/imagen.jpg"></div>
                     <div class="field"><label for="bannerButtonText">Texto del botón</label><input id="bannerButtonText" placeholder="Ver producto"></div>
                   </div>
                   <div class="field"><label for="bannerLink">Enlace del botón</label><input id="bannerLink" type="url" placeholder="Usa el enlace del producto si lo dejas vacío"></div>
@@ -542,7 +542,7 @@ tbody tr:hover{background:#eff6ff}
         <div class="field"><label for="carouselEditTitle">Título del banner</label><input id="carouselEditTitle" placeholder="Usa el nombre del producto si lo dejas vacío"></div>
         <div class="field"><label for="carouselEditCategory">Categoría</label><input id="carouselEditCategory" placeholder="Usa la categoría del producto"></div>
         <div class="field"><label for="carouselEditDescription">Descripción corta</label><textarea id="carouselEditDescription" style="min-height:70px" placeholder="Texto breve que aparecerá en el banner..."></textarea></div>
-        <div class="field"><label for="carouselEditImage">URL de imagen del banner</label><input id="carouselEditImage" type="url" placeholder="https://... o Productos/imagen.jpg"><div id="carouselImagePreview" style="margin-top:8px;min-height:80px;background:var(--panel2);border-radius:6px;overflow:hidden;display:none"><img id="carouselPreviewImg" style="width:100%;max-height:180px;object-fit:cover" alt="Preview"></div></div>
+        <div class="field"><label for="carouselEditImage">URL de imagen del banner</label><input id="carouselEditImage" type="text" placeholder="https://... o Productos/imagen.jpg"><div id="carouselImagePreview" style="margin-top:8px;min-height:80px;background:var(--panel2);border-radius:6px;overflow:hidden;display:none"><img id="carouselPreviewImg" style="width:100%;max-height:180px;object-fit:cover" alt="Preview"></div></div>
         <div class="field"><label for="carouselEditButton">Texto del botón</label><input id="carouselEditButton" placeholder="Ver producto"></div>
         <div class="field"><label for="carouselEditLink">Enlace del botón</label><input id="carouselEditLink" type="url" placeholder="https://..."></div>
         <div class="split-actions" style="margin-top:6px">
@@ -907,7 +907,8 @@ function selectProduct(product) {
 
 function mediaAbsUrl(url) {
   if (!url) return "";
-  if (/^https?:\/\//.test(url) || url.startsWith("/")) return url;
+  if (/^https?:\/\//.test(url)) return url;
+  if (url.startsWith("/")) return API_ORIGIN ? `${API_ORIGIN}${url}` : url;
   return `${API_ORIGIN}/${url}`;
 }
 
@@ -1070,7 +1071,7 @@ async function loadCarousel() {
 
 function carouselCardHtml(product, inCarousel) {
   const meta = product.metadata || {};
-  const img = meta.banner_image || meta.image || meta.imagen || "";
+  const img = meta.banner_image || meta.image || meta.imagen || product.image || "";
   const mediaImg = (product.media || []).find(m => m.media_type === "image");
   const imgSrc = img || (mediaImg ? mediaAbsUrl(mediaImg.url) : "");
   const imgHtml = imgSrc
