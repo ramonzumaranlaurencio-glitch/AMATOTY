@@ -25,7 +25,38 @@
       "href": "https://www.amazon.com/s?k=protector+solar+facial+spf+50+textura+ligera&tag=lcapro-20"
     }
   ],
+  "home_car01": [],
+  "home_car02": [
+    {
+      "title": "Portable Mini Blender",
+      "text": "Licuadora compacta para smoothies, proteinas y jugos rapidos fuera de casa.",
+      "img": "assets/placeholder.png",
+      "href": "https://www.amazon.com/s?k=portable+mini+blender+rechargeable&tag=lcapro-20"
+    },
+    {
+      "title": "Home Cable Organizer",
+      "text": "Organizador simple para mantener cables visibles, cargadores y escritorio bajo control.",
+      "img": "assets/placeholder.png",
+      "href": "https://www.amazon.com/s?k=home+cable+organizer+desk+cable+management&tag=lcapro-20"
+    }
+  ],
+  "home_car03": [],
+  "home_car04": [
+    {
+      "title": "Car Seat Gap Organizer",
+      "text": "Accesorio para guardar celular, llaves y objetos pequenos al alcance del conductor.",
+      "img": "assets/placeholder.png",
+      "href": "https://www.amazon.com/s?k=car+seat+gap+organizer&tag=lcapro-20"
+    },
+    {
+      "title": "Protector Solar Facial SPF50",
+      "text": "Protector facial de uso diario para quienes buscan textura ligera y alta proteccion.",
+      "img": "assets/placeholder.png",
+      "href": "https://www.amazon.com/s?k=protector+solar+facial+spf+50+textura+ligera&tag=lcapro-20"
+    }
+  ],
+  "oye_bonita": [],
+  "smart_search": [],
   "blog": [],
-  "category": [],
-  "oye_bonita": []
+  "category": []
 }

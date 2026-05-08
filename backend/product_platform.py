@@ -1421,6 +1421,7 @@ def update_product_banner(user, product_id):
         if not require_role(membership, WRITE_ROLES):
             return jsonify({"error": "Permiso insuficiente."}), 403
         existing_metadata = json_loads(row["metadata_json"], {})
+        # Campos legacy (compatibilidad)
         banner_fields = {
             "mostrar_en_banner": json_bool(data.get("mostrar_en_banner", existing_metadata.get("mostrar_en_banner", False))),
             "show_in_banner": json_bool(data.get("mostrar_en_banner", existing_metadata.get("mostrar_en_banner", False))),
@@ -1431,6 +1432,10 @@ def update_product_banner(user, product_id):
             "banner_button_text": str(data.get("banner_button_text") or existing_metadata.get("banner_button_text") or "").strip(),
             "banner_category": str(data.get("banner_category") or existing_metadata.get("banner_category") or "").strip(),
         }
+        # Campos por carrusel individual (carousel_01 … carousel_06)
+        for car_key in ("carousel_01", "carousel_02", "carousel_03", "carousel_04", "carousel_05", "carousel_06"):
+            if car_key in data:
+                banner_fields[car_key] = json_bool(data[car_key])
         updated_metadata = {**existing_metadata, **banner_fields}
         conn.execute(
             "UPDATE platform_products SET metadata_json = ?, updated_at = ? WHERE id = ?",

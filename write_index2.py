@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# Writes docs/index.html  — 4-carousel layout (2 horizontal left + 2 vertical right)
+import os
+
+HTML = '''\
 <!doctype html>
 <html lang="en">
 <head>
@@ -304,7 +309,7 @@
       var slide = document.createElement("div");
       slide.className = "hcar-slide";
       slide.innerHTML =
-        "<img src='" + s.img + "' alt='" + (s.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\"assets/placeholder.png\"'>" +
+        "<img src='" + s.img + "' alt='" + (s.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\\"assets/placeholder.png\\"'>" +
         "<div class='hcar-overlay'>" +
           "<h3>" + (s.title||"") + "</h3>" +
           "<p>" + (s.text||"") + "</p>" +
@@ -352,7 +357,7 @@
       var card = document.createElement("div");
       card.className = "vcar-card";
       card.innerHTML =
-        "<img src='" + (c.img||"assets/placeholder.png") + "' alt='" + (c.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\"assets/placeholder.png\"'>" +
+        "<img src='" + (c.img||"assets/placeholder.png") + "' alt='" + (c.title||"") + "' loading='lazy' onerror='this.onerror=null;this.src=\\"assets/placeholder.png\\"'>" +
         "<div class='vcar-card-body'>" +
           "<h3>" + (c.title||"") + "</h3>" +
           "<p>" + (c.text||"") + "</p>" +
@@ -393,22 +398,22 @@
     {
       img:"assets/EMPRESAS.png",
       title:"Simplificamos tu cadena de suministro",
-      text:"Logística internacional para empresas de todos los tamaños.",
-      desc:"Nos encargamos de todo el proceso logístico para que tu empresa reciba lo que necesita, cuando lo necesita. Destinatarios seguros, envío eficiente, entrega garantizada. Tú enfócate en crecer, nosotros movemos tu operación.",
+      text:"Log\u00edstica internacional para empresas de todos los tama\u00f1os.",
+      desc:"Nos encargamos de todo el proceso log\u00edstico para que tu empresa reciba lo que necesita, cuando lo necesita. Destinatarios seguros, env\u00edo eficiente, entrega garantizada. T\u00fa enf\u00f3cate en crecer, nosotros movemos tu operaci\u00f3n.",
       href:"contact.html"
     },
     {
       img:"assets/EMPRESAS.png",
       title:"Aprovisionamiento global",
       text:"Encontramos los productos que tu empresa necesita.",
-      desc:"Accede a proveedores verificados de todo el mundo. Optimiza tus costos de abastecimiento con análisis comparativo y sin intermediarios innecesarios.",
+      desc:"Accede a proveedores verificados de todo el mundo. Optimiza tus costos de abastecimiento con an\u00e1lisis comparativo y sin intermediarios innecesarios.",
       href:"category/index.html"
     },
     {
       img:"assets/EMPRESAS.png",
       title:"Entrega garantizada",
-      text:"Cumplimiento en tiempos, calidad y documentación.",
-      desc:"Cada envío cuenta con seguimiento en tiempo real, documentación completa y soporte post-entrega. Tu operación nunca se detiene.",
+      text:"Cumplimiento en tiempos, calidad y documentaci\u00f3n.",
+      desc:"Cada env\u00edo cuenta con seguimiento en tiempo real, documentaci\u00f3n completa y soporte post-entrega. Tu operaci\u00f3n nunca se detiene.",
       href:"contact.html"
     }
   ];
@@ -416,39 +421,39 @@
   var PER_SLIDES = [
     {
       img:"assets/PERSONAS.png",
-      title:"Los sabores, marcas y productos de Sudamérica",
-      text:"Más cerca de ti — productos auténticos de tu país.",
-      desc:"Productos originales de Sudamérica disponibles para todo el mundo. Pide hoy y recibe donde estés. Compra segura, envío a todo el mundo, atención personalizada.",
+      title:"Los sabores, marcas y productos de Sudam\u00e9rica",
+      text:"M\u00e1s cerca de ti — productos aut\u00e9nticos de tu pa\u00eds.",
+      desc:"Productos originales de Sudam\u00e9rica disponibles para todo el mundo. Pide hoy y recibe donde est\u00e9s. Compra segura, env\u00edo a todo el mundo, atenci\u00f3n personalizada.",
       href:"category/index.html"
     },
     {
       img:"assets/PERSONAS.png",
       title:"Los mejores gadgets para tu hogar",
       text:"Probados por expertos, recomendados con criterio.",
-      desc:"Desde mini blenders portátiles hasta organizadores inteligentes, seleccionamos solo lo que realmente vale la pena. Envío a todo el mundo.",
+      desc:"Desde mini blenders port\u00e1tiles hasta organizadores inteligentes, seleccionamos solo lo que realmente vale la pena. Env\u00edo a todo el mundo.",
       href:"category/kitchen.html"
     },
     {
       img:"assets/PERSONAS.png",
-      title:"Oye Bonita &mdash; Diagnóstico Facial IA",
+      title:"Oye Bonita &mdash; Diagn\u00f3stico Facial IA",
       text:"Cuidado personal con inteligencia artificial.",
-      desc:"Sube tu foto y recibe un diagnóstico facial personalizado. Tipo de piel, rutina de mañana y noche, y productos recomendados. Completamente gratis.",
+      desc:"Sube tu foto y recibe un diagn\u00f3stico facial personalizado. Tipo de piel, rutina de ma\u00f1ana y noche, y productos recomendados. Completamente gratis.",
       href:"oye-bonita.html"
     }
   ];
 
   var EMP_VCARDS = [
-    {img:"assets/placeholder.png", title:"Home Cable Organizer",  text:"Organiza cables en tu empresa u oficina. Diseño profesional.",  desc:"El Home Cable Organizer mantiene tu espacio de trabajo libre de enredos. Compatible con cables de hasta 10mm. Material de alta durabilidad.", href:"blog/home-cable-organizer-review.html"},
-    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Aspira residuos en teclados y equipos de oficina.",               desc:"Potente aspiradora de escritorio sin cables. Ideal para mantener limpios los equipos de cómputo y áreas de trabajo. Incluye accesorios.", href:"blog/mini-vacuum-cleaner-review.html"},
-    {img:"assets/placeholder.png", title:"Car Seat Gap Organizer",text:"Mantiene el vehículo corporativo organizado.",                  desc:"Soluciona el espacio entre asientos de cualquier vehículo. Diseño universal, fácil instalación, sin herramientas. Ideal para flotas.", href:"blog/car-seat-gap-organizer-review.html"},
-    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos frescos en la cocina corporativa.",            desc:"Reduce el desperdicio de alimentos hasta un 30%. Apto para refrigerador, fácil de limpiar, compatible con contenedores estándar.", href:"blog/kitchen-food-saver-gadget-review.html"}
+    {img:"assets/placeholder.png", title:"Home Cable Organizer",  text:"Organiza cables en tu empresa u oficina. Dise\u00f1o profesional.",  desc:"El Home Cable Organizer mantiene tu espacio de trabajo libre de enredos. Compatible con cables de hasta 10mm. Material de alta durabilidad.", href:"blog/home-cable-organizer-review.html"},
+    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Aspira residuos en teclados y equipos de oficina.",               desc:"Potente aspiradora de escritorio sin cables. Ideal para mantener limpios los equipos de c\u00f3mputo y \u00e1reas de trabajo. Incluye accesorios.", href:"blog/mini-vacuum-cleaner-review.html"},
+    {img:"assets/placeholder.png", title:"Car Seat Gap Organizer",text:"Mantiene el veh\u00edculo corporativo organizado.",                  desc:"Soluciona el espacio entre asientos de cualquier veh\u00edculo. Dise\u00f1o universal, f\u00e1cil instalaci\u00f3n, sin herramientas. Ideal para flotas.", href:"blog/car-seat-gap-organizer-review.html"},
+    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos frescos en la cocina corporativa.",            desc:"Reduce el desperdicio de alimentos hasta un 30%. Apto para refrigerador, f\u00e1cil de limpiar, compatible con contenedores est\u00e1ndar.", href:"blog/kitchen-food-saver-gadget-review.html"}
   ];
 
   var PER_VCARDS = [
-    {img:"assets/placeholder.png", title:"Portable Mini Blender", text:"Batidos en cualquier lugar. USB recargable, 300ml.", desc:"El Mini Blender portátil es compacto, recargable vía USB y silencioso. Perfecto para smoothies, batidos de proteína y jugos en cualquier lugar. Capacidad 300ml, cuchillas de acero inox.", href:"blog/portable-mini-blender-review.html"},
-    {img:"assets/home.jpg",        title:"Oye Bonita IA",         text:"Diagnóstico facial personalizado con inteligencia artificial.", desc:"Sube tu foto, descubre tu tipo de piel y recibe una rutina de belleza completa. Ingredientes recomendados, maquillaje sugerido y productos específicos para ti. Completamente gratis.", href:"oye-bonita.html"},
-    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Limpia teclado y escritorio al instante, sin cables.", desc:"Potente aspiradora de escritorio portátil. Sin cables, batería recargable, accesorios incluidos. Ideal para laptop, teclado y espacios pequeños.", href:"blog/mini-vacuum-cleaner-review.html"},
-    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos más tiempo y ahorra dinero.",   desc:"El Kitchen Food Saver mantiene tus alimentos frescos hasta 3 veces más tiempo. Compatible con la mayoría de contenedores. Fácil de usar y limpiar.", href:"blog/kitchen-food-saver-gadget-review.html"}
+    {img:"assets/placeholder.png", title:"Portable Mini Blender", text:"Batidos en cualquier lugar. USB recargable, 300ml.", desc:"El Mini Blender port\u00e1til es compacto, recargable v\u00eda USB y silencioso. Perfecto para smoothies, batidos de prote\u00edna y jugos en cualquier lugar. Capacidad 300ml, cuchillas de acero inox.", href:"blog/portable-mini-blender-review.html"},
+    {img:"assets/home.jpg",        title:"Oye Bonita IA",         text:"Diagn\u00f3stico facial personalizado con inteligencia artificial.", desc:"Sube tu foto, descubre tu tipo de piel y recibe una rutina de belleza completa. Ingredientes recomendados, maquillaje sugerido y productos espec\u00edficos para ti. Completamente gratis.", href:"oye-bonita.html"},
+    {img:"assets/placeholder.png", title:"Mini Vacuum Cleaner",   text:"Limpia teclado y escritorio al instante, sin cables.", desc:"Potente aspiradora de escritorio port\u00e1til. Sin cables, bater\u00eda recargable, accesorios incluidos. Ideal para laptop, teclado y espacios peque\u00f1os.", href:"blog/mini-vacuum-cleaner-review.html"},
+    {img:"assets/placeholder.png", title:"Kitchen Food Saver",    text:"Conserva alimentos m\u00e1s tiempo y ahorra dinero.",   desc:"El Kitchen Food Saver mantiene tus alimentos frescos hasta 3 veces m\u00e1s tiempo. Compatible con la mayor\u00eda de contenedores. F\u00e1cil de usar y limpiar.", href:"blog/kitchen-food-saver-gadget-review.html"}
   ];
 
   /* ── Init horizontal carousels ── */
@@ -593,3 +598,11 @@
 <script src="assets/ai_chat.js" defer></script>
 </body>
 </html>
+'''
+
+out = os.path.join(os.path.dirname(__file__), 'docs', 'index.html')
+with open(out, 'w', encoding='utf-8', newline='\n') as f:
+    f.write(HTML)
+print(f'Written {len(HTML)} chars to {out}')
+print('Has BOM:', HTML.startswith('\ufeff'))
+print('Has 4 carousels:', HTML.count('hcar-') > 0 and HTML.count('vcar-') > 0)
