@@ -603,9 +603,18 @@ def public_media_url(url):
     url = str(url or "").strip()
     if not url:
         return ""
+    # Cloudinary and other absolute external URLs: return as-is
     if re.match(r"^https?://", url, re.I):
+        # Strip hardcoded local dev URL to avoid it leaking into production
+        local_prefixes = ("http://127.0.0.1:", "http://localhost:")
+        if any(url.startswith(p) for p in local_prefixes):
+            # Extract just the path part so it works on any host
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            return parsed.path  # e.g. "/Productos/filename.webp"
         return url
-    return urljoin(request.host_url, url.lstrip("/"))
+    # Relative path — return as-is (caller prepends API origin client-side)
+    return "/" + url.lstrip("/")
 
 
 def public_product_payload(product_row, media_rows, organization_row):

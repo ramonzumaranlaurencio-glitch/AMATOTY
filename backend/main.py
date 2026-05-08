@@ -353,7 +353,13 @@ def _send_site_file(filename):
     for site_dir in site_dirs:
         path = os.path.abspath(os.path.join(site_dir, normalized))
         if path.startswith(os.path.abspath(site_dir)) and os.path.exists(path):
-            return send_from_directory(site_dir, normalized)
+            resp = send_from_directory(site_dir, normalized)
+            # Prevent browsers from caching HTML so JS fixes and carousel changes show immediately
+            if normalized.endswith(".html"):
+                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+                resp.headers["Pragma"] = "no-cache"
+                resp.headers["Expires"] = "0"
+            return resp
     if normalized in ["index.html", ""]:
         return _fallback_index_html()
     if normalized in ["oye-bonita.html", "oye_bonita.html"]:
@@ -2716,4 +2722,4 @@ def safepay_checkout():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050)
+    app.run(host="0.0.0.0", port=5050, use_reloader=True, reloader_type="stat")
