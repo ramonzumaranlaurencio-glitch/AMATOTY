@@ -722,6 +722,31 @@ function firstImage(p){
   return "";
 }
 
+// Returns the affiliate link adapted to the visitor's region.
+// US/CA/GB/AU → Amazon US with tag; BR → Amazon.com.br; LATAM → MercadoLibre country site.
+function getAffiliateLink(p){
+  const region  = (window.I18N&&window.I18N.getRegion)  ? window.I18N.getRegion()  : 'US';
+  const country = (window.I18N&&window.I18N.getCountry) ? window.I18N.getCountry() : 'US';
+  const q = encodeURIComponent(p.amazon_keyword||p.search_query||p.name||'product');
+  if(region==='US'){
+    return p.affiliate_link
+      || (p.source_links&&p.source_links[0]&&p.source_links[0].url)
+      || `https://www.amazon.com/s?k=${q}&tag=amatotyshop-20`;
+  }
+  if(region==='BR'){
+    return p.affiliate_link_br
+      || `https://www.amazon.com.br/s?k=${q}`;
+  }
+  // LATAM
+  const ML={PE:'mercadolibre.com.pe',CO:'mercadolibre.com.co',MX:'mercadolibre.com.mx',
+            CL:'mercadolibre.cl',AR:'mercadolibre.com.ar',EC:'mercadolibre.com.ec',
+            BO:'mercadolibre.com.bo',PY:'mercadolibre.com.py',UY:'mercadolibre.com.uy',VE:'mercadolibre.com.ve'};
+  const domain=ML[country]||'mercadolibre.com.mx';
+  return p.affiliate_link_latam
+    || (p.source_links&&p.source_links[0]&&p.source_links[0].url)
+    || `https://listado.${domain}/${q}`;
+}
+
 // Returns product name/title in the active language (supports title_en, title_es, title_pt etc.)
 function getProductFieldForLang(flat,fallback){
   if(typeof flat!=='string'){
@@ -882,7 +907,9 @@ function renderGrid(){
     const stars="★".repeat(Math.round(p.rating||4))+"☆".repeat(Math.max(0,5-Math.round(p.rating||4)));
     const shipText=Number(p.stock||0)>0?_t('available'):`📋 ${_t('quote_only')}`;
     const seeLabel=_t('see_offer');
-    const providerLinks=(p.source_links||[]).slice(0,1).map(l=>`<a class="btn-see-offer" href="${esc(l.url)}" target="_blank" rel="nofollow noopener">${esc(seeLabel)} ${esc(l.name)}</a>`).join("")||`<a class="btn-see-offer" href="https://www.amazon.com/s?k=${encodeURIComponent(p.name)}&tag=amatotyshop-20" target="_blank" rel="nofollow noopener">${esc(seeLabel)}</a>`;
+    const buyLabel=_t('buy_now');
+    const affLink=getAffiliateLink(p);
+    const providerLinks=`<a class="btn-see-offer" href="${esc(affLink)}" target="_blank" rel="nofollow sponsored noopener">${esc(buyLabel)}</a>`;
     return `<div class="prod-card">
       <div class="prod-card-img" onclick="openDetail(${i})">
         ${badge}
@@ -925,9 +952,7 @@ function openDetail(idx){
   document.getElementById("detailTitle").textContent=p.name;
   const specsCells=(p.specs_list||[]).filter(s=>!["search_query","id","interno"].some(k=>s.etiqueta?.toLowerCase().includes(k))).slice(0,6)
     .map(s=>`<div class="spec-cell"><span>${esc(s.etiqueta)}</span><strong>${esc(s.valor)}</strong></div>`).join("");
-  const links=(p.source_links||[]).map(l=>`<a class="provider-link" href="${esc(l.url)}" target="_blank" rel="nofollow noopener">${esc(l.name||l.label)}</a>`).join("")
-    ||`<a class="provider-link" href="https://www.amazon.com/s?k=${encodeURIComponent(p.name)}" target="_blank" rel="nofollow noopener">Amazon</a>
-       <a class="provider-link" href="https://listado.mercadolibre.com/${encodeURIComponent(p.name)}" target="_blank" rel="nofollow noopener">Mercado Libre</a>`;
+  const links=`<a class="provider-link" href="${esc(getAffiliateLink(p))}" target="_blank" rel="nofollow sponsored noopener">${esc(p.source_links&&p.source_links[0]?p.source_links[0].name:'Buy')}</a>`;
   document.getElementById("detailBody").innerHTML=`
     <img class="detail-img" src="${esc(img)}" alt="${esc(p.name)}" onerror="this.src='assets/placeholder.png'">
     <div class="detail-info">
