@@ -645,7 +645,8 @@ function renderResults() {
     return `
     <tr onclick="selectProduct(${index})">
       <td><div class="product-cell">
-        <img class="market-thumb" src="${imgSrc}" alt="${name}" onerror="this.src='assets/placeholder.png'">
+        <img class="market-thumb" src="${imgSrc}" alt="${name}" loading="lazy"
+          onerror="if(this.src.indexOf('placeholder')<0){console.warn('[LcaImageLoader] Broken:',this.src);this.src='assets/placeholder.png'}else{this.style.opacity='1'}">
         <div><strong>${name}</strong><br><small>${brand}</small></div>
       </div></td>
       <td>${ProductAIGuard.escapeHtml(category)}<br><small>Proveedor: ${ProductAIGuard.escapeHtml(p.provider || p.supplier || "Por validar")}</small><br><small>Stock: ${Number(p.stock || 0) > 0 ? ProductAIGuard.escapeHtml(String(p.stock)) : "A cotizar"}</small></td>
@@ -987,5 +988,6 @@ async function loadProducts() {
 
 loadProducts();
 </script>
+<script src="assets/image_loader.js" defer></script>
 </body>
 </html>

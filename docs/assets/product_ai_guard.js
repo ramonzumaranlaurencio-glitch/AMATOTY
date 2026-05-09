@@ -24,6 +24,8 @@
   const BAD_IMAGE_PATTERNS = [
     "source.unsplash.com",
     "picsum.photos",
+    "m.media-amazon.com",
+    "images-amazon.com",
     "placeholder",
     "61Qe0euJJZL",
     "71Qe0euJJZL",
@@ -32,10 +34,13 @@
 
   const TRUSTED_IMAGE_PATTERNS = [
     "mlstatic.com",
-    "m.media-amazon.com",
     "alicdn.com",
-    "ae01.alicdn.com"
+    "ae01.alicdn.com",
+    "ae03.alicdn.com",
+    "http2.mlstatic.com"
   ];
+  // NOTE: m.media-amazon.com is intentionally excluded – URLs return 404 due to
+  // Amazon CDN access controls. Use local assets or verified marketplace thumbnails.
 
   const TRUSTED_IMAGE_SOURCES = [
     "marketplace_thumbnail",
@@ -107,9 +112,19 @@
       ? (String(product.image_source || "").includes("marketplace") ? "Imagen de marketplace" : "Imagen verificada por IA")
       : "Imagen referencial: pendiente de verificacion IA";
 
+    const _fbImg = fallbackFor(product, prefix);
+    const _altImg = _fbImg !== image ? escapeHtml(_fbImg) : "assets/placeholder.png";
     return `
       <div class="card" style="background:#fff;min-width:220px;max-width:320px;margin:12px auto;padding:18px;box-shadow:0 2px 12px #d5d9d9;">
-        <img src="${escapeHtml(image)}" alt="${name}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px;">
+        <div class="lca-img-wrap" style="height:180px;border-radius:12px;margin-bottom:8px;overflow:hidden;">
+          <div class="lca-skeleton"></div>
+          <img src="${escapeHtml(image)}" alt="${name}" loading="lazy"
+            style="width:100%;height:180px;object-fit:cover;border-radius:12px;"
+            onerror="if(this.src!=='${_altImg}'){this.src='${_altImg}'}else{this.src='assets/placeholder.png'};console.warn('[LcaImageLoader] Broken:',this.getAttribute('data-orig-src')||this.src);"
+            data-orig-src="${escapeHtml(image)}"
+            onload="var s=this.previousElementSibling;if(s&&s.classList.contains('lca-skeleton'))s.style.display='none';this.style.opacity='1';"
+          >
+        </div>
         <h3 style="color:#b12704;">${name}</h3>
         <div style="font-size:0.95em;color:#64748b;margin-bottom:6px;">${brand ? brand + " - " : ""}${category}</div>
         <p style="font-size:1.05em;margin-bottom:8px;">${escapeHtml(product.short_desc)}</p>

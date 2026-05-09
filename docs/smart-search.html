@@ -93,8 +93,9 @@ button{cursor:pointer}
 .prod-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s,transform .2s;position:relative;display:flex;flex-direction:column}
 .prod-card:hover{box-shadow:0 8px 28px rgba(30,58,95,.14);transform:translateY(-2px)}
 .prod-card-img{position:relative;aspect-ratio:1;overflow:hidden;background:var(--panel2);cursor:pointer}
-.prod-card-img img{width:100%;height:100%;object-fit:contain;padding:10px;transition:transform .3s}
+.prod-card-img img{width:100%;height:100%;object-fit:cover;padding:0;transition:transform .3s,opacity .3s}
 .prod-card:hover .prod-card-img img{transform:scale(1.04)}
+@keyframes lcaSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .prod-badge{position:absolute;top:8px;left:8px;background:#dc2626;color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:900}
 .prod-badge.hot{background:#dc2626}
 .prod-badge.new{background:#059669}
@@ -358,12 +359,24 @@ button{cursor:pointer}
   position:relative;aspect-ratio:1;
   background:rgba(255,255,255,.06);
   overflow:hidden;
+  min-height:120px;
 }
+.hub-card-img-wrap .lca-skeleton{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.06) 75%);
+  background-size:200% 100%;
+  animation:lcaSkeleton 1.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes lcaSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .hub-card-img-wrap img{
+  position:relative;z-index:2;
   width:100%;height:100%;
   object-fit:contain;padding:14px;
-  transition:transform .3s;
+  transition:transform .3s, opacity .3s;
+  opacity:0;
 }
+.hub-card-img-wrap img.loaded,.hub-card-img-wrap img[style*="opacity:1"]{opacity:1}
 .hub-card:hover .hub-card-img-wrap img{transform:scale(1.06);}
 .hub-card-hot-badge{
   position:absolute;top:10px;left:10px;
@@ -1142,7 +1155,11 @@ function renderGrid(){
     return `<div class="prod-card">
       <div class="prod-card-img" onclick="openDetail(${i})">
         ${badge}
-        <img src="${esc(img)}" alt="${esc(p.name)}" onerror="this.src='assets/placeholder.png'" loading="lazy">
+        <div class="lca-skeleton" style="position:absolute;inset:0;background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:lcaSkeleton 1.5s ease-in-out infinite;z-index:1;pointer-events:none;"></div>
+        <img src="${esc(img)}" alt="${esc(p.name)}" loading="lazy"
+          style="position:relative;z-index:2;object-fit:cover;opacity:0;transition:opacity .3s"
+          onload="var s=this.previousElementSibling;if(s&&s.classList.contains('lca-skeleton'))s.style.display='none';this.style.opacity='1';"
+          onerror="var s=this.previousElementSibling;if(s)s.style.display='none';if(this.src.indexOf('placeholder')<0){this.src='assets/placeholder.png'}else{this.style.opacity='1'};console.warn('[LcaImageLoader] Broken:',this.src);">
         <button class="prod-fav" title="Save" onclick="event.stopPropagation()">♡</button>
       </div>
       <div class="prod-card-body">
@@ -1448,6 +1465,47 @@ loadProducts();
   const WMT = (kw) =>
     `https://www.walmart.com/search?q=${encodeURIComponent(kw)}`;
 
+  // ── Image resilience helpers ──────────────────────────────────────────────
+  const HUB_CAT_ASSETS = {
+    trending:"assets/home.jpg", tiktok:"assets/placeholder.png",
+    home:"assets/home.jpg",     industrial:"assets/placeholder.png",
+    tech:"assets/placeholder.png", fitness:"assets/placeholder.png",
+    amazon:"assets/placeholder.png", walmart:"assets/placeholder.png"
+  };
+  const BLOCKED_HOSTS_HUB = ["m.media-amazon.com","images-amazon.com"];
+  const SVG_PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect width='300' height='300' fill='%23f1f5f9'/%3E%3Cpath d='M150 95c-15 0-27 12-27 27s12 27 27 27 27-12 27-27-12-27-27-27zm-55 110c0-30 25-55 55-55s55 25 55 55H95z' fill='%23cbd5e1'/%3E%3C/svg%3E";
+
+  function _isBlockedHubImg(url){
+    if(!url) return true;
+    const lc=url.toLowerCase();
+    return BLOCKED_HOSTS_HUB.some(h=>lc.includes(h));
+  }
+
+  /** Returns a safe src: category fallback if amazon/blocked, original otherwise */
+  function _hubImg(p, sectionId){
+    if(_isBlockedHubImg(p.img)){
+      const cat=String(sectionId||"").replace(/^hub-/,"");
+      return HUB_CAT_ASSETS[cat]||"assets/placeholder.png";
+    }
+    return p.img||"assets/placeholder.png";
+  }
+
+  /** Called on img error – falls back through category asset then SVG */
+  window._hubImgError=function(img){
+    const tried=img.getAttribute("data-fb-tried")||"0";
+    const orig=img.getAttribute("data-orig-src")||"";
+    const cat=img.getAttribute("data-category")||"";
+    if(orig) console.warn("[LcaImageLoader] Broken image:",orig);
+    if(tried==="0"){
+      img.setAttribute("data-fb-tried","1");
+      img.src=HUB_CAT_ASSETS[cat]||"assets/placeholder.png";
+    } else if(tried==="1"){
+      img.setAttribute("data-fb-tried","2");
+      img.src=SVG_PH;
+    }
+  };
+  // ── End image helpers ─────────────────────────────────────────────────────
+
   const HUB_SECTIONS = [
     {
       id:"trending", icon:"🔥", title:"Trending Products", badge:"🔥 Hot Right Now", badgeCls:"trending",
@@ -1559,10 +1617,14 @@ loadProducts();
               <div class="hub-card">
                 <div class="hub-card-img-wrap">
                   ${p.badge?`<span class="hub-card-hot-badge ${p.badge}">${BADGE_LABELS[p.badge]||''}</span>`:''}
-                  <img src="${p.img||'assets/placeholder.png'}"
+                  <div class="lca-skeleton"></div>
+                  <img src="${_hubImg(p,section.id)}"
                        alt="${p.name}"
-                       onerror="this.src='assets/placeholder.png'"
-                       loading="lazy">
+                       data-orig-src="${p.img||''}"
+                       data-category="${section.id.replace('hub-','')}"
+                       loading="lazy"
+                       onload="var s=this.previousElementSibling;if(s&&s.classList&&s.classList.contains('lca-skeleton'))s.style.display='none';this.style.opacity='1';"
+                       onerror="_hubImgError(this)">
                 </div>
                 <div class="hub-card-body">
                   <div class="hub-card-name">${p.name}</div>
@@ -1610,5 +1672,6 @@ loadProducts();
 })();
 </script>
 <script src="assets/ai_chat.js" defer></script>
+<script src="assets/image_loader.js" defer></script>
 </body>
 </html>
