@@ -919,7 +919,13 @@ function renderResults(){applyFilters();}
 const countryCurrency = {PE:"PEN",US:"USD",MX:"MXN",CO:"COP",CL:"CLP",AR:"ARS",EC:"USD",BO:"BOB",BR:"BRL",UY:"UYU"};
 
 const API_ORIGIN = window.location.hostname.includes("github.io") ? "https://amatoty.onrender.com" : "";
+const IS_GITHUB_PAGES = window.location.hostname.includes("github.io");
 const SAFEPAY_PROXY = API_ORIGIN + "/api/safepay/checkout";
+
+// Warm up Render backend on page load so it's ready when user searches
+if(IS_GITHUB_PAGES){
+  fetch(API_ORIGIN+"/healthz",{cache:"no-store"}).catch(()=>{});
+}
 
 let products = [];
 let filtered = [];
@@ -1330,6 +1336,11 @@ async function executeSearch(){
   const sideBtn=document.getElementById("searchSideBtn");
   [runBtn,sideBtn].forEach(b=>{b.disabled=true;});
   showToast("🔍 Buscando con IA...");
+  // If on GitHub Pages, warn user backend may be waking up
+  let wakeTimer;
+  if(IS_GITHUB_PAGES){
+    wakeTimer=setTimeout(()=>showToast("⏳ Despertando servidor IA (puede tardar ~30s la primera vez)..."),5000);
+  }
   const payload={
     query:document.getElementById("query").value.trim(),
     category:document.getElementById("categoryFilter").value,
@@ -1356,9 +1367,14 @@ async function executeSearch(){
     document.getElementById("aiModeBadge").textContent=resp.analysis_mode||"IA activa";
     showToast(`✓ ${filtered.length} resultados encontrados`);
   }catch(err){
-    showToast("Sin conexión con IA. Mostrando catálogo local.");
+    if(IS_GITHUB_PAGES){
+      showToast("⚠️ El servidor IA tardó demasiado. Intenta de nuevo en unos segundos.");
+    }else{
+      showToast("Sin conexión con IA. Mostrando catálogo local.");
+    }
     applyFilters();
   }finally{
+    clearTimeout(wakeTimer);
     [runBtn,sideBtn].forEach(b=>{b.disabled=false;});
   }
 }
