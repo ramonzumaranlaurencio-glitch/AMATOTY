@@ -537,7 +537,7 @@ button{cursor:pointer}
     <h1>Find the Best Amazon &amp; Walmart Deals in One Place</h1>
     <p>Curated trending products, viral TikTok finds, and top-rated deals — all with fast shipping and great prices.</p>
     <div class="hub-hero-btns">
-      <a class="hub-btn-walmart" href="https://www.walmart.com/search?q=trending+deals" target="_blank" rel="nofollow sponsored noopener noreferrer">
+      <a class="hub-btn-walmart" href="https://goto.walmart.com/c/7284190/568844/9383?u=https%3A%2F%2Fwww.walmart.com%2Fsearch%3Fq%3Dtrending%2Bdeals" target="_blank" rel="nofollow sponsored noopener noreferrer">
         🛒 Shop Walmart
       </a>
       <a class="hub-btn-amazon" href="https://www.amazon.com/s?k=best+sellers&tag=amatotyshop-20" target="_blank" rel="nofollow sponsored noopener noreferrer">
@@ -1473,7 +1473,7 @@ loadProducts();
       ? `https://www.amazon.com/dp/${asin}?tag=amatotyshop-20`
       : `https://www.amazon.com/s?k=${encodeURIComponent(kw)}&tag=amatotyshop-20`;
   const WMT = (kw) =>
-    `https://www.walmart.com/search?q=${encodeURIComponent(kw)}`;
+    `https://goto.walmart.com/c/7284190/568844/9383?u=${encodeURIComponent('https://www.walmart.com/search?q='+encodeURIComponent(kw))}`;
 
   // ── Image resilience helpers ──────────────────────────────────────────────
   const HUB_CAT_ASSETS = {
