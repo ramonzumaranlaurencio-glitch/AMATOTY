@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="impact-site-verification" value="ab01b12b-0262-49c2-b0b3-f236bf394a37">
+<title>Viral Deals – TikTok-Style Product Discovery | AMATOTY</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Discover viral TikTok products, Amazon finds and Walmart deals in a swipe-up feed. Best prices guaranteed.">
+<meta name="theme-color" content="#050810">
+<meta name="color-scheme" content="dark">
+<link rel="alternate" hreflang="en" href="viral-deals.html">
+<style>
+/* ════════════════════════════════════════════════════════
+   VIRAL DEALS – TikTok-style vertical swipe feed
+   ════════════════════════════════════════════════════════ */
+:root{
+  --wmt:#0071ce; --wmt2:#004c8e;
+  --amz:#ff9900; --amz2:#e67e00;
+  --neon:#00d4ff; --neon2:#7c3aed;
+  --pink:#ff006e; --green:#39ff14;
+  --dark:#050810; --dark2:#0a0e1a;
+  --glass:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.1);
+  --text:#f1f5f9; --text2:#94a3b8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{background:var(--dark);color:var(--text);font-family:-apple-system,'Segoe UI',Arial,sans-serif;height:100%;overflow:hidden;overscroll-behavior:none}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font:inherit;border:none;background:none}
+
+/* ── PROGRESS BAR ── */
+#progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--pink));z-index:2000;transition:width .15s;box-shadow:0 0 8px var(--neon);pointer-events:none}
+
+/* ── TOP NAV ── */
+#top-nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:env(safe-area-inset-top,0) 16px 0;
+  background:linear-gradient(to bottom,rgba(5,8,16,.96) 0%,transparent 100%);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.nav-inner{display:flex;align-items:center;gap:10px;height:52px}
+.nav-brand{
+  font-size:19px;font-weight:900;white-space:nowrap;flex-shrink:0;
+  background:linear-gradient(135deg,#fff,var(--neon));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;padding:0 4px}
+.nav-cats::-webkit-scrollbar{display:none}
+.cat-pill{
+  flex-shrink:0;background:var(--glass);border:1px solid var(--border);
+  border-radius:999px;padding:5px 14px;font-size:11px;font-weight:800;
+  color:var(--text2);cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.cat-pill:hover,.cat-pill.active{background:rgba(0,212,255,.18);border-color:var(--neon);color:var(--neon)}
+.nav-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.nav-btn{
+  width:36px;height:36px;border-radius:50%;background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all .15s;cursor:pointer;
+}
+.nav-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25)}
+
+/* ── MAIN FEED ── */
+#feed{
+  height:100dvh;overflow-y:scroll;
+  scroll-snap-type:y mandatory;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+}
+#feed::-webkit-scrollbar{display:none}
+
+/* ── SLIDE ── */
+.slide{
+  height:100dvh;width:100%;scroll-snap-align:start;
+  position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;
+  contain:strict;
+}
+
+/* ── BACKGROUND ── */
+.slide-bg{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;transition:transform .7s ease;
+  will-change:transform;
+}
+.slide.active .slide-bg{transform:scale(1.05)}
+.slide-bg-grad{position:absolute;inset:0;background:var(--grad,linear-gradient(135deg,#0a0e1a,#1a0520))}
+
+/* ── OVERLAYS ── */
+.slide-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to top,rgba(5,8,16,.96) 0%,rgba(5,8,16,.55) 38%,transparent 65%),
+    linear-gradient(to bottom,rgba(5,8,16,.5) 0%,transparent 25%);
+}
+.glow-orb{
+  position:absolute;border-radius:50%;filter:blur(90px);
+  pointer-events:none;opacity:.22;
+}
+
+/* ── SIDEBAR (TikTok right) ── */
+.slide-sidebar{
+  position:absolute;right:14px;bottom:210px;
+  display:flex;flex-direction:column;gap:18px;align-items:center;z-index:10;
+}
+.side-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;transition:transform .15s;
+}
+.side-btn:hover{transform:scale(1.12)}
+.side-icon{
+  width:48px;height:48px;background:rgba(255,255,255,.1);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.15);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;transition:all .18s;
+}
+.side-btn.liked .side-icon{background:rgba(255,0,110,.3);border-color:#ff006e;box-shadow:0 0 16px rgba(255,0,110,.4)}
+.side-label{font-size:10px;color:#fff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+
+/* ── BOTTOM INFO ── */
+.slide-info{
+  position:relative;z-index:10;width:100%;
+  padding:0 16px 20px;
+  padding-bottom:max(20px,env(safe-area-inset-bottom,20px));
+  padding-right:72px; /* avoid sidebar */
+}
+.slide-section-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,212,255,.14);border:1px solid rgba(0,212,255,.3);
+  border-radius:999px;padding:3px 12px;font-size:11px;font-weight:800;
+  color:var(--neon);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;
+}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin-left:6px;
+}
+.badge.viral{background:linear-gradient(135deg,#ee1d52,#69c9d0);color:#fff}
+.badge.hot{background:#ef4444;color:#fff}
+.badge.deal{background:#f59e0b;color:#111}
+.badge.new{background:#10b981;color:#fff}
+.badge.cheap{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
+
+.slide-name{
+  font-size:clamp(20px,5vw,28px);font-weight:900;line-height:1.2;
+  color:#fff;margin-bottom:6px;text-shadow:0 2px 10px rgba(0,0,0,.7);
+}
+.slide-benefit{font-size:14px;color:rgba(255,255,255,.8);margin-bottom:10px;line-height:1.4;max-width:300px}
+.slide-price-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.slide-price{font-size:28px;font-weight:900;color:#fff;letter-spacing:-.5px}
+.slide-orig{font-size:13px;color:rgba(255,255,255,.45);text-decoration:line-through}
+.slide-disc{background:#ef4444;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:900}
+.slide-rating{display:flex;align-items:center;gap:6px;margin-bottom:14px;font-size:13px}
+.slide-stars{color:#f59e0b;letter-spacing:1px;font-size:14px}
+.slide-reviews{color:rgba(255,255,255,.45);font-size:11px}
+
+/* ── CTA BUTTONS ── */
+.slide-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px}
+.btn-wmt{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:linear-gradient(135deg,var(--wmt),var(--wmt2));color:#fff;
+  border-radius:12px;padding:13px 10px;font-size:14px;font-weight:800;
+  box-shadow:0 4px 18px rgba(0,113,206,.45);
+  transition:all .18s;white-space:nowrap;text-align:center;
+}
+.btn-wmt:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,113,206,.65);color:#fff}
+.btn-amz{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:linear-gradient(135deg,var(--amz),var(--amz2));color:#111;
+  border-radius:12px;padding:13px 10px;font-size:14px;font-weight:800;
+  box-shadow:0 4px 18px rgba(255,153,0,.45);
+  transition:all .18s;white-space:nowrap;text-align:center;
+}
+.btn-amz:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,153,0,.65);color:#111}
+.slide-disclosure{font-size:9px;color:rgba(255,255,255,.25);margin-top:8px}
+.slide-disclosure a{color:rgba(0,212,255,.4)}
+
+/* ── SWIPE HINT ── */
+.swipe-hint{
+  position:absolute;bottom:130px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  animation:bounceUp 1.4s infinite ease-in-out;
+  transition:opacity .5s;pointer-events:none;z-index:20;
+}
+.swipe-hint .sh-arrow{font-size:26px;filter:drop-shadow(0 0 8px rgba(0,212,255,.7))}
+.swipe-hint span{font-size:10px;color:rgba(255,255,255,.7);font-weight:800;letter-spacing:1.5px}
+@keyframes bounceUp{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+
+/* ── SECTION HEADER SLIDE ── */
+.slide.sec-header{justify-content:center;align-items:center}
+.sec-inner{text-align:center;padding:40px 24px;z-index:10;position:relative;max-width:420px;margin:0 auto}
+.sec-icon{font-size:64px;margin-bottom:16px;line-height:1;filter:drop-shadow(0 0 24px rgba(0,212,255,.5))}
+.sec-title{
+  font-size:clamp(28px,8vw,52px);font-weight:900;line-height:1.1;margin-bottom:12px;
+  background:linear-gradient(135deg,#fff 20%,var(--neon) 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sec-sub{font-size:16px;color:var(--text2);max-width:300px;margin:0 auto 24px;line-height:1.6}
+.sec-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.35);
+  border-radius:999px;padding:10px 28px;font-size:13px;font-weight:800;
+  color:var(--neon);cursor:pointer;
+  animation:glowPulse 2s infinite;
+}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 14px rgba(0,212,255,.25)}50%{box-shadow:0 0 32px rgba(0,212,255,.6)}}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+  background:rgba(10,14,26,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--border);border-radius:999px;
+  padding:10px 22px;font-size:13px;font-weight:700;color:#fff;
+  z-index:9999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none;
+}
+#toast.show{opacity:1}
+
+/* ── WISHLIST PANEL ── */
+#wl-panel{position:fixed;inset:0;z-index:5000;display:none}
+#wl-panel.open{display:flex;flex-direction:column;justify-content:flex-end}
+.wl-overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.wl-drawer{
+  position:relative;width:100%;max-height:82vh;
+  background:#0d1b2e;border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border);padding:20px;overflow-y:auto;
+}
+.wl-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.wl-title{
+  font-size:18px;font-weight:900;margin-bottom:16px;
+  background:linear-gradient(135deg,#fff,var(--neon));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.wl-empty{color:#64748b;text-align:center;padding:24px 0;font-size:14px}
+.wl-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.wl-item img{width:54px;height:54px;object-fit:contain;border-radius:10px;background:rgba(255,255,255,.06);flex-shrink:0}
+.wl-info{flex:1;min-width:0}
+.wl-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wl-price{font-size:14px;font-weight:900;color:var(--amz)}
+.wl-btns{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.wl-btn{font-size:11px;font-weight:800;border-radius:8px;padding:5px 10px;white-space:nowrap}
+.wl-btn.wmt{background:var(--wmt);color:#fff}
+.wl-btn.amz{background:var(--amz);color:#111}
+.wl-close-btn{
+  margin-top:16px;width:100%;padding:12px;border-radius:12px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:400px){
+  .slide-btns{grid-template-columns:1fr}
+  .btn-wmt,.btn-amz{padding:12px;font-size:13px}
+  .slide-info{padding-right:68px}
+}
+@media(min-width:700px){
+  #feed{max-width:480px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  .slide-btns{max-width:340px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── PROGRESS BAR ── -->
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- ── TOP NAV ── -->
+<nav id="top-nav">
+  <div class="nav-inner">
+    <a href="smart-search.html" class="nav-brand">AMATOTY</a>
+    <div class="nav-cats" id="nav-cats"></div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="openWishlist()" title="Wishlist" aria-label="Open wishlist">❤️</button>
+      <a href="smart-search.html" class="nav-btn" title="Smart Search" aria-label="Smart Search">🔍</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN FEED ── -->
+<div id="feed" role="main" aria-label="Product feed"></div>
+
+<!-- ── TOAST ── -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ── WISHLIST PANEL ── -->
+<div id="wl-panel" role="dialog" aria-modal="true" aria-label="Wishlist">
+  <div class="wl-overlay" onclick="closeWishlist()"></div>
+  <div class="wl-drawer">
+    <div class="wl-handle"></div>
+    <div class="wl-title">❤️ My Wishlist</div>
+    <div id="wl-items"></div>
+    <button class="wl-close-btn" onclick="closeWishlist()">Close</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+const AMZ_TAG = 'amatotyshop-20';
+const amzUrl  = (kw, asin) => asin
+  ? `https://www.amazon.com/dp/${asin}?tag=${AMZ_TAG}`
+  : `https://www.amazon.com/s?k=${encodeURIComponent((kw||'').trim())}&tag=${AMZ_TAG}`;
+const wmtUrl  = (kw) => `https://www.walmart.com/search?q=${encodeURIComponent((kw||'').trim())}`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id:'tiktok',   label:'📱 TikTok Viral',  icon:'📱', title:'TikTok Viral Finds',      sub:'Products trending on TikTok with millions of views.',          grad:'linear-gradient(135deg,#1a0020,#0d0829)',  glow:'#ee1d52' },
+  { id:'amazon',   label:'📦 Amazon Finds',  icon:'📦', title:'Amazon Best Sellers',      sub:'Top-rated with hundreds of thousands of 5-star reviews.',      grad:'linear-gradient(135deg,#1a0900,#0d1b2e)',  glow:'#ff9900' },
+  { id:'walmart',  label:'🛒 Walmart Deals', icon:'🛒', title:'Walmart Hot Deals',        sub:'Incredible prices on everyday essentials — ships fast.',        grad:'linear-gradient(135deg,#000d1a,#001a33)',  glow:'#0071ce' },
+  { id:'gadgets',  label:'💡 Smart Gadgets', icon:'💡', title:'Smart Gadgets',            sub:'The coolest tech that actually changes your daily life.',       grad:'linear-gradient(135deg,#0a001a,#001a14)',  glow:'#00d4ff' },
+  { id:'tools',    label:'🔧 Tools',         icon:'🔧', title:'Pro-Grade Industrial Tools',sub:'Built for professionals. Priced for every budget.',            grad:'linear-gradient(135deg,#1a0f00,#0d1b2e)',  glow:'#f59e0b' },
+  { id:'home',     label:'🏠 Home Upgrades', icon:'🏠', title:'Home Upgrades',            sub:'Transform any space with these top-rated finds.',              grad:'linear-gradient(135deg,#001a0d,#0a0e1a)',  glow:'#10b981' },
+  { id:'kitchen',  label:'🍳 Kitchen',       icon:'🍳', title:'Kitchen Essentials',       sub:'Cook smarter, eat better, save time every single day.',        grad:'linear-gradient(135deg,#1a0000,#0d1b2e)',  glow:'#ef4444' },
+  { id:'under25',  label:'💸 Under $25',     icon:'💸', title:'Under $25 Steals',         sub:'Amazing products that absolutely will not break the bank.',    grad:'linear-gradient(135deg,#001a1a,#0a0e1a)',  glow:'#39ff14' },
+  { id:'luxury',   label:'✨ Luxury Look',   icon:'✨', title:'Luxury Looking Cheap',     sub:'Designer aesthetics at a tiny fraction of the price.',         grad:'linear-gradient(135deg,#1a1a00,#1a0033)',  glow:'#a855f7' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUCT DATA  (48 products across 9 sections)
+// ─────────────────────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  // ── 📱 TIKTOK VIRAL ──────────────────────────────────────────────────────
+  { s:'tiktok', name:'Ice Roller Face Massager',       benefit:'Depuffs skin in 5 minutes ✨ Celebrities are obsessed',     price:'$16.99', orig:'$34.99', disc:'51%', rating:4.8, rev:'47K', badge:'viral', img:'https://m.media-amazon.com/images/I/61GVRRgpHtL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0020,#0d0829)', amz:'ice roller face massager depuff',       wmt:'ice roller face massager' },
+  { s:'tiktok', name:'Gua Sha Facial Stone',           benefit:'Sculpts your jawline in 10 min. Celebs swear by this 🌟',  price:'$14.99', orig:'$29.99', disc:'50%', rating:4.7, rev:'32K', badge:'viral', img:'https://m.media-amazon.com/images/I/61xOYX5IXFL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0520,#08061a)', amz:'gua sha facial tool jade rose quartz',  wmt:'gua sha stone facial tool' },
+  { s:'tiktok', name:'Cleaning Gel Putty',             benefit:'Pulls dust from ANY crack — keyboard, vents, car 🤯',      price:'$8.99',  orig:'$17.99', disc:'50%', rating:4.6, rev:'89K', badge:'viral', img:'https://m.media-amazon.com/images/I/71y-l4n5T8L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0a0e1a)', amz:'cleaning gel putty keyboard car vent',  wmt:'cleaning putty gel keyboard' },
+  { s:'tiktok', name:'Cloud Slippers Memory Foam',     benefit:'Like walking on clouds – wear them ALL day 🥰',            price:'$22.99', orig:'$45.99', disc:'50%', rating:4.9, rev:'120K',badge:'viral', img:'https://m.media-amazon.com/images/I/61dw1VFQEBL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0d0020,#1a0010)', amz:'cloud slippers memory foam women men',  wmt:'cloud slippers memory foam' },
+  { s:'tiktok', name:'Sunrise Alarm Clock',            benefit:'Wake up naturally without the jarring buzzer 🌅',          price:'$39.99', orig:'$79.99', disc:'50%', rating:4.7, rev:'28K', badge:'new',   img:'https://m.media-amazon.com/images/I/61S6FDGTHrL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0a00,#0d1b2e)', amz:'sunrise alarm clock light therapy wake up light', wmt:'sunrise alarm clock light' },
+  { s:'tiktok', name:'LED Strip Lights 16.4ft Color',  benefit:'Sync to music, 16M colors. Your room becomes their room 🎶',price:'$19.99', orig:'$39.99', disc:'50%', rating:4.7, rev:'203K',badge:'viral', img:'https://m.media-amazon.com/images/I/81tFR2nMt4L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#000d1a,#1a001a)', amz:'led strip lights color changing music sync app',  wmt:'led strip lights color changing 16ft' },
+
+  // ── 📦 AMAZON FINDS ──────────────────────────────────────────────────────
+  { s:'amazon',  name:'Echo Dot 5th Gen',              benefit:'Alexa, smarter than ever. Your home finally has an IQ 🤖',price:'$49.99', orig:'$99.99', disc:'50%', rating:4.7, rev:'890K',badge:'hot',   asin:'B09B8W5FW7', img:'https://m.media-amazon.com/images/I/914e7V0qNzL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001020,#1a0800)', amz:'echo dot 5th generation alexa', wmt:'amazon echo dot 5th gen' },
+  { s:'amazon',  name:'Fire TV Stick 4K Max',          benefit:'Ultra HD streaming + Alexa. Cut the cable forever 📺',    price:'$59.99', orig:'$119.99',disc:'50%', rating:4.6, rev:'340K',badge:'hot',   asin:'B0BP9SNVH9', img:'https://m.media-amazon.com/images/I/61V1IKSFuDL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0500,#0d1b2e)', amz:'fire tv stick 4k max wifi 6', wmt:'fire tv stick 4k max' },
+  { s:'amazon',  name:'Bose QuietComfort 45',          benefit:'Industry-best ANC. Your boss literally cannot reach you 🎧',price:'$249.00',orig:'$329.00',disc:'24%', rating:4.7, rev:'52K', badge:'deal',  img:'https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_SX466_.jpg',  grad:'linear-gradient(135deg,#001a1a,#0a0e1a)', amz:'bose quietcomfort 45 noise cancelling headphones', wmt:'bose quietcomfort 45' },
+  { s:'amazon',  name:'Kindle Paperwhite 2024',        benefit:'300 books in your pocket. Reads exactly like real paper 📚',price:'$139.99',orig:'$199.99',disc:'30%', rating:4.8, rev:'180K',badge:'new',   img:'https://m.media-amazon.com/images/I/614VGXFM+8L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0d001a,#001a0d)', amz:'kindle paperwhite 2024 e-reader waterproof', wmt:'kindle paperwhite' },
+  { s:'amazon',  name:'iRobot Roomba i4+ Self-Empty',  benefit:'Empties ITSELF. You will never vacuum again. Promise. 🤖', price:'$299.99',orig:'$499.99',disc:'40%', rating:4.5, rev:'67K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71C2lGHmDpL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a1a00,#0a0e1a)', amz:'irobot roomba i4 plus self emptying robot vacuum', wmt:'irobot roomba self emptying' },
+  { s:'amazon',  name:'Ring Video Doorbell Wired',     benefit:'See & speak to anyone at your door from anywhere on Earth 🔔',price:'$59.99',orig:'$99.99',disc:'40%', rating:4.6, rev:'94K', badge:'hot',   img:'https://m.media-amazon.com/images/I/71mJNLExFwL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001010,#1a0d00)', amz:'ring video doorbell wired hd security', wmt:'ring video doorbell wired' },
+
+  // ── 🛒 WALMART DEALS ─────────────────────────────────────────────────────
+  { s:'walmart', name:'Onn 55-Inch 4K Roku Smart TV',  benefit:'Big-screen energy for under $300. Pure insane value 📺',  price:'$278.00',orig:'$399.00',disc:'30%', rating:4.5, rev:'41K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71y-MdHD0NL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#000d1a,#1a0500)', amz:'55 inch 4k smart tv roku built in', wmt:'onn 55 inch 4k roku tv' },
+  { s:'walmart', name:'Better Homes Air Fryer 5Qt',    benefit:'8 presets, digital display, crispy every time 🍟',        price:'$59.00', orig:'$99.00', disc:'41%', rating:4.6, rev:'28K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71y-xMH2n5L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0800,#001a08)', amz:'5 quart air fryer digital 8 presets', wmt:'better homes air fryer 5qt' },
+  { s:'walmart', name:'Blackweb Gaming Headset RGB',   benefit:'7.1 surround. Your enemies will hear you coming 🎮',      price:'$29.99', orig:'$59.99', disc:'50%', rating:4.4, rev:'15K', badge:'deal',  img:'https://m.media-amazon.com/images/I/61eou4+-p3L._AC_SX466_.jpg',  grad:'linear-gradient(135deg,#0a001a,#001a10)', amz:'gaming headset 7.1 surround sound usb rgb', wmt:'blackweb gaming headset rgb' },
+  { s:'walmart', name:'Hyper Tough 20V Cordless Drill',benefit:'Pro power, budget price. Ships with 2 batteries 🔧',      price:'$49.00', orig:'$89.00', disc:'45%', rating:4.5, rev:'22K', badge:'deal',  img:'https://m.media-amazon.com/images/I/81GBMbR-rKL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0f00,#0a0e1a)', amz:'20v cordless drill set 2 batteries case', wmt:'hyper tough 20v drill set' },
+  { s:'walmart', name:'Mainstays 7-Piece Bed Set Queen',benefit:'Hotel vibes at home. Comforter + sheets + pillowcases 🛏️',price:'$42.99',orig:'$89.99', disc:'52%', rating:4.5, rev:'31K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71mJNLExFwL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a1a,#1a001a)', amz:'queen comforter set 7 piece bedding complete', wmt:'mainstays 7 piece bed set queen' },
+
+  // ── 💡 SMART GADGETS ─────────────────────────────────────────────────────
+  { s:'gadgets', name:'Wireless Earbuds ANC Pro',       benefit:'Active noise cancel. Cry on flights without anyone knowing ✈️',price:'$49.99',orig:'$99.99',disc:'50%', rating:4.7, rev:'156K',badge:'hot',  img:'https://m.media-amazon.com/images/I/61SUj2aKoEL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#000d1a,#1a001a)', amz:'wireless earbuds active noise canceling anc 30hr', wmt:'wireless earbuds anc pro' },
+  { s:'gadgets', name:'Smart Watch Fitness Pro',         benefit:'GPS, blood O₂, heart rate. Your personal health AI ⌚',   price:'$69.99', orig:'$149.99',disc:'53%', rating:4.6, rev:'78K', badge:'new',  img:'https://m.media-amazon.com/images/I/61I5bFPpnQL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0a001a,#001a0a)', amz:'smartwatch fitness tracker gps blood oxygen heart rate', wmt:'smart watch fitness tracker gps' },
+  { s:'gadgets', name:'USB-C Hub 7-in-1 4K HDMI',       benefit:'One cable to rule them all. 4K HDMI + 100W PD + 3×USB 🔌',price:'$34.99', orig:'$69.99', disc:'50%', rating:4.7, rev:'43K', badge:'hot',  img:'https://m.media-amazon.com/images/I/71OGaJDt5ML._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0d001a)', amz:'usb c hub 7 in 1 4k hdmi 100w pd charging', wmt:'usb c hub 7 in 1 4k' },
+  { s:'gadgets', name:'Portable Mini Projector 1080p',   benefit:'Movie theater anywhere. Projects 200 inches on any wall 🎬',price:'$149.99',orig:'$299.99',disc:'50%', rating:4.5, rev:'21K', badge:'viral',img:'https://m.media-amazon.com/images/I/71z-7CMJL5L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0a00,#001a1a)', amz:'portable mini projector 1080p outdoor wifi bluetooth', wmt:'portable projector 1080p mini' },
+  { s:'gadgets', name:'Mechanical Keyboard RGB TKL',     benefit:'Tactile clicks. RGB everything. Type like a pro ⌨️',      price:'$55.99', orig:'$109.99',disc:'49%', rating:4.7, rev:'64K', badge:'hot',  img:'https://m.media-amazon.com/images/I/81J6h8MFMbL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0d001a,#001a0d)', amz:'mechanical keyboard rgb tkl tenkeyless compact', wmt:'mechanical keyboard rgb compact tkl' },
+  { s:'gadgets', name:'Portable Charger 26800mAh',       benefit:'Charges iPhone 13x over. 3 ports, fast charge 🔋',        price:'$39.99', orig:'$79.99', disc:'50%', rating:4.8, rev:'98K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71LBHB-r06L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0a001a)', amz:'portable charger power bank 26800mah fast charging 3 ports', wmt:'power bank 26800mah fast charge' },
+
+  // ── 🔧 INDUSTRIAL TOOLS ───────────────────────────────────────────────────
+  { s:'tools',   name:'Cordless Drill 20V Brushless',   benefit:'Brushless motor + 2 batteries + case. Built for the job site 🔨',price:'$89.99',orig:'$179.99',disc:'50%',rating:4.7, rev:'48K', badge:'hot',  img:'https://m.media-amazon.com/images/I/81GBMbR-rKL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0f00,#0a1020)', amz:'20v cordless drill brushless 2 batteries carrying case', wmt:'cordless drill set 20v brushless' },
+  { s:'tools',   name:'Socket Set 230 Piece Chrome',    benefit:'Every socket you will ever need. Chrome vanadium steel 🔩',price:'$59.99', orig:'$119.99',disc:'50%', rating:4.8, rev:'35K', badge:'deal',  img:'https://m.media-amazon.com/images/I/81fIJFQpEAL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0a0a00,#1a0a00)', amz:'socket set 230 piece chrome vanadium metric sae', wmt:'socket set 230 piece chrome' },
+  { s:'tools',   name:'Laser Level 360° Self-Leveling', benefit:'Perfectly straight lines every time. 1/8 inch accuracy 🎯',price:'$42.99', orig:'$84.99', disc:'49%', rating:4.7, rev:'27K', badge:'new',   img:'https://m.media-amazon.com/images/I/71TqNlVHbxL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a00,#0a0a1a)', amz:'laser level 360 self leveling cross line horizontal vertical', wmt:'laser level 360 self leveling' },
+  { s:'tools',   name:'Digital Multimeter TRMS Auto',   benefit:'Measure anything electrical. TRMS accuracy, fits in pocket ⚡',price:'$34.99',orig:'$69.99',disc:'50%', rating:4.7, rev:'19K', badge:'deal',  img:'https://m.media-amazon.com/images/I/61KZf3pz7HL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a1000,#0a001a)', amz:'digital multimeter auto ranging trms true rms', wmt:'digital multimeter auto range trms' },
+  { s:'tools',   name:'Stud Finder 6-in-1 Wall Scanner',benefit:'Finds wood, metal & live wires. Your drywall hero 🏗️',   price:'$28.99', orig:'$57.99', disc:'50%', rating:4.6, rev:'14K', badge:'deal',  img:'https://m.media-amazon.com/images/I/61fH4m9wkML._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#1a0010)', amz:'stud finder wall scanner 6 in 1 wood metal live wire', wmt:'stud finder wall scanner 6 in 1' },
+
+  // ── 🏠 HOME UPGRADES ─────────────────────────────────────────────────────
+  { s:'home',    name:'Robot Vacuum Self-Charging',     benefit:'Maps your home, vacuums, then puts itself away 🤖',       price:'$149.99',orig:'$299.99',disc:'50%', rating:4.6, rev:'112K',badge:'hot',   img:'https://m.media-amazon.com/images/I/71C2lGHmDpL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a0a,#0a0e1a)', amz:'robot vacuum self charging auto dock mapping wifi', wmt:'robot vacuum self charging wifi' },
+  { s:'home',    name:'Weighted Blanket 15lb Queen',    benefit:'Anxiety goes down. Sleep quality goes way up 😴',         price:'$49.99', orig:'$99.99', disc:'50%', rating:4.8, rev:'87K', badge:'viral',  img:'https://m.media-amazon.com/images/I/71mJNLExFwL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0d001a,#001a0d)', amz:'weighted blanket 15lb queen size anxiety relief', wmt:'weighted blanket 15 pound queen' },
+  { s:'home',    name:'Smart Plug WiFi 4-Pack',         benefit:'Control everything with your voice. Alexa/Google/App 🔌',  price:'$24.99', orig:'$49.99', disc:'50%', rating:4.7, rev:'234K',badge:'hot',   img:'https://m.media-amazon.com/images/I/61-CXimRl5L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0a001a)', amz:'smart plug wifi 4 pack alexa google home', wmt:'smart plug wifi 4 pack' },
+  { s:'home',    name:'Portable Clothes Steamer',       benefit:'Wrinkle-free in 60 seconds. No ironing board needed 🌊',  price:'$29.99', orig:'$59.99', disc:'50%', rating:4.6, rev:'56K', badge:'viral',  img:'https://m.media-amazon.com/images/I/71LoMHRf3JL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#00101a,#1a000a)', amz:'handheld garment steamer clothes wrinkle portable', wmt:'handheld clothes steamer portable' },
+  { s:'home',    name:'Cordless Handheld Vacuum',       benefit:'Powerful suction for desk, car and couch. No cord mess 🧹',price:'$29.99', orig:'$59.99', disc:'50%', rating:4.5, rev:'44K', badge:'deal',  img:'https://m.media-amazon.com/images/I/61+3iXVlYUL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0010,#001a10)', amz:'cordless handheld vacuum mini portable powerful suction', wmt:'cordless handheld vacuum mini' },
+
+  // ── 🍳 KITCHEN ESSENTIALS ────────────────────────────────────────────────
+  { s:'kitchen', name:'Instant Pot Duo 7-in-1 6Qt',    benefit:'Pressure cooker + slow cooker + rice cooker in ONE 🍲',  price:'$89.99', orig:'$169.99',disc:'47%', rating:4.8, rev:'320K',badge:'hot',   img:'https://m.media-amazon.com/images/I/71V1jgEBsxL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0000,#001020)', amz:'instant pot duo 7 in 1 6 quart pressure cooker', wmt:'instant pot duo 6 quart 7 in 1' },
+  { s:'kitchen', name:'Air Fryer 5.8Qt XL Digital',    benefit:'Crispy like fried, healthy like baked. 85% less oil 🥗',  price:'$79.99', orig:'$159.99',disc:'50%', rating:4.7, rev:'189K',badge:'viral',  img:'https://m.media-amazon.com/images/I/71y-xMH2n5L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0a00,#0a0e1a)', amz:'air fryer 5.8 quart digital xl large family size', wmt:'air fryer 5.8qt xl digital' },
+  { s:'kitchen', name:'Portable USB Mini Blender',     benefit:'Make smoothies anywhere. USB charge, personal 12oz cup 🥤',price:'$24.99',orig:'$49.99', disc:'50%', rating:4.7, rev:'92K', badge:'viral',  img:'https://m.media-amazon.com/images/I/61eou4+-p3L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#1a0010)', amz:'portable mini blender usb rechargeable personal 12oz', wmt:'portable mini blender usb rechargeable' },
+  { s:'kitchen', name:'Vacuum Food Sealer Machine',    benefit:'Keep food fresh 5X longer. Save money every week 💰',     price:'$34.99', orig:'$69.99', disc:'50%', rating:4.6, rev:'44K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71y-MdHD0NL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a1a,#1a0010)', amz:'food vacuum sealer machine bags airtight seal', wmt:'vacuum food sealer machine bags' },
+
+  // ── 💸 UNDER $25 ─────────────────────────────────────────────────────────
+  { s:'under25', name:'Car Seat Gap Organizer Filler', benefit:'No more reaching under the seat. Fits every car 🚗',      price:'$18.99', orig:'$37.99', disc:'50%', rating:4.6, rev:'71K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71E9T0JMPEL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0d001a)', amz:'car seat gap organizer filler leather', wmt:'car seat gap organizer filler' },
+  { s:'under25', name:'Cable Management Clips 16-Pack',benefit:'Zero cable chaos. Stick anywhere, reuse forever 📦',      price:'$12.99', orig:'$25.99', disc:'50%', rating:4.8, rev:'145K',badge:'viral',  img:'https://m.media-amazon.com/images/I/71LoMHRf3JL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0a1000,#001a1a)', amz:'cable management clips adhesive 16 pack desk wall', wmt:'cable organizer clips adhesive 16 pack' },
+  { s:'under25', name:'Ab Roller Wheel + Knee Pad',    benefit:'6-pack in 8 weeks. Knee pad included. All fitness levels 💪',price:'$18.99',orig:'$37.99',disc:'50%', rating:4.7, rev:'38K', badge:'hot',   img:'https://m.media-amazon.com/images/I/71-G7B+e3wL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a000a,#000d1a)', amz:'ab roller wheel core workout knee pad set', wmt:'ab roller wheel fitness knee pad' },
+  { s:'under25', name:'Speed Jump Rope Ball Bearing',  benefit:'2000 reps/min. Adjustable, tangle-free, competition grade ⚡',price:'$14.99',orig:'$29.99',disc:'50%', rating:4.7, rev:'29K', badge:'deal',  img:'https://m.media-amazon.com/images/I/71nTMpNJRVL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a00,#0a001a)', amz:'speed jump rope ball bearing adjustable cable competition', wmt:'speed jump rope ball bearing' },
+  { s:'under25', name:'Resistance Bands Set 5-Pack',   benefit:'Full gym in a bag. 11 resistance levels + door anchor 🏋️',price:'$19.99', orig:'$39.99', disc:'50%', rating:4.8, rev:'203K',badge:'viral',  img:'https://m.media-amazon.com/images/I/81CWRVkkVtL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0a00,#001a1a)', amz:'resistance bands set 5 piece door anchor handles legs', wmt:'resistance bands 5 piece set workout' },
+  { s:'under25', name:'Yoga Mat Extra Thick Non-Slip', benefit:'6mm thick, eco-friendly TPE, carry strap included 🧘',    price:'$24.99', orig:'$49.99', disc:'50%', rating:4.7, rev:'61K', badge:'new',   img:'https://m.media-amazon.com/images/I/71JR7PZFXIL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#001a10,#0d001a)', amz:'yoga mat extra thick 6mm non slip tpe eco friendly', wmt:'yoga mat extra thick non slip 6mm' },
+
+  // ── ✨ LUXURY LOOKING CHEAP ───────────────────────────────────────────────
+  { s:'luxury',  name:'Aesthetic Desk Lamp + Wireless Charger', benefit:'Looks $200. Is $45. Your desk becomes an influencer set 💫',price:'$45.99',orig:'$89.99',disc:'49%', rating:4.6, rev:'34K', badge:'cheap', img:'https://m.media-amazon.com/images/I/71+OjkAFX1L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a001a,#001a1a)', amz:'aesthetic desk lamp wireless charger touch dimmer', wmt:'desk lamp wireless charger aesthetic' },
+  { s:'luxury',  name:'500ml Ultrasonic Aroma Diffuser', benefit:'Your home smells like a 5-star hotel. Under $40 🌸',     price:'$38.99', orig:'$79.99', disc:'51%', rating:4.7, rev:'52K', badge:'cheap', img:'https://m.media-amazon.com/images/I/71+OjkAFX1L._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0010,#001a10)', amz:'ultrasonic aromatherapy diffuser 500ml essential oils luxury', wmt:'ultrasonic diffuser 500ml aromatherapy' },
+  { s:'luxury',  name:'Gold Rose Luxury Skincare Set',benefit:'8-piece routine under $35. Feels like Sephora 🌹',         price:'$32.99', orig:'$64.99', disc:'49%', rating:4.6, rev:'29K', badge:'cheap', img:'https://m.media-amazon.com/images/I/61xOYX5IXFL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#1a0808,#08001a)', amz:'luxury skincare gift set 8 piece vitamin c serum retinol', wmt:'luxury skincare set gift 8 piece' },
+  { s:'luxury',  name:'Crystal Nail Art Starter Kit',  benefit:'Salon nails at home. 20-piece kit, lasts 3 weeks 💅',     price:'$24.99', orig:'$49.99', disc:'50%', rating:4.7, rev:'41K', badge:'cheap', img:'https://m.media-amazon.com/images/I/61GVRRgpHtL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0d0020,#001a10)', amz:'crystal nail art kit starter gel uv lamp 20 piece', wmt:'nail art starter kit gel uv lamp' },
+  { s:'luxury',  name:'Faux Leather Laptop Bag 15.6in',benefit:'Looks Gucci, costs $35. Fits 15.6-inch laptops 👜',       price:'$34.99', orig:'$69.99', disc:'50%', rating:4.8, rev:'67K', badge:'cheap', img:'https://m.media-amazon.com/images/I/81J6h8MFMbL._AC_SX466_.jpg', grad:'linear-gradient(135deg,#0a0a0a,#1a0a00)', amz:'faux leather laptop bag 15.6 inch briefcase luxury look', wmt:'leather laptop bag 15.6 luxury look' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WISHLIST (localStorage)
+// ─────────────────────────────────────────────────────────────────────────────
+let wishlist = [];
+try { wishlist = JSON.parse(localStorage.getItem('viral_wl_v1') || '[]'); } catch(_) {}
+function saveWL() { try { localStorage.setItem('viral_wl_v1', JSON.stringify(wishlist)); } catch(_) {} }
+function isWL(idx) { return wishlist.some(w => w.idx === idx); }
+
+function toggleWL(idx) {
+  const p = PRODUCTS[idx];
+  if (isWL(idx)) {
+    wishlist = wishlist.filter(w => w.idx !== idx);
+    showToast('💔 Removed from wishlist');
+  } else {
+    wishlist.push({ idx, name: p.name, price: p.price, img: p.img || '', amz: p.amz, wmt: p.wmt });
+    showToast('❤️ Saved to wishlist!');
+  }
+  saveWL();
+  const btn = document.querySelector(`[data-wl="${idx}"]`);
+  if (btn) btn.classList.toggle('liked', isWL(idx));
+}
+
+function openWishlist() {
+  const panel = document.getElementById('wl-panel');
+  const items = document.getElementById('wl-items');
+  if (!wishlist.length) {
+    items.innerHTML = '<p class="wl-empty">No items yet — heart a product to save it! ❤️</p>';
+  } else {
+    items.innerHTML = wishlist.map(w => `
+      <div class="wl-item">
+        <img src="${w.img || 'assets/placeholder.png'}" alt="" onerror="this.src='assets/placeholder.png'">
+        <div class="wl-info">
+          <div class="wl-name">${w.name}</div>
+          <div class="wl-price">${w.price}</div>
+        </div>
+        <div class="wl-btns">
+          <a class="wl-btn wmt" href="${wmtUrl(w.wmt)}" target="_blank" rel="nofollow sponsored noopener noreferrer">Walmart</a>
+          <a class="wl-btn amz" href="${amzUrl(w.amz)}" target="_blank" rel="nofollow sponsored noopener noreferrer">Amazon</a>
+        </div>
+      </div>`).join('');
+  }
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeWishlist() {
+  document.getElementById('wl-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────────────────────────────────────
+let _toastTmr;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_toastTmr);
+  _toastTmr = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUILD FEED
+// ─────────────────────────────────────────────────────────────────────────────
+const BADGE_MAP = { viral:'📱 VIRAL', hot:'🔥 HOT', deal:'💰 DEAL', new:'✨ NEW', cheap:'✨ LUXURY' };
+let allSlides = [];
+let currentIdx = 0;
+
+function buildFeed() {
+  const feed = document.getElementById('feed');
+  const catNav = document.getElementById('nav-cats');
+
+  // Category pills
+  catNav.innerHTML = SECTIONS.map((sec, i) =>
+    `<button class="cat-pill${i===0?' active':''}" data-sec="${sec.id}" onclick="jumpTo('${sec.id}')">${sec.label}</button>`
+  ).join('');
+
+  // Build all slide HTML
+  let html = '';
+
+  SECTIONS.forEach(sec => {
+    const secProds = PRODUCTS.filter(p => p.s === sec.id);
+
+    // ── Section header slide ──
+    html += `
+    <div class="slide sec-header" id="sec-${sec.id}" data-sec="${sec.id}">
+      <div class="slide-bg-grad" style="--grad:${sec.grad}"></div>
+      <div class="glow-orb" style="width:320px;height:320px;background:${sec.glow};top:35%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="slide-overlay"></div>
+      <div class="sec-inner">
+        <div class="sec-icon">${sec.icon}</div>
+        <div class="sec-title">${sec.title}</div>
+        <div class="sec-sub">${sec.sub}</div>
+        <div class="sec-cta">Swipe up to discover ↑</div>
+      </div>
+    </div>`;
+
+    // ── Product slides ──
+    secProds.forEach((p, localIdx) => {
+      const globalIdx = PRODUCTS.indexOf(p);
+      const stars = '★'.repeat(Math.min(5, Math.round(p.rating))) + '☆'.repeat(Math.max(0, 5 - Math.round(p.rating)));
+      const secLabel = SECTIONS.find(s => s.id === p.s)?.label || '';
+
+      html += `
+    <div class="slide" data-idx="${globalIdx}" data-sec="${p.s}">
+      ${p.img
+        ? `<img class="slide-bg" src="${p.img}" alt="${p.name}" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.removeProperty('display')">`
+        : ''}
+      <div class="slide-bg-grad" style="${p.img ? 'display:none;' : ''}--grad:${p.grad}"></div>
+      <div class="slide-overlay"></div>
+
+      <div class="slide-sidebar">
+        <div class="side-btn ${isWL(globalIdx)?'liked':''}" data-wl="${globalIdx}" onclick="toggleWL(${globalIdx})" role="button" aria-label="Save to wishlist" tabindex="0">
+          <div class="side-icon">❤️</div>
+          <span class="side-label">${p.rev || '10K'}</span>
+        </div>
+        <div class="side-btn" onclick="shareProduct(${globalIdx})" role="button" aria-label="Share product" tabindex="0">
+          <div class="side-icon">📤</div>
+          <span class="side-label">Share</span>
+        </div>
+        <a class="side-btn" href="${amzUrl(p.amz, p.asin||'')}" target="_blank" rel="nofollow sponsored noopener noreferrer" aria-label="Buy on Amazon">
+          <div class="side-icon">🛒</div>
+          <span class="side-label">Buy</span>
+        </a>
+      </div>
+
+      <div class="slide-info">
+        <div class="slide-section-tag">
+          ${secLabel}
+          ${p.badge ? `<span class="badge ${p.badge}">${BADGE_MAP[p.badge] || p.badge}</span>` : ''}
+        </div>
+        <div class="slide-name">${p.name}</div>
+        <div class="slide-benefit">${p.benefit}</div>
+        <div class="slide-price-row">
+          <span class="slide-price">${p.price}</span>
+          ${p.orig ? `<span class="slide-orig">${p.orig}</span>` : ''}
+          ${p.disc ? `<span class="slide-disc">-${p.disc} OFF</span>` : ''}
+        </div>
+        <div class="slide-rating">
+          <span class="slide-stars">${stars}</span>
+          <span style="color:#fff;font-weight:800">${p.rating}</span>
+          <span class="slide-reviews">(${p.rev} reviews)</span>
+        </div>
+        <div class="slide-btns">
+          <a class="btn-wmt" href="${wmtUrl(p.wmt)}" target="_blank" rel="nofollow sponsored noopener noreferrer">🛒 Walmart</a>
+          <a class="btn-amz" href="${amzUrl(p.amz, p.asin||'')}" target="_blank" rel="nofollow sponsored noopener noreferrer">📦 Amazon</a>
+        </div>
+        <div class="slide-disclosure">
+          As an affiliate, we may earn from qualifying purchases.
+          <a href="affiliate-disclosure.html" target="_blank">Disclosure</a>
+        </div>
+      </div>
+    </div>`;
+    });
+  });
+
+  feed.innerHTML = html;
+
+  // Swipe-up hint on first slide
+  const first = feed.querySelector('.slide');
+  if (first) {
+    first.insertAdjacentHTML('beforeend',
+      `<div class="swipe-hint" id="swipe-hint">
+         <div class="sh-arrow">↑</div>
+         <span>SWIPE UP</span>
+       </div>`);
+  }
+
+  allSlides = Array.from(feed.querySelectorAll('.slide'));
+  setupObserver();
+  setupScrollProgress(feed);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTERSECTION OBSERVER – active card + progress
+// ─────────────────────────────────────────────────────────────────────────────
+function setupObserver() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        // Hide swipe hint
+        const hint = document.getElementById('swipe-hint');
+        if (hint && allSlides.indexOf(entry.target) > 0) hint.style.opacity = '0';
+        // Sync category pills
+        const sec = entry.target.dataset.sec;
+        if (sec) {
+          document.querySelectorAll('.cat-pill').forEach(el =>
+            el.classList.toggle('active', el.dataset.sec === sec)
+          );
+        }
+        currentIdx = allSlides.indexOf(entry.target);
+        updateProgress();
+      } else {
+        entry.target.classList.remove('active');
+      }
+    });
+  }, { threshold: 0.55 });
+
+  allSlides.forEach(el => observer.observe(el));
+}
+
+function updateProgress() {
+  const pct = allSlides.length > 1 ? (currentIdx / (allSlides.length - 1)) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct.toFixed(1) + '%';
+}
+
+function setupScrollProgress(feed) {
+  feed.addEventListener('scroll', () => {
+    const pct = feed.scrollHeight > feed.clientHeight
+      ? (feed.scrollTop / (feed.scrollHeight - feed.clientHeight)) * 100 : 0;
+    document.getElementById('progress-bar').style.width = pct.toFixed(1) + '%';
+  }, { passive: true });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+function jumpTo(secId) {
+  const el = document.getElementById('sec-' + secId);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+function shareProduct(idx) {
+  const p = PRODUCTS[idx];
+  const url = amzUrl(p.amz, p.asin || '');
+  if (navigator.share) {
+    navigator.share({ title: p.name, text: p.benefit + ' — Only ' + p.price, url })
+      .catch(() => {});
+  } else {
+    try { navigator.clipboard.writeText(url); } catch(_) {}
+    showToast('🔗 Link copied to clipboard!');
+  }
+}
+
+// Keyboard navigation (desktop)
+document.addEventListener('keydown', e => {
+  const feed = document.getElementById('feed');
+  const h = feed.clientHeight;
+  if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+    e.preventDefault();
+    feed.scrollBy({ top: h, behavior: 'smooth' });
+  }
+  if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+    e.preventDefault();
+    feed.scrollBy({ top: -h, behavior: 'smooth' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+buildFeed();
+</script>
+</body>
+</html>
