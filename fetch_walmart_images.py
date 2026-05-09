@@ -61,14 +61,19 @@ def _img_hires(url: str) -> str:
     return url
 
 
+WMT_AFFILIATE = "https://goto.walmart.com/c/7284190/568844/9383"
+
+
 def _walmart_url(product_page_url: str, item_id: str) -> str:
-    """Devuelve URL limpia del producto en Walmart."""
+    """Devuelve URL de afiliado del producto en Walmart (Impact ID 7284190)."""
     if product_page_url and product_page_url.startswith("http"):
-        # Limpiar parámetros de tracking internos de SerpAPI
-        return product_page_url.split("?")[0]
-    if item_id:
-        return f"https://www.walmart.com/ip/{item_id}"
-    return ""
+        dest = product_page_url.split("?")[0]
+    elif item_id:
+        dest = f"https://www.walmart.com/ip/{item_id}"
+    else:
+        return ""
+    from urllib.parse import quote_plus
+    return f"{WMT_AFFILIATE}?u={quote_plus(dest)}"
 
 
 def buscar_en_walmart(query: str) -> dict:
