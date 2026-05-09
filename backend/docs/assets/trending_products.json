@@ -10,12 +10,12 @@
       "currency": "USD",
       "rating": 4.5,
       "badge": "fire",
-      "image": "https://i5.walmartimages.com/seo/Panti-Portable-Blender-Cordless-18oz-Personal-Blender-Shakes-Smoothies-BPA-Free-Cover-Handle-USB-C-Rechargeable-Dishwasher-Safe-Parts-Black_dd39e4ef-0ffc-4221-a036-136488d7a3eb.742e5c165936f126c1bb240793e96cc5.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_00_mini_licuadora_portatil.jpeg",
       "image_verified": true,
       "search_query": "portable mini blender usb rechargeable",
       "amazon_url": "https://www.amazon.com/s?k=portable+mini+blender+usb&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/Panti-Portable-Blender-Cordless-18oz-Personal-Blender-Shakes-Smoothies-BPA-Free-Cover-Handle-USB-C-Rechargeable-Dishwasher-Safe-Parts-Black/17240811669",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     },
     {
       "name": "Organizador de asiento de auto",
@@ -26,12 +26,12 @@
       "currency": "USD",
       "rating": 4.2,
       "badge": "deal",
-      "image": "https://i5.walmartimages.com/seo/Car-Seat-Gap-Filler-Seat-Side-Gap-Filler-Organizer-2-in1-Seat-Crevice-Blocker-Universal-Fit-Car-SUV-Truck-Fill-Gap-Seat-Console-2-Pack_891d201c-9cf5-47ec-a529-fef3303ad14a.b56b0958dcca2a3f5149da3306251ab9.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_01_organizador_de_asiento_de_auto.jpeg",
       "image_verified": true,
       "search_query": "car seat gap organizer",
       "amazon_url": "https://www.amazon.com/s?k=car+seat+gap+organizer&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/Car-Seat-Gap-Filler-Seat-Side-Gap-Filler-Organizer-2-in1-Seat-Crevice-Blocker-Universal-Fit-Car-SUV-Truck-Fill-Gap-Seat-Console-2-Pack/18140015617",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     },
     {
       "name": "Mini aspiradora inalambrica",
@@ -42,12 +42,12 @@
       "currency": "USD",
       "rating": 4.3,
       "badge": "new",
-      "image": "https://i5.walmartimages.com/seo/VacLife-Handheld-Vacuum-Car-Vacuum-Cleaner-Cordless-Mini-Portable-Rechargeable-Vacuum-Cleaner-with-2-Filters-Orange-VL189_931141d8-7c11-4590-bde3-1b6b0a95389c.e8b9d9a56cc4b5f2fa522925f75c4bcd.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_02_mini_aspiradora_inalambrica.jpeg",
       "image_verified": true,
       "search_query": "mini handheld vacuum cleaner cordless",
       "amazon_url": "https://www.amazon.com/s?k=mini+handheld+vacuum+cordless&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/VacLife-Handheld-Vacuum-Car-Vacuum-Cleaner-Cordless-Mini-Portable-Rechargeable-Vacuum-Cleaner-with-2-Filters-Orange-VL189/5449496951",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     },
     {
       "name": "Organizador de cables",
@@ -58,12 +58,12 @@
       "currency": "USD",
       "rating": 4.1,
       "badge": "deal",
-      "image": "https://i5.walmartimages.com/seo/VIVO-Black-36-Clamp-on-Under-Desk-Cable-Net-Mesh-Cable-Management_60dd285d-c680-4586-a606-7c63a5995759.d46ba3c3f99b76d0a28b2ff62aac958d.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_03_organizador_de_cables.jpeg",
       "image_verified": true,
       "search_query": "cable organizer clips desk",
       "amazon_url": "https://www.amazon.com/s?k=cable+organizer+clips+desk&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/VIVO-Black-36-Clamp-on-Under-Desk-Cable-Net-Mesh-Cable-Management/2607097963",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     },
     {
       "name": "Envasadora de alimentos al vacio",
@@ -74,12 +74,12 @@
       "currency": "USD",
       "rating": 4.2,
       "badge": "fire",
-      "image": "https://i5.walmartimages.com/seo/FoodSaver-Vacuum-Sealer-Starter-System-Black-Accessories-and-Bags-Included_7d408a46-d44b-4e77-94d2-9924cdcb76d1.df8b0548adc9ab9625f5c1b6a1415e69.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_04_envasadora_de_alimentos_al_vacio.jpeg",
       "image_verified": true,
       "search_query": "kitchen food saver vacuum sealer",
       "amazon_url": "https://www.amazon.com/s?k=kitchen+food+saver+vacuum+sealer&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/FoodSaver-Vacuum-Sealer-Starter-System-Black-Accessories-and-Bags-Included/40483841",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     },
     {
       "name": "Tiras LED RGB 3m",
@@ -90,12 +90,12 @@
       "currency": "USD",
       "rating": 4.1,
       "badge": "deal",
-      "image": "https://i5.walmartimages.com/seo/DAYBETTER-Led-Strip-Lights-100ft-Light-Strips-with-App-Control-Remote-RGB-Led-Lights-for-Bedroom-Music-Sync-Color-Changing-Lights-for-Room-Party_4ceacfbf-9be8-4e92-a0ac-cf29ae5733fa.5a991cc633febd54906ada5cc202552c.jpeg?odnHeight=600&odnWidth=600&odnBg=FFFFFF",
+      "image": "assets/products/prod_05_tiras_led_rgb_3m.jpeg",
       "image_verified": true,
       "search_query": "led strip lights color changing",
       "amazon_url": "https://www.amazon.com/s?k=led+strip+lights+color+changing&tag=amatotyshop-20",
       "walmart_url": "https://www.walmart.com/ip/DAYBETTER-Led-Strip-Lights-100ft-Light-Strips-App-Control-Remote-5050-RGB-Lights-Bedroom-Music-Sync-Color-Changing-Room-Party/789645906",
-      "image_source": "walmart_cdn"
+      "image_source": "local"
     }
   ]
 }
