@@ -457,6 +457,29 @@ button{cursor:pointer}
   .hub-btn-wm,.hub-btn-amz{font-size:11px;padding:7px 8px;}
   .hub-hero h1{font-size:1.5rem;}
 }
+
+/* ── LATAM LOCALIZATION ─────────────────────────────────────────────────── */
+.latam-banner{background:linear-gradient(90deg,#0a0e1a,#0d1b2e);border-bottom:1px solid rgba(255,255,255,.10);padding:8px 20px;display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:#94a3b8}
+.latam-banner strong{color:#fff}
+.latam-ship-badge{background:rgba(0,120,255,.18);border:1px solid rgba(0,120,255,.4);border-radius:999px;padding:3px 14px;font-size:11px;font-weight:800;color:#60a5fa;white-space:nowrap}
+.latam-section-strip{background:linear-gradient(90deg,#0d1b2e,#0a1628);padding:10px 20px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)}
+.latam-section-title-text{font-size:15px;font-weight:900;color:#fff;display:flex;align-items:center;gap:6px}
+.latam-under80-btn{background:rgba(255,153,0,.14);border:1px solid rgba(255,153,0,.4);color:#fbbf24;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;white-space:nowrap}
+.latam-under80-btn:hover,.latam-under80-btn.active{background:rgba(255,153,0,.32);border-color:#fbbf24;color:#fff}
+.latam-badges{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.latam-badge{border-radius:999px;padding:2px 7px;font-size:9px;font-weight:800;white-space:nowrap;display:inline-block;line-height:1.5}
+.latam-badge.free-ship{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.latam-badge.intl-ship{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+.latam-badge.tiktok{background:linear-gradient(90deg,#ff0050,#00f2ea);color:#fff;border:none}
+.latam-badge.best-val{background:#fef9c3;color:#854d0e;border:1px solid #fef08a}
+.latam-cost-breakdown{background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:7px 9px;margin-top:5px;font-size:10px}
+.latam-cost-breakdown .breakdown-row{display:flex;justify-content:space-between;padding:1px 0;color:var(--ink2);gap:4px}
+.latam-cost-breakdown .breakdown-row.total{border-top:1px solid var(--line);margin-top:3px;padding-top:4px;font-weight:900;color:var(--ink);font-size:11px}
+@media(max-width:600px){
+  .latam-banner{font-size:11px;padding:6px 12px}
+  .latam-section-strip{padding:8px 12px}
+  .latam-cost-breakdown{font-size:9px}
+}
 </style>
 
 </head>
@@ -525,6 +548,9 @@ button{cursor:pointer}
   </select>
   &nbsp;|&nbsp; <span id="aiModeBadge" class="ai-badge" data-i18n="loading_catalog">Loading catalog...</span>
 </div>
+
+<!-- ── LATAM PERSONALIZATION BANNER ── -->
+<div id="latam-banner" class="latam-banner" style="display:none"></div>
 
 <!-- ══════════════════════════════════════════════════════════════════════
      AFFILIATE DEALS HUB
@@ -659,6 +685,12 @@ button{cursor:pointer}
         </div>
         <div class="amz-chips" id="amzHistoryChips"></div>
       </div>
+    </div>
+
+    <!-- LATAM SECTION STRIP -->
+    <div id="latam-section-strip" class="latam-section-strip" style="display:none">
+      <span id="latam-section-title-text" class="latam-section-title-text">🔥 Trending Products</span>
+      <button id="under80Btn" class="latam-under80-btn" onclick="toggleUnder80()">💰 Under $80 USD</button>
     </div>
 
     <!-- GRID -->
@@ -918,6 +950,18 @@ function navigateSuggestions(dir){
 function renderResults(){applyFilters();}
 const countryCurrency = {PE:"PEN",US:"USD",MX:"MXN",CO:"COP",CL:"CLP",AR:"ARS",EC:"USD",BO:"BOB",BR:"BRL",UY:"UYU"};
 
+// ── LATAM LOCALIZATION CONFIG ─────────────────────────────────────────────
+const LATAM_CONFIG = {
+  CO:{name:"Colombia",  flag:"🇨🇴",shipping_badge:"🇨🇴 Free Shipping to Colombia",   section_title:"🔥 Trending en Colombia",          currency:"COP",rate:4100, shipping_usd:12,tax_pct:.19,free_ship_above_usd:50,max_recommend_usd:80},
+  PE:{name:"Perú",      flag:"🇵🇪",shipping_badge:"🇵🇪 Ships to Peru",               section_title:"🔥 Viral en Perú",                  currency:"PEN",rate:3.75, shipping_usd:10,tax_pct:.18,free_ship_above_usd:50,max_recommend_usd:80},
+  CL:{name:"Chile",     flag:"🇨🇱",shipping_badge:"🇨🇱 AmazonGlobal Chile",          section_title:"🛒 Best Amazon Deals for Chile",    currency:"CLP",rate:950,  shipping_usd:11,tax_pct:.19,free_ship_above_usd:60,max_recommend_usd:80},
+  MX:{name:"México",    flag:"🇲🇽",shipping_badge:"🇲🇽 Envío a México",              section_title:"🔥 Trending en México",             currency:"MXN",rate:17.2, shipping_usd:8, tax_pct:.16,free_ship_above_usd:45,max_recommend_usd:80},
+  AR:{name:"Argentina", flag:"🇦🇷",shipping_badge:"🇦🇷 Envío a Argentina",           section_title:"🔥 Ofertas Virales Argentina",      currency:"ARS",rate:1100, shipping_usd:15,tax_pct:.21,free_ship_above_usd:70,max_recommend_usd:80},
+  EC:{name:"Ecuador",   flag:"🇪🇨",shipping_badge:"🇪🇨 Ships to Ecuador",            section_title:"🔥 Trending en Ecuador",            currency:"USD",rate:1,    shipping_usd:9, tax_pct:.12,free_ship_above_usd:50,max_recommend_usd:80},
+};
+let _latamCountry = "";
+let _under80Active = false;
+
 const API_ORIGIN = window.location.hostname.includes("github.io") ? "https://amatoty.onrender.com" : "";
 const IS_GITHUB_PAGES = window.location.hostname.includes("github.io");
 const SAFEPAY_PROXY = API_ORIGIN + "/api/safepay/checkout";
@@ -1122,7 +1166,8 @@ function applyFilters(){
       &&(!compat||blob.includes(compat))
       &&(!mat||blob.includes(mat))
       &&(!minP||price>=minP)
-      &&(!maxP||price<=maxP);
+      &&(!maxP||price<=maxP)
+      &&(!_under80Active||price<=80);
   });
 
   filtered.sort((a,b)=>{
@@ -1188,6 +1233,7 @@ function renderGrid(){
           ${hasDiscount?`<div><span class="prod-price-orig">${money(p.price_original)}</span> <span class="prod-discount">-${discPct}%</span></div>`:""}
         </div>
         <div class="prod-ship">${shipText}</div>
+        ${getLatamBadges(p)}${getLatamCostBreakdown(p)}
         <div class="prod-actions">
           <button class="btn-add-cart" onclick="addToCart(${i})">🛒 ${esc(_t('add_to_cart'))}</button>
           ${providerLinks}
@@ -1392,7 +1438,78 @@ function showToast(msg){
 function onCountryChange(){
   const c=document.getElementById("country").value;
   document.getElementById("currency").value=countryCurrency[c]||"USD";
+  applyLatamUI(c);
   renderGrid();
+}
+
+// ── LATAM LOCALIZATION FUNCTIONS ──────────────────────────────────────────
+async function autoDetectCountry(){
+  try{
+    const resp=await fetch(`${API_ORIGIN}/api/locale`,{cache:"no-store"});
+    if(!resp.ok)return;
+    const data=await resp.json();
+    const c=(data.country||"").toUpperCase();
+    if(!LATAM_CONFIG[c])return;
+    const countryEl=document.getElementById("country");
+    const currencyEl=document.getElementById("currency");
+    if(countryEl&&countryEl.querySelector(`option[value="${c}"]`))countryEl.value=c;
+    const cfg=LATAM_CONFIG[c];
+    if(currencyEl&&currencyEl.querySelector(`option[value="${cfg.currency}"]`))currencyEl.value=cfg.currency;
+    applyLatamUI(c);
+  }catch(e){}
+}
+
+function applyLatamUI(country){
+  const cfg=LATAM_CONFIG[country];
+  if(!cfg){_latamCountry="";return;}
+  _latamCountry=country;
+  const banner=document.getElementById("latam-banner");
+  if(banner){
+    banner.style.display="flex";
+    banner.innerHTML=`<span>${cfg.flag} Personalizado para <strong>${cfg.name}</strong></span><span class="latam-ship-badge">${cfg.shipping_badge}</span>`;
+  }
+  const strip=document.getElementById("latam-section-strip");
+  const titleEl=document.getElementById("latam-section-title-text");
+  if(strip)strip.style.display="flex";
+  if(titleEl)titleEl.textContent=cfg.section_title;
+  if(products.length)applyFilters();
+}
+
+function toggleUnder80(){
+  _under80Active=!_under80Active;
+  const btn=document.getElementById("under80Btn");
+  if(btn)btn.classList.toggle("active",_under80Active);
+  applyFilters();
+}
+
+function getLatamBadges(p){
+  const cfg=LATAM_CONFIG[_latamCountry];
+  if(!cfg)return "";
+  const price=basePrice(p);
+  const b=[];
+  if(price<cfg.free_ship_above_usd)
+    b.push('<span class="latam-badge free-ship">🚚 Free Shipping</span>');
+  else
+    b.push('<span class="latam-badge intl-ship">📦 Ships Intl.</span>');
+  if(p.viral||p.featured||p.mostrar_en_banner||p.destacado)
+    b.push('<span class="latam-badge tiktok">🔥 TikTok Viral</span>');
+  if(price<=cfg.max_recommend_usd)
+    b.push('<span class="latam-badge best-val">💰 Best Value</span>');
+  return `<div class="latam-badges">${b.join("")}</div>`;
+}
+
+function getLatamCostBreakdown(p){
+  const cfg=LATAM_CONFIG[_latamCountry];
+  if(!cfg)return "";
+  const priceUSD=basePrice(p);
+  const shipUSD=priceUSD>=cfg.free_ship_above_usd?0:cfg.shipping_usd;
+  const taxUSD=priceUSD*cfg.tax_pct;
+  const totalUSD=priceUSD+shipUSD+taxUSD;
+  const r=cfg.rate;
+  const sym=cfg.currency==="USD"?"$":cfg.currency+" ";
+  const fmt=(v)=>(v*r).toLocaleString("es",{maximumFractionDigits:0});
+  const shipStr=shipUSD===0?'<span style="color:#15803d">Gratis ✓</span>':sym+fmt(shipUSD);
+  return `<div class="latam-cost-breakdown"><div class="breakdown-row"><span>Precio</span><span>${sym}${fmt(priceUSD)}</span></div><div class="breakdown-row"><span>Envío est.</span><span>${shipStr}</span></div><div class="breakdown-row"><span>Impuestos est.</span><span>${sym}${fmt(taxUSD)}</span></div><div class="breakdown-row total"><span>Total aprox.</span><span>${sym}${fmt(totalUSD)}</span></div></div>`;
 }
 
 // ── EVENTOS ──────────────────────────────────────────────────────────────
@@ -1479,6 +1596,7 @@ async function loadProducts(){
 }
 
 loadProducts();
+autoDetectCountry();
 
 // ══════════════════════════════════════════════════════════════════════════
 // AFFILIATE DEALS HUB – static curated product sections
