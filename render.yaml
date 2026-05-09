@@ -35,6 +35,10 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
+      # SerpAPI — búsqueda real de productos Walmart, imágenes, etc.
+      - key: SERPAPI_KEY
+        value: "3cedd66c5897ae1197d88edf71277345f27f80634e1de7f12c72e465a6e1f8b9"
+
       # Clave secreta Flask
       - key: SECRET_KEY
         generateValue: true
