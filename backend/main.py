@@ -1141,12 +1141,78 @@ def _google_cse_image_for_query(query):
     return ""
 
 
-def _gemini_image_for_query(query):
-    """Usa Gemini con Google Search grounding para encontrar imagen real de producto."""
+_TRUSTED_IMAGE_CDNS = (
+    "m.media-amazon.com",
+    "images-na.ssl-images-amazon.com",
+    "images-fe.ssl-images-amazon.com",
+    "ae01.alicdn.com",
+    "ae02.alicdn.com",
+    "ae03.alicdn.com",
+    "http2.mlstatic.com",
+    "i.ebayimg.com",
+    "i5.walmartimages.com",
+    "i1.wp.com",
+    "images.walmart.com",
+    "cdn.shopify.com",
+)
+_BLOCKED_IMAGE_SOURCES = (
+    "placeholder",
+    "source.unsplash.com",
+    "picsum.photos",
+    "via.placeholder",
+    "dummyimage.com",
+    "lorempixel.com",
+)
+
+_GEMINI_IMAGE_PROMPT_TEMPLATE = """\
+You are a product image hunter with access to Google Search. Your task: find ONE real product \
+listing image for the given product.
+
+Product: {query}
+Brand: {brand}
+Category: {category}
+
+RULES — follow exactly:
+1. Use Google Search to look for the product on Amazon, AliExpress, Walmart, MercadoLibre, \
+or the official brand website.
+2. The image MUST show the actual product (white background or clear product shot). \
+NOT a lifestyle photo, banner, logo, or placeholder.
+3. Preferred CDN domains (highest trust):
+   m.media-amazon.com · ae01.alicdn.com · ae03.alicdn.com · http2.mlstatic.com \
+· i5.walmartimages.com · images.walmart.com · cdn.shopify.com
+4. Return ONLY the raw HTTPS URL — no markdown, no explanation, no quotes.
+5. The URL should resolve to an image file (.jpg .jpeg .png .webp) or a CDN path \
+(Amazon CDN URLs often lack extensions — that is OK).
+6. If you cannot find a real product image after searching, respond with exactly: NO_IMAGE
+
+Respond with the URL or NO_IMAGE. Nothing else."""
+
+
+def _is_trusted_image_cdn(url: str) -> bool:
+    low = url.lower()
+    return any(cdn in low for cdn in _TRUSTED_IMAGE_CDNS)
+
+
+def _gemini_image_for_query(query, brand="", category=""):
+    """Usa Gemini 2.5 Flash con Google Search grounding para buscar imagen real de producto.
+
+    Prompt potenciado:
+    - Busca en Amazon, AliExpress, Walmart, MercadoLibre y fabricante oficial.
+    - Valida que sea imagen real del producto (no lifestyle/placeholder).
+    - Prefiere CDNs confiables: m.media-amazon.com, ae01.alicdn.com, etc.
+    - Si no encuentra, retorna "".
+    """
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    query = _clean_search_text(query)
-    if not api_key or not query:
+    clean_q = _clean_search_text(query)
+    if not api_key or not clean_q:
         return ""
+
+    prompt = _GEMINI_IMAGE_PROMPT_TEMPLATE.format(
+        query=clean_q,
+        brand=_clean_search_text(brand) or "any",
+        category=_clean_search_text(category) or "general",
+    )
+
     try:
         from google import genai
         from google.genai import types
@@ -1154,30 +1220,103 @@ def _gemini_image_for_query(query):
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
             model=GEMINI_MODEL,
-            contents=(
-                f"Find a real product image URL for: {query}. "
-                "Return ONLY one valid HTTPS image URL ending in .jpg, .jpeg, .png or .webp "
-                "from a real product page (Amazon, AliExpress, MercadoLibre, manufacturer). "
-                "No text, no explanation, just the URL."
-            ),
+            contents=prompt,
             config=types.GenerateContentConfig(
                 tools=[types.Tool(google_search=types.GoogleSearch())],
-                temperature=0.1,
+                temperature=0.05,
             ),
         )
         text = (response.text or "").strip()
-        blocked = ("placeholder", "source.unsplash.com", "picsum.photos")
-        # Try to extract a direct image URL from the response
-        for pattern in [
-            r"https://[^\s\"'<>]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s\"'<>]*)?",
-        ]:
-            for url in re.findall(pattern, text, re.I):
-                url = _secure_image_url(url)
-                if _is_web_image_url(url) and not any(b in url.lower() for b in blocked):
-                    return url
+
+        if not text or text.upper().startswith("NO_IMAGE"):
+            return ""
+
+        # Extract all HTTPS URLs from response text
+        candidates = re.findall(r"https://[^\s\"'<>\n\]]+", text, re.I)
+        for raw_url in candidates:
+            url = _secure_image_url(raw_url.rstrip(".,)"))
+            low = url.lower()
+            if not _is_web_image_url(url):
+                continue
+            if any(b in low for b in _BLOCKED_IMAGE_SOURCES):
+                continue
+            # Accept if it's from a trusted CDN OR ends with an image extension
+            if _is_trusted_image_cdn(url) or re.search(r"\.(?:jpg|jpeg|png|webp|gif)(?:[?#]|$)", low):
+                return url
+
     except Exception:
         pass
     return ""
+
+
+def _gemini_batch_images_for_products(products):
+    """Llama a Gemini UNA VEZ con todos los productos sin imagen y retorna
+    un dict {product_name_lower: image_url}.
+
+    Más eficiente que llamar _gemini_image_for_query por separado para cada producto.
+    """
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key or not products:
+        return {}
+
+    # Build compact product list for the prompt
+    items = []
+    for idx, p in enumerate(products):
+        name = _clean_search_text(p.get("name") or p.get("search_query") or "")
+        brand = _clean_search_text(p.get("brand") or "")
+        cat = _clean_search_text(p.get("category") or "")
+        if name:
+            items.append(f'{idx}. name="{name}" brand="{brand}" category="{cat}"')
+
+    if not items:
+        return {}
+
+    prompt = (
+        "You are a product image hunter with access to Google Search.\n"
+        "Find ONE real product listing image for EACH product below.\n\n"
+        "RULES:\n"
+        "- Search Amazon, AliExpress, Walmart, MercadoLibre or the official brand site.\n"
+        "- Images must show the actual product (NOT lifestyle/banner/placeholder).\n"
+        "- Trusted CDNs: m.media-amazon.com, ae01.alicdn.com, http2.mlstatic.com, "
+        "i5.walmartimages.com, cdn.shopify.com.\n"
+        "- If no real image found for a product, use null for that entry.\n\n"
+        "Products:\n" + "\n".join(items) + "\n\n"
+        'Respond ONLY with a valid JSON object: {"0": "https://...", "1": null, ...}'
+    )
+
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                response_mime_type="application/json",
+                temperature=0.05,
+            ),
+        )
+        raw = _extract_json(response.text)
+        result = {}
+        for idx_str, url in (raw or {}).items():
+            try:
+                idx = int(idx_str)
+                p = products[idx]
+                name_key = (p.get("name") or "").lower().strip()
+                if url and isinstance(url, str):
+                    url = _secure_image_url(url.strip())
+                    low = url.lower()
+                    if (_is_web_image_url(url)
+                            and not any(b in low for b in _BLOCKED_IMAGE_SOURCES)
+                            and (_is_trusted_image_cdn(url) or re.search(r"\.(?:jpg|jpeg|png|webp)(?:[?#]|$)", low))):
+                        result[name_key] = url
+            except (IndexError, ValueError):
+                continue
+        return result
+    except Exception:
+        return {}
 
 
 def _serpapi_image_for_query(query):
@@ -1227,68 +1366,123 @@ def _product_image_query(product, fallback_query=""):
 
 
 def _enrich_products_with_serpapi_images(products, fallback_query=""):
-        if not products:
-            return products
-        max_lookups = _serpapi_image_lookup_limit()
-        cache = {}
-        lookups = 0
-        enriched = []
-        for product in products:
-            item = dict(product)
-            current_image = _secure_image_url(item.get("image") or "")
-            if _is_web_image_url(current_image):
-                item["image"] = current_image
-                item["image_source"] = item.get("image_source") or "web"
-                enriched.append(item)
-                continue
-            query = _product_image_query(item, fallback_query)
-            image_url = ""
-            # Prioridad 1: SerpAPI
-            if _serpapi_key() and query and lookups < max_lookups:
-                if query not in cache:
-                    cache[query] = _serpapi_image_for_query(query)
-                    lookups += 1
-                image_url = cache.get(query) or ""
-                if image_url:
-                    item["image"] = image_url
-                    item["image_source"] = "serpapi_google_images"
-                    item["image_verified"] = True
-                    try:
-                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.82)
-                    except (TypeError, ValueError):
-                        item["image_match_score"] = 0.82
-            # Prioridad 2: Google Custom Search (fallback cuando no hay SerpAPI)
-            if not image_url and query and lookups < max_lookups:
-                cse_cache_key = f"cse:{query}"
-                if cse_cache_key not in cache:
-                    cache[cse_cache_key] = _google_cse_image_for_query(query)
-                    lookups += 1
-                image_url = cache.get(cse_cache_key) or ""
-                if image_url:
-                    item["image"] = image_url
-                    item["image_source"] = "google_cse"
-                    item["image_verified"] = True
-                    try:
-                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.80)
-                    except (TypeError, ValueError):
-                        item["image_match_score"] = 0.80
-            # Prioridad 3: Gemini Flash con Google Search grounding
-            if not image_url and query and lookups < max_lookups:
-                gem_cache_key = f"gem:{query}"
-                if gem_cache_key not in cache:
-                    cache[gem_cache_key] = _gemini_image_for_query(query)
-                    lookups += 1
-                image_url = cache.get(gem_cache_key) or ""
-                if image_url:
-                    item["image"] = image_url
-                    item["image_source"] = "gemini_search"
-                    item["image_verified"] = True
-                    try:
-                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.78)
-                    except (TypeError, ValueError):
-                        item["image_match_score"] = 0.78
+    """Enriquece cada producto sin imagen buscando con Gemini, SerpAPI o Google CSE.
+
+    Prioridad de fuentes:
+    P1 – SerpAPI Google Images (si SERPAPI_KEY configurada)
+    P2 – Google Custom Search (si GOOGLE_CSE_API_KEY + GOOGLE_CSE_ID configurados)
+    P3 – Gemini 2.5 Flash + Google Search grounding (siempre disponible con GEMINI_API_KEY)
+
+    Cuando SerpAPI y CSE no están configurados, Gemini pasa a ser la fuente principal
+    y se usa _gemini_batch_images_for_products para eficiencia (una sola llamada API).
+    """
+    if not products:
+        return products
+
+    max_lookups = _serpapi_image_lookup_limit()
+    has_serpapi = bool(_serpapi_key())
+    has_cse = all(_google_cse_credentials())
+    has_gemini = bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
+
+    # ── Pre-classify products ──────────────────────────────────────────────────
+    already_have_image = []
+    need_image = []
+    for product in products:
+        item = dict(product)
+        current_image = _secure_image_url(item.get("image") or "")
+        if _is_web_image_url(current_image):
+            item["image"] = current_image
+            item["image_source"] = item.get("image_source") or "web"
+            already_have_image.append(item)
+        else:
+            need_image.append(item)
+
+    if not need_image:
+        return already_have_image
+
+    # ── Gemini batch (efficient, runs when no SerpAPI/CSE or as primary) ──────
+    gemini_batch_map = {}
+    if has_gemini and (not has_serpapi and not has_cse) and len(need_image) > 1:
+        # Use batch when Gemini is the only/primary source — one API call for all
+        gemini_batch_map = _gemini_batch_images_for_products(need_image)
+
+    # ── Per-product enrichment ─────────────────────────────────────────────────
+    cache = {}
+    lookups = 0
+    enriched = []
+
+    for item in need_image:
+        query = _product_image_query(item, fallback_query)
+        image_url = ""
+
+        # Check batch result first (if batch ran)
+        name_key = (item.get("name") or "").lower().strip()
+        if gemini_batch_map.get(name_key):
+            image_url = gemini_batch_map[name_key]
+            item["image"] = image_url
+            item["image_source"] = "gemini_batch_search"
+            item["image_verified"] = True
+            try:
+                item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.84)
+            except (TypeError, ValueError):
+                item["image_match_score"] = 0.84
             enriched.append(item)
-        return enriched
+            continue
+
+        # Prioridad 1: SerpAPI
+        if not image_url and has_serpapi and query and lookups < max_lookups:
+            if query not in cache:
+                cache[query] = _serpapi_image_for_query(query)
+                lookups += 1
+            image_url = cache.get(query) or ""
+            if image_url:
+                item["image"] = image_url
+                item["image_source"] = "serpapi_google_images"
+                item["image_verified"] = True
+                try:
+                    item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.84)
+                except (TypeError, ValueError):
+                    item["image_match_score"] = 0.84
+
+        # Prioridad 2: Google Custom Search
+        if not image_url and has_cse and query and lookups < max_lookups:
+            cse_key = f"cse:{query}"
+            if cse_key not in cache:
+                cache[cse_key] = _google_cse_image_for_query(query)
+                lookups += 1
+            image_url = cache.get(cse_key) or ""
+            if image_url:
+                item["image"] = image_url
+                item["image_source"] = "google_cse"
+                item["image_verified"] = True
+                try:
+                    item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.82)
+                except (TypeError, ValueError):
+                    item["image_match_score"] = 0.82
+
+        # Prioridad 3: Gemini individual (siempre disponible, último recurso)
+        if not image_url and has_gemini and query and lookups < max_lookups:
+            gem_key = f"gem:{query}"
+            if gem_key not in cache:
+                cache[gem_key] = _gemini_image_for_query(
+                    query,
+                    brand=item.get("brand", ""),
+                    category=item.get("category", ""),
+                )
+                lookups += 1
+            image_url = cache.get(gem_key) or ""
+            if image_url:
+                item["image"] = image_url
+                item["image_source"] = "gemini_search"
+                item["image_verified"] = True
+                try:
+                    item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.80)
+                except (TypeError, ValueError):
+                    item["image_match_score"] = 0.80
+
+        enriched.append(item)
+
+    return already_have_image + enriched
 
 
 def _ml_attribute(result, *keys):
@@ -1610,9 +1804,53 @@ def _normalize_search_query(q):
     return q
 
 
+def _save_gemini_image_to_platform_db(product_id, image_url, image_source="gemini_search"):
+    """Guarda la URL de imagen encontrada por Gemini en la tabla platform_products.
+
+    Actualiza el campo metadata_json añadiendo image, image_source e image_verified.
+    Si falla, solo imprime warning — no interrumpe el flujo.
+    """
+    if not product_id or not image_url:
+        return
+    try:
+        from product_platform import get_db
+        conn = get_db()
+        row = conn.execute(
+            "SELECT metadata_json FROM platform_products WHERE id = ?", (product_id,)
+        ).fetchone()
+        if not row:
+            conn.close()
+            return
+        try:
+            meta = json.loads(row["metadata_json"] or "{}")
+        except Exception:
+            meta = {}
+        # Only update if no existing verified image
+        if meta.get("image") and meta.get("image_verified"):
+            conn.close()
+            return
+        meta["image"] = image_url
+        meta["image_source"] = image_source
+        meta["image_verified"] = True
+        meta["image_match_score"] = max(float(meta.get("image_match_score") or 0), 0.82)
+        conn.execute(
+            "UPDATE platform_products SET metadata_json = ?, updated_at = datetime('now') WHERE id = ?",
+            (json.dumps(meta), product_id),
+        )
+        conn.commit()
+        conn.close()
+        print(f"[gemini-image] Saved image for product {product_id}: {image_url[:80]}", flush=True)
+    except Exception as exc:
+        print(f"[gemini-image] Could not save image for {product_id}: {exc}", file=sys.stderr)
+
+
 def _load_platform_products(query="", category=""):
     """Lee los productos publicados de la BD del platform y los convierte al
-    formato estándar que usa smart-search."""
+    formato estándar que usa smart-search.
+
+    Si algún producto no tiene imagen, llama a Gemini en batch para encontrarla
+    y la guarda de vuelta en la BD (una sola llamada API por solicitud).
+    """
     try:
         from product_platform import get_db, public_product_payload, product_media
         conn = get_db()
@@ -1666,6 +1904,7 @@ def _load_platform_products(query="", category=""):
                     "currency":    row["currency"] or "USD",
                     "stock":       row["stock"] or 0,
                     "image":       payload.get("image") or "",
+                    "image_source": payload.get("image_source") or "",
                     "source_links": payload.get("source_links") or [],
                     "confidence":  0.90,
                     "provider":    row["organization_name"] or "",
@@ -1673,11 +1912,26 @@ def _load_platform_products(query="", category=""):
                     "id":          row["id"],
                     "_source":     "platform_db",
                 })
+            # ── Auto-enrich images via Gemini for products without image ───────
+            no_image = [p for p in result if not _is_web_image_url(p.get("image") or "")]
+            if no_image:
+                batch_map = _gemini_batch_images_for_products(no_image)
+                for p in result:
+                    if _is_web_image_url(p.get("image") or ""):
+                        continue
+                    name_key = (p.get("name") or "").lower().strip()
+                    found_url = batch_map.get(name_key)
+                    if found_url:
+                        p["image"] = found_url
+                        p["image_source"] = "gemini_batch_search"
+                        p["image_verified"] = True
+                        p["image_match_score"] = 0.84
+                        # Persist to DB asynchronously (best-effort)
+                        _save_gemini_image_to_platform_db(p.get("id"), found_url, "gemini_batch_search")
             return result
         finally:
             conn.close()
     except Exception as exc:
-        import sys
         print(f"[smart-search] No se pudo leer platform_products: {exc}", file=sys.stderr)
         return []
 
@@ -2414,6 +2668,121 @@ def validar_imagen_producto():
             "validation_prompt": IMAGE_VALIDATION_PROMPT,
         }
     )
+
+
+@app.route("/api/enrich-product-images", methods=["POST"])
+def enrich_product_images():
+    """Enriquece imágenes de productos del panel usando Gemini AI.
+
+    Llamar sin body o con body JSON:
+    {
+      "product_ids": ["id1","id2"],   // opcional: solo esos productos
+      "force": false                  // true = re-enriquece aunque ya tenga imagen
+    }
+    Retorna:
+    {
+      "ok": true,
+      "total": N,
+      "enriched": M,
+      "skipped": K,
+      "results": [{"id":"...","name":"...","image":"...","source":"..."}]
+    }
+    """
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return jsonify({"ok": False, "error": "GEMINI_API_KEY no configurada."}), 503
+
+    data = request.get_json(silent=True) or {}
+    product_ids = data.get("product_ids") or []
+    force = bool(data.get("force", False))
+
+    try:
+        from product_platform import get_db, public_product_payload, product_media
+        conn = get_db()
+        if product_ids:
+            placeholders = ",".join("?" * len(product_ids))
+            rows = conn.execute(
+                f"SELECT p.*, o.name AS organization_name "
+                f"FROM platform_products p "
+                f"JOIN platform_organizations o ON o.id = p.organization_id "
+                f"WHERE p.id IN ({placeholders})",
+                product_ids,
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT p.*, o.name AS organization_name "
+                "FROM platform_products p "
+                "JOIN platform_organizations o ON o.id = p.organization_id "
+                "WHERE p.status = 'published' AND o.status = 'active' "
+                "ORDER BY p.priority ASC, p.updated_at DESC LIMIT 200"
+            ).fetchall()
+        conn.close()
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"DB error: {exc}"}), 500
+
+    # Build list of products needing image
+    candidates = []
+    for row in rows:
+        try:
+            from product_platform import get_db as _gdb, public_product_payload, product_media
+            c2 = _gdb()
+            media = product_media(c2, row["id"])
+            org = c2.execute(
+                "SELECT * FROM platform_organizations WHERE id = ?", (row["organization_id"],)
+            ).fetchone()
+            payload = public_product_payload(row, media, org)
+            c2.close()
+        except Exception:
+            payload = {}
+
+        existing_image = payload.get("image") or ""
+        has_real_image = _is_web_image_url(existing_image)
+        if has_real_image and not force:
+            continue
+        candidates.append({
+            "id":       row["id"],
+            "name":     row["name"],
+            "brand":    payload.get("brand") or row.get("organization_name") or "",
+            "category": row["category"] or "",
+            "search_query": row["name"],
+        })
+
+    if not candidates:
+        return jsonify({"ok": True, "total": len(rows), "enriched": 0,
+                        "skipped": len(rows), "results": []})
+
+    # Call Gemini batch
+    batch_map = _gemini_batch_images_for_products(candidates)
+
+    results = []
+    enriched_count = 0
+    for p in candidates:
+        name_key = (p["name"] or "").lower().strip()
+        found_url = batch_map.get(name_key)
+        if not found_url and _serpapi_key():
+            found_url = _serpapi_image_for_query(
+                _product_image_query(p, p["name"])
+            )
+        if not found_url:
+            found_url = _gemini_image_for_query(p["name"], p.get("brand", ""), p.get("category", ""))
+        if found_url:
+            _save_gemini_image_to_platform_db(p["id"], found_url, "gemini_enrich_endpoint")
+            enriched_count += 1
+        results.append({
+            "id":     p["id"],
+            "name":   p["name"],
+            "image":  found_url or "",
+            "source": "gemini" if found_url else "not_found",
+            "ok":     bool(found_url),
+        })
+
+    return jsonify({
+        "ok":      True,
+        "total":   len(rows),
+        "enriched": enriched_count,
+        "skipped": len(rows) - len(candidates),
+        "results": results,
+    })
 
 
 @app.route("/api/chat", methods=["POST"])
