@@ -1717,7 +1717,8 @@ loadProducts();
       var rating=Number(p.rating||4.5).toFixed(1);
       var price=p.price?'$'+p.price:'';
       var amzUrl=p.amazon_url||'https://www.amazon.com/s?k='+encodeURIComponent(p.search_query||p.name||'')+'&tag=amatotyshop-20';
-      var wmtUrl=p.walmart_url||'https://www.walmart.com/search?q='+encodeURIComponent(p.search_query||p.name||'');
+      var _wmtDest=p.walmart_url||('https://www.walmart.com/search?q='+encodeURIComponent(p.search_query||p.name||''));
+      var wmtUrl='https://goto.walmart.com/c/7284190/568844/9383?u='+encodeURIComponent(_wmtDest);
 
       html+='<div class="hub-card">'
         +'<div class="hub-card-img-wrap">'
