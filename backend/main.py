@@ -3026,6 +3026,273 @@ def api_chat():
         return jsonify({"error": f"Error Gemini: {err[:200]}"}), 500
 
 
+@app.route("/api/discover-viral-products", methods=["GET"])
+def discover_viral_products():
+    """Search for trending/viral products from Amazon and Walmart via SerpAPI."""
+    query = request.args.get("q", "").strip()
+    category = request.args.get("category", "").strip()
+    platform = request.args.get("platform", "both").lower()
+    try:
+        limit = min(int(request.args.get("limit", 12)), 24)
+    except (TypeError, ValueError):
+        limit = 12
+
+    if not query:
+        viral_defaults = {
+            "tech": "trending tech gadgets 2024",
+            "home": "viral home products amazon finds",
+            "beauty": "tiktok beauty products viral 2024",
+            "kitchen": "kitchen gadgets tiktok viral",
+            "fitness": "fitness gadgets viral amazon",
+            "automotive": "car accessories viral tiktok",
+        }
+        query = viral_defaults.get(category.lower(), "tiktok viral products amazon finds 2024")
+
+    products = []
+    api_key = _serpapi_key()
+
+    # ── Amazon via SerpAPI Google Shopping ────────────────────────────────────
+    if platform in ("amazon", "both") and api_key:
+        try:
+            params = urllib.parse.urlencode({
+                "engine": "google_shopping",
+                "q": query,
+                "api_key": api_key,
+                "num": limit,
+                "gl": "us",
+                "hl": "en",
+            })
+            url = f"https://serpapi.com/search.json?{params}"
+            req = urllib.request.Request(url, headers={"User-Agent": "AMATOTY-Viral/1.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                payload = json.loads(resp.read().decode())
+            for item in (payload.get("shopping_results") or [])[:limit]:
+                title = item.get("title") or ""
+                if not title:
+                    continue
+                price_str = item.get("price") or "$0"
+                price_match = re.search(r"\$?([\d,]+\.?\d*)", str(price_str))
+                price = float(price_match.group(1).replace(",", "")) if price_match else 0.0
+                rating = float(item.get("rating") or 4.2)
+                reviews = int(item.get("reviews") or 0)
+                viral_score = min(99, max(65, int(reviews / 500 + 70))) if reviews else 75
+                asin_match = re.search(r"/dp/([A-Z0-9]{10})", item.get("link") or "")
+                asin = asin_match.group(1) if asin_match else ""
+                affl_url = (
+                    f"https://www.amazon.com/dp/{asin}?tag=amatotyshop-20"
+                    if asin
+                    else f"https://www.amazon.com/s?k={urllib.parse.quote_plus(title)}&tag=amatotyshop-20"
+                )
+                products.append({
+                    "name": title,
+                    "price": price_str,
+                    "price_usd": round(price, 2),
+                    "image": _secure_image_url(item.get("thumbnail") or ""),
+                    "source": "Amazon",
+                    "affiliate_link": affl_url,
+                    "rating": round(min(5.0, max(1.0, rating)), 1),
+                    "reviews": reviews,
+                    "category": category or "general",
+                    "viral_score": viral_score,
+                    "asin": asin,
+                })
+        except Exception as exc:
+            print(f"[discover-viral] Amazon SerpAPI error: {exc}", file=sys.stderr)
+
+    # ── Walmart via SerpAPI ───────────────────────────────────────────────────
+    if platform in ("walmart", "both") and api_key:
+        wmt_limit = limit // 2 if platform == "both" else limit
+        wmt = _search_walmart_products(query, margin=0, limit=wmt_limit)
+        for item in wmt:
+            src_links = item.get("source_links") or [{}]
+            products.append({
+                "name": item["name"],
+                "price": f"${item['price_base']:.2f}",
+                "price_usd": item["price_base"],
+                "image": _secure_image_url(item.get("image") or ""),
+                "source": "Walmart",
+                "affiliate_link": src_links[0].get("url") or "",
+                "rating": float(item.get("rating") or 4.2),
+                "reviews": 0,
+                "category": category or "general",
+                "viral_score": min(99, max(65, int(float(item.get("image_match_score") or 0.8) * 100))),
+                "asin": "",
+            })
+
+    products.sort(key=lambda x: x.get("viral_score", 0), reverse=True)
+    return jsonify({
+        "ok": True,
+        "query": query,
+        "total": len(products),
+        "products": products[:limit],
+    })
+
+
+@app.route("/api/generate-viral-content", methods=["POST"])
+def generate_viral_content():
+    """Use Gemini to generate TikTok + Facebook marketing content for an affiliate product."""
+    data = request.get_json(silent=True) or {}
+    product_name = str(data.get("name") or "").strip()
+    category = str(data.get("category") or "").strip()
+    price = str(data.get("price") or "").strip()
+    language = str(data.get("language") or "es").lower()
+    country = str(data.get("country") or "US").upper()
+    affiliate_link = str(data.get("affiliate_link") or "").strip()
+
+    if not product_name:
+        return jsonify({"ok": False, "error": "Product name required"}), 400
+
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        return jsonify({"ok": False, "error": "GEMINI_API_KEY not configured on server"}), 500
+
+    lang_names = {
+        "es": "Spanish (Latin American informal, casual and energetic)",
+        "en": "English (US informal, Gen Z friendly, energetic)",
+        "pt": "Portuguese (Brazilian informal, energetic)",
+    }
+    lang_name = lang_names.get(language, lang_names["es"])
+
+    tiktok_phrases = {
+        "es": ["TikTok me hizo comprarlo", "Amazon finds", "Lo necesitas", "Productos virales", "Top 5 gadgets", "No puedo creer que esto exista", "El producto del año", "Esto cambió mi vida", "Por qué no lo tenía antes"],
+        "en": ["TikTok made me buy it", "Amazon finds", "You need this in your life", "Life-changing product", "Under-the-radar find", "This hits different", "Sold out for a reason", "Best purchase ever"],
+        "pt": ["O TikTok me fez comprar", "Amazon finds", "Você precisa disso", "Produto viral", "Melhor compra do ano", "Por que eu não sabia disso antes"],
+    }
+    phrases = ", ".join((tiktok_phrases.get(language) or tiktok_phrases["es"])[:5])
+    dest_link = affiliate_link or "https://amatoty.github.io/viral-deals.html"
+
+    # Disclosure text per language — required by FTC (US), ASA (UK), CONAR (LATAM), and
+    # Amazon Associates Program Operating Agreement section 5.
+    _disclosure = {
+        "es": {
+            "short": "#publicidad #enlacedeafiliado",
+            "amazon": "Como afiliado de Amazon gano por compras que califican.",
+            "tiktok_verbal": "[Al inicio del video, di claramente: 'Este video contiene enlaces de afiliado. Como afiliado de Amazon gano por compras que califican.']",
+            "fb_footer": "\n\n⚠️ Divulgación: Este post contiene enlaces de afiliado. Como afiliado de Amazon gano por compras que califican. Los precios pueden variar.",
+        },
+        "en": {
+            "short": "#ad #affiliate #amazonaffiliate",
+            "amazon": "As an Amazon Associate I earn from qualifying purchases.",
+            "tiktok_verbal": "[At the start of the video, say clearly: 'This video contains affiliate links. As an Amazon Associate I earn from qualifying purchases.']",
+            "fb_footer": "\n\n⚠️ Disclosure: This post contains affiliate links. As an Amazon Associate I earn from qualifying purchases. Prices may vary.",
+        },
+        "pt": {
+            "short": "#publi #linkafiliado #afiliado",
+            "amazon": "Como afiliado da Amazon ganho com compras qualificadas.",
+            "tiktok_verbal": "[No início do vídeo, diga claramente: 'Este vídeo contém links de afiliado. Como afiliado da Amazon ganho com compras qualificadas.']",
+            "fb_footer": "\n\n⚠️ Divulgação: Este post contém links de afiliado. Como afiliado da Amazon ganho com compras qualificadas. Os preços podem variar.",
+        },
+    }
+    disc = _disclosure.get(language, _disclosure["en"])
+
+    prompt = f"""You are an expert viral social media marketing specialist for TikTok and Facebook affiliate marketing.
+Generate compelling marketing content for this product in {lang_name}.
+
+Product: {product_name}
+Category: {category or "general"}
+Price: {price or "check current price at the link"}
+Country: {country}
+Affiliate store: AMATOTY
+Affiliate link: {dest_link}
+
+Use viral phrases like: {phrases}
+
+MANDATORY COMPLIANCE RULES — follow strictly or the content is unusable:
+
+A) FTC / ADVERTISING DISCLOSURE (required by law):
+   - ALL content MUST include the required affiliate disclosure.
+   - TikTok: Include verbal disclosure at the start. The cta field must start with the disclosure.
+   - Facebook: The full_post must end with the disclosure footer provided below.
+   - Hashtags list must always include: {disc['short']}
+   - Amazon disclosure statement (must appear in facebook full_post): "{disc['amazon']}"
+   - TikTok verbal disclosure instruction: {disc['tiktok_verbal']}
+   - Facebook footer (append verbatim to full_post): {disc['fb_footer']}
+
+B) PRICE ACCURACY — do NOT invent or guarantee specific discounts or savings amounts.
+   - If price is provided, you may mention it. Do NOT fabricate "X% off" or "was $Y now $Z" unless those figures are given to you.
+   - Use phrases like "price may vary", "check current price" if exact data is unknown.
+
+C) TIKTOK POLICY:
+   - NO direct product URLs in TikTok script (use "Link in bio" or equivalent in the target language).
+   - TikTok Branded Content: The cta field must begin with the verbal disclosure instruction.
+
+D) FACEBOOK ADVERTISING POLICIES:
+   - Must not use misleading before/after claims without substantiation.
+   - Include the affiliate disclosure footer verbatim at the end of full_post.
+
+E) AMAZON ASSOCIATES PROGRAM OPERATING AGREEMENT:
+   - The Amazon disclosure statement must appear in the facebook full_post.
+   - Do not misrepresent prices or availability.
+
+Generate ALL of the following in {lang_name}:
+
+1. SHORT TITLE: Max 60 characters, click-worthy, honest headline
+2. PRODUCT DESCRIPTION: 2-3 sentences focusing on the biggest benefit, honest and accurate
+3. TIKTOK SCRIPT (60-90 seconds):
+   - HOOK: First 3 seconds, attention-grabbing (honest, no false claims)
+   - SETUP: Relatable problem or situation (10-15 seconds)
+   - REVEAL: Product reveal + 3 key benefits with emojis (20-30 seconds)
+   - PROOF: Why people love it / social proof — only honest statements (10 seconds)
+   - CTA: Must begin with the verbal disclosure, then "Link in bio 🔗" (NO direct links)
+   - full_script: Complete ready-to-read script including the verbal disclosure at the top
+4. FACEBOOK POST (include the actual affiliate link and the required disclosure footer):
+   - Headline with emojis
+   - 3-4 sentences body with benefits — honest, no fabricated discount percentages
+   - Include link: {dest_link}
+   - 5 hashtags including {disc['short']}
+   - full_post: Complete ready-to-post text ENDING with this footer verbatim: {disc['fb_footer']}
+5. HASHTAGS: 20 hashtags mixing popular, niche, and local (country: {country}). Must include {disc['short']}
+6. VIRAL HOOKS: 3 short one-liner hooks — honest, no false price claims
+
+Respond ONLY with valid JSON (no markdown code blocks) in this EXACT structure:
+{{
+  "title": "...",
+  "description": "...",
+  "tiktok": {{
+    "hook": "...",
+    "setup": "...",
+    "reveal": "...",
+    "proof": "...",
+    "cta": "...",
+    "full_script": "...",
+    "duration": "60-90s",
+    "tips": ["filming tip 1", "filming tip 2"]
+  }},
+  "facebook": {{
+    "headline": "...",
+    "body": "...",
+    "link": "{dest_link}",
+    "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"],
+    "full_post": "..."
+  }},
+  "hashtags": ["#tag1", "#tag2", "#tag3"],
+  "viral_hooks": ["hook1", "hook2", "hook3"],
+  "disclosure_included": true
+}}"""
+
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=[prompt],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.78,
+            ),
+        )
+        result = _extract_json(response.text)
+        result["ok"] = True
+        result["product"] = product_name
+        result["language"] = language
+        result["generated_at"] = datetime.utcnow().isoformat()
+        return jsonify(result)
+    except Exception as exc:
+        return jsonify({"ok": False, "error": str(exc)[:500]}), 500
+
+
 @app.route("/<path:filename>")
 def site_file(filename):
     normalized = filename.strip("/")
