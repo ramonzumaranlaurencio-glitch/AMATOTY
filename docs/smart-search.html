@@ -340,14 +340,20 @@ button{cursor:pointer}
   gap:16px;
 }
 .hub-card{
-  background:rgba(255,255,255,.04);
+  background:rgba(255,255,255,.05);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.09);
   border-radius:16px;padding:0;
   overflow:hidden;
-  transition:all .25s;
+  transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;
   display:flex;flex-direction:column;
   position:relative;
+  cursor:pointer;
+}
+.hub-card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 20px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(99,179,237,.25);
+  border-color:rgba(99,179,237,.3);
 }
 .hub-card:hover{
   background:rgba(255,255,255,.08);
@@ -359,25 +365,27 @@ button{cursor:pointer}
   position:relative;aspect-ratio:1;
   background:rgba(255,255,255,.06);
   overflow:hidden;
-  min-height:120px;
+  min-height:130px;
 }
+/* Skeleton covers img until load – no opacity hack needed */
 .hub-card-img-wrap .lca-skeleton{
-  position:absolute;inset:0;z-index:1;
-  background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.06) 75%);
+  position:absolute;inset:0;z-index:2;
+  background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.06) 75%);
   background-size:200% 100%;
-  animation:lcaSkeleton 1.5s ease-in-out infinite;
+  animation:lcaSkeleton 1.4s ease-in-out infinite;
   pointer-events:none;
+  transition:opacity .25s;
 }
-@keyframes lcaSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.hub-card-img-wrap .lca-skeleton.hidden{opacity:0;pointer-events:none;}
 .hub-card-img-wrap img{
-  position:relative;z-index:2;
+  position:relative;z-index:1;
   width:100%;height:100%;
-  object-fit:contain;padding:14px;
-  transition:transform .3s, opacity .3s;
-  opacity:0;
+  object-fit:cover;
+  display:block;
+  transition:transform .35s ease;
 }
-.hub-card-img-wrap img.loaded,.hub-card-img-wrap img[style*="opacity:1"]{opacity:1}
-.hub-card:hover .hub-card-img-wrap img{transform:scale(1.06);}
+.hub-card:hover .hub-card-img-wrap img{transform:scale(1.08);}
+@keyframes lcaSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .hub-card-hot-badge{
   position:absolute;top:10px;left:10px;
   border-radius:6px;padding:3px 8px;
@@ -407,24 +415,26 @@ button{cursor:pointer}
 .hub-card-btns{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:6px;}
 .hub-btn-wm{
   display:flex;align-items:center;justify-content:center;gap:6px;
-  background:linear-gradient(135deg,#0071ce,#004c8e);
-  color:#fff;border:none;border-radius:8px;
-  padding:8px 10px;font-size:12px;font-weight:800;
+  background:linear-gradient(135deg,#0071ce,#005fa3);
+  color:#fff;border:none;border-radius:10px;
+  padding:9px 10px;font-size:12px;font-weight:800;
   cursor:pointer;text-decoration:none;
   transition:all .18s;width:100%;text-align:center;
+  box-shadow:0 2px 8px rgba(0,113,206,.35);
 }
-.hub-btn-wm:hover{background:linear-gradient(135deg,#0082ec,#0071ce);color:#fff;transform:translateY(-1px);}
+.hub-btn-wm:hover{background:linear-gradient(135deg,#0082ec,#0071ce);color:#fff;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,113,206,.5);}
 .hub-btn-amz{
   display:flex;align-items:center;justify-content:center;gap:6px;
-  background:linear-gradient(135deg,#ff9900,#e67e00);
-  color:#111;border:none;border-radius:8px;
-  padding:8px 10px;font-size:12px;font-weight:800;
+  background:linear-gradient(135deg,#ff9900,#e07b00);
+  color:#111;border:none;border-radius:10px;
+  padding:9px 10px;font-size:12px;font-weight:800;
   cursor:pointer;text-decoration:none;
   transition:all .18s;width:100%;text-align:center;
+  box-shadow:0 2px 8px rgba(255,153,0,.35);
 }
-.hub-btn-amz:hover{background:linear-gradient(135deg,#ffb300,#ff9900);color:#111;transform:translateY(-1px);}
+.hub-btn-amz:hover{background:linear-gradient(135deg,#ffb300,#ff9900);color:#111;transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,153,0,.5);}
 .hub-card-disclosure{
-  font-size:9px;color:#334155;text-align:center;margin-top:4px;
+  font-size:9px;color:#475569;text-align:center;margin-top:4px;
 }
 
 /* ── HUB ANIMATIONS ── */
@@ -1617,40 +1627,50 @@ loadProducts();
               <div class="hub-card">
                 <div class="hub-card-img-wrap">
                   ${p.badge?`<span class="hub-card-hot-badge ${p.badge}">${BADGE_LABELS[p.badge]||''}</span>`:''}
-                  <div class="lca-skeleton"></div>
+                  <div class="lca-skeleton" id="sk-${section.id}-${p.name.replace(/\s/g,'_')}"></div>
                   <img src="${_hubImg(p,section.id)}"
                        alt="${p.name}"
                        data-orig-src="${p.img||''}"
                        data-category="${section.id.replace('hub-','')}"
-                       loading="lazy"
-                       onload="var s=this.previousElementSibling;if(s&&s.classList&&s.classList.contains('lca-skeleton'))s.style.display='none';this.style.opacity='1';"
+                       onload="(function(img){var sk=img.previousElementSibling;if(sk&&sk.classList.contains('lca-skeleton')){sk.classList.add('hidden');setTimeout(function(){sk.style.display='none'},300);}})(this)"
                        onerror="_hubImgError(this)">
                 </div>
                 <div class="hub-card-body">
                   <div class="hub-card-name">${p.name}</div>
-                  <div class="hub-card-benefit">${p.benefit}</div>
-                  <div class="hub-card-rating">★★★★★ <span>${p.rating}</span></div>
-                  <div class="hub-card-price">${p.price}</div>
+                  <div class="hub-card-benefit">${p.benefit||p.short_desc||''}</div>
+                  <div class="hub-card-rating">★★★★★ <span>${p.rating||4.5}</span></div>
+                  <div class="hub-card-price">$${p.price||p.price_sale||''}</div>
                   <div class="hub-card-btns">
                     <a class="hub-btn-wm"
-                       href="${WMT(p.wmtKw)}"
+                       href="${p.walmart_url||WMT(p.wmtKw||p.search_query||p.name)}"
                        target="_blank"
                        rel="nofollow sponsored noopener noreferrer">
                       🛒 Walmart
                     </a>
                     <a class="hub-btn-amz"
-                       href="${AMZ(p.amzKw, p.asin||'')}"
+                       href="${p.amazon_url||AMZ(p.amzKw||p.search_query||p.name, p.asin||'')}"
                        target="_blank"
                        rel="nofollow sponsored noopener noreferrer">
                       📦 Amazon
                     </a>
                   </div>
-                  <div class="hub-card-disclosure">As an affiliate we may earn from qualifying purchases.</div>
+                  <div class="hub-card-disclosure">Como afiliado podemos ganar comisiones.</div>
                 </div>
               </div>`).join('')}
           </div>
         </div>
       </div>`).join('');
+
+    // ── Fix images already in browser cache (onload won't fire for them) ──
+    container.querySelectorAll('.hub-card-img-wrap img').forEach(function(img){
+      if(img.complete){
+        var sk=img.previousElementSibling;
+        if(sk&&sk.classList&&sk.classList.contains('lca-skeleton')){
+          sk.classList.add('hidden');
+          sk.style.display='none';
+        }
+      }
+    });
   }
 
   // Render after DOM is ready (in case script runs during parsing)
@@ -1658,6 +1678,97 @@ loadProducts();
     document.addEventListener('DOMContentLoaded', renderHub);
   } else {
     renderHub();
+  }
+})();
+
+// ── JSON TRENDING LOADER ───────────────────────────────────────────────────
+// Loads trending_products.json and prepends a "Productos de tendencia" section
+// at the top of the affiliate hub using the same card style.
+(function(){
+  const CAT_IMG = {
+    cocina:"assets/kitchen.jpg", kitchen:"assets/kitchen.jpg",
+    hogar:"assets/home.jpg",    home:"assets/home.jpg",
+    automocion:"assets/home.jpg", automotive:"assets/home.jpg",
+    tech:"assets/placeholder.png", belleza:"assets/placeholder.png",
+    "default":"assets/placeholder.png"
+  };
+  const BADGE_MAP={fire:"🔥 Hot",deal:"💰 Deal",new:"✨ New",tiktok:"📱 Viral"};
+
+  function safeImg(p){
+    var src=String(p.image||"").trim();
+    if(!src||src.toLowerCase().includes("media-amazon")||src.toLowerCase().includes("placeholder"))
+      return CAT_IMG[String(p.category||"").toLowerCase()]||CAT_IMG["default"];
+    return src;
+  }
+
+  function renderJsonTrending(products){
+    var hub=document.getElementById('hub-sections-container');
+    if(!hub||!products||!products.length) return;
+    var html='<div class="hub-section" id="hub-json-trending"><div class="hub-section-inner">'
+      +'<div class="hub-section-header">'
+      +'<div class="hub-section-title"><span class="hub-icon">🔥</span> Productos de tendencia</div>'
+      +'<span class="hub-section-badge trending">🔥 Ahora mismo</span>'
+      +'</div><div class="hub-grid">';
+
+    products.forEach(function(p){
+      var img=safeImg(p);
+      var badge=p.badge?'<span class="hub-card-hot-badge '+p.badge+'">'+(BADGE_MAP[p.badge]||'')+'</span>':'';
+      var stars='★★★★★';
+      var rating=Number(p.rating||4.5).toFixed(1);
+      var price=p.price?'$'+p.price:'';
+      var amzUrl=p.amazon_url||'https://www.amazon.com/s?k='+encodeURIComponent(p.search_query||p.name||'')+'&tag=amatotyshop-20';
+      var wmtUrl=p.walmart_url||'https://www.walmart.com/search?q='+encodeURIComponent(p.search_query||p.name||'');
+
+      html+='<div class="hub-card">'
+        +'<div class="hub-card-img-wrap">'
+        +badge
+        +'<div class="lca-skeleton"></div>'
+        +'<img src="'+img+'" alt="'+p.name+'" '
+        +'onload="(function(img){var sk=img.previousElementSibling;if(sk&&sk.classList.contains(\'lca-skeleton\')){sk.classList.add(\'hidden\');setTimeout(function(){sk.style.display=\'none\'},300);}})(this)" '
+        +'onerror="if(this.src.indexOf(\'placeholder\')<0){this.src=\'assets/placeholder.png\'}else{var sk=this.previousElementSibling;if(sk)sk.style.display=\'none\'}">'
+        +'</div>'
+        +'<div class="hub-card-body">'
+        +'<div class="hub-card-name">'+p.name+'</div>'
+        +'<div class="hub-card-benefit">'+( p.short_desc||p.benefit||'' )+'</div>'
+        +'<div class="hub-card-rating">'+stars+' <span>'+rating+'</span></div>'
+        +'<div class="hub-card-price">'+price+'</div>'
+        +'<div class="hub-card-btns">'
+        +'<a class="hub-btn-wm" href="'+wmtUrl+'" target="_blank" rel="nofollow sponsored noopener noreferrer">🛒 Walmart</a>'
+        +'<a class="hub-btn-amz" href="'+amzUrl+'" target="_blank" rel="nofollow sponsored noopener noreferrer">📦 Amazon</a>'
+        +'</div>'
+        +'<div class="hub-card-disclosure">Como afiliado podemos ganar comisiones.</div>'
+        +'</div></div>';
+    });
+
+    html+='</div></div></div>';
+
+    // Prepend before existing sections
+    hub.insertAdjacentHTML('afterbegin', html);
+
+    // Fix cached images immediately
+    var section=document.getElementById('hub-json-trending');
+    if(section) section.querySelectorAll('.hub-card-img-wrap img').forEach(function(img){
+      if(img.complete){
+        var sk=img.previousElementSibling;
+        if(sk&&sk.classList.contains('lca-skeleton')){sk.classList.add('hidden');sk.style.display='none';}
+      }
+    });
+  }
+
+  function init(){
+    fetch('assets/trending_products.json')
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var products=Array.isArray(data)?data:(Array.isArray(data.products)?data.products:[]);
+        renderJsonTrending(products);
+      })
+      .catch(function(e){console.warn('[trending_products] No se pudo cargar el JSON:',e);});
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init);
+  } else {
+    init();
   }
 })();
 
