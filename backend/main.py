@@ -1172,7 +1172,7 @@ Product: {query}
 Brand: {brand}
 Category: {category}
 
-RULES — follow exactly:
+RULES — follow STRICTLY:
 1. Use Google Search to look for the product on Amazon, AliExpress, Walmart, MercadoLibre, \
 or the official brand website.
 2. The image MUST show the actual product (white background or clear product shot). \
@@ -1181,11 +1181,12 @@ NOT a lifestyle photo, banner, logo, or placeholder.
    m.media-amazon.com · ae01.alicdn.com · ae03.alicdn.com · http2.mlstatic.com \
 · i5.walmartimages.com · images.walmart.com · cdn.shopify.com
 4. Return ONLY the raw HTTPS URL — no markdown, no explanation, no quotes.
-5. The URL should resolve to an image file (.jpg .jpeg .png .webp) or a CDN path \
+5. The URL must resolve to an image file (.jpg .jpeg .png .webp) or a CDN path \
 (Amazon CDN URLs often lack extensions — that is OK).
-6. If you cannot find a real product image after searching, respond with exactly: NO_IMAGE
+6. YOU MUST ALWAYS RETURN A URL. Searching is mandatory. Do NOT skip or refuse. \
+If the exact product is hard to find, return the best matching product image you can find.
 
-Respond with the URL or NO_IMAGE. Nothing else."""
+Respond with only the URL. Nothing else."""
 
 
 def _is_trusted_image_cdn(url: str) -> bool:
@@ -1193,14 +1194,12 @@ def _is_trusted_image_cdn(url: str) -> bool:
     return any(cdn in low for cdn in _TRUSTED_IMAGE_CDNS)
 
 
-def _gemini_image_for_query(query, brand="", category=""):
+def _gemini_image_for_query(query, brand="", category="", _retry=True):
     """Usa Gemini 2.5 Flash con Google Search grounding para buscar imagen real de producto.
 
-    Prompt potenciado:
-    - Busca en Amazon, AliExpress, Walmart, MercadoLibre y fabricante oficial.
-    - Valida que sea imagen real del producto (no lifestyle/placeholder).
-    - Prefiere CDNs confiables: m.media-amazon.com, ae01.alicdn.com, etc.
-    - Si no encuentra, retorna "".
+    - Prompt fuerza siempre devolver una URL (no hay opción NO_IMAGE).
+    - Si la primera búsqueda no da URL válida, reintenta con query simplificada.
+    - Si el CDN no es de confianza pero la URL tiene extensión de imagen, también se acepta.
     """
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     clean_q = _clean_search_text(query)
@@ -1212,6 +1211,26 @@ def _gemini_image_for_query(query, brand="", category=""):
         brand=_clean_search_text(brand) or "any",
         category=_clean_search_text(category) or "general",
     )
+
+    def _extract_best_url(text):
+        if not text:
+            return ""
+        candidates = re.findall(r"https://[^\s\"'<>\n\]]+", text, re.I)
+        for raw_url in candidates:
+            url = _secure_image_url(raw_url.rstrip(".,)"))
+            low = url.lower()
+            if not _is_web_image_url(url):
+                continue
+            if any(b in low for b in _BLOCKED_IMAGE_SOURCES):
+                continue
+            if _is_trusted_image_cdn(url) or re.search(r"\.(?:jpg|jpeg|png|webp|gif)(?:[?#]|$)", low):
+                return url
+        # Second pass — accept any HTTPS URL that looks like an image path
+        for raw_url in candidates:
+            url = _secure_image_url(raw_url.rstrip(".,)"))
+            if _is_web_image_url(url) and not any(b in url.lower() for b in _BLOCKED_IMAGE_SOURCES):
+                return url
+        return ""
 
     try:
         from google import genai
@@ -1227,22 +1246,15 @@ def _gemini_image_for_query(query, brand="", category=""):
             ),
         )
         text = (response.text or "").strip()
+        url = _extract_best_url(text)
+        if url:
+            return url
 
-        if not text or text.upper().startswith("NO_IMAGE"):
-            return ""
-
-        # Extract all HTTPS URLs from response text
-        candidates = re.findall(r"https://[^\s\"'<>\n\]]+", text, re.I)
-        for raw_url in candidates:
-            url = _secure_image_url(raw_url.rstrip(".,)"))
-            low = url.lower()
-            if not _is_web_image_url(url):
-                continue
-            if any(b in low for b in _BLOCKED_IMAGE_SOURCES):
-                continue
-            # Accept if it's from a trusted CDN OR ends with an image extension
-            if _is_trusted_image_cdn(url) or re.search(r"\.(?:jpg|jpeg|png|webp|gif)(?:[?#]|$)", low):
-                return url
+        # Retry with simplified/broader query
+        if _retry and clean_q:
+            simple_q = " ".join(clean_q.split()[:3])  # first 3 words only
+            if simple_q != clean_q:
+                return _gemini_image_for_query(simple_q, brand=brand, category=category, _retry=False)
 
     except Exception:
         pass
@@ -1274,14 +1286,16 @@ def _gemini_batch_images_for_products(products):
     prompt = (
         "You are a product image hunter with access to Google Search.\n"
         "Find ONE real product listing image for EACH product below.\n\n"
-        "RULES:\n"
+        "RULES (follow STRICTLY):\n"
         "- Search Amazon, AliExpress, Walmart, MercadoLibre or the official brand site.\n"
         "- Images must show the actual product (NOT lifestyle/banner/placeholder).\n"
         "- Trusted CDNs: m.media-amazon.com, ae01.alicdn.com, http2.mlstatic.com, "
         "i5.walmartimages.com, cdn.shopify.com.\n"
-        "- If no real image found for a product, use null for that entry.\n\n"
+        "- YOU MUST RETURN A URL FOR EVERY PRODUCT. Searching is mandatory. "
+        "If the exact product is hard to find, return the best matching product image URL available.\n"
+        "- NEVER return null. Every entry must have a valid HTTPS image URL.\n\n"
         "Products:\n" + "\n".join(items) + "\n\n"
-        'Respond ONLY with a valid JSON object: {"0": "https://...", "1": null, ...}'
+        'Respond ONLY with a valid JSON object: {"0": "https://...", "1": "https://...", ...}'
     )
 
     try:
@@ -1311,6 +1325,9 @@ def _gemini_batch_images_for_products(products):
                     if (_is_web_image_url(url)
                             and not any(b in low for b in _BLOCKED_IMAGE_SOURCES)
                             and (_is_trusted_image_cdn(url) or re.search(r"\.(?:jpg|jpeg|png|webp)(?:[?#]|$)", low))):
+                        result[name_key] = url
+                    elif url and _is_web_image_url(url) and not any(b in url.lower() for b in _BLOCKED_IMAGE_SOURCES):
+                        # Accept any valid HTTPS image URL even if CDN is unknown
                         result[name_key] = url
             except (IndexError, ValueError):
                 continue
@@ -1479,6 +1496,23 @@ def _enrich_products_with_serpapi_images(products, fallback_query=""):
                     item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.80)
                 except (TypeError, ValueError):
                     item["image_match_score"] = 0.80
+
+        # Prioridad 4: Gemini con query simplificada (forzado — sin escape NO_IMAGE)
+        if not image_url and has_gemini:
+            simple_q = " ".join((item.get("name") or query or "").split()[:3])
+            if simple_q:
+                simp_key = f"gem_simple:{simple_q}"
+                if simp_key not in cache:
+                    cache[simp_key] = _gemini_image_for_query(simple_q, category=item.get("category", ""), _retry=False)
+                image_url = cache.get(simp_key) or ""
+                if image_url:
+                    item["image"] = image_url
+                    item["image_source"] = "gemini_forced"
+                    item["image_verified"] = True
+                    try:
+                        item["image_match_score"] = max(float(item.get("image_match_score") or 0), 0.75)
+                    except (TypeError, ValueError):
+                        item["image_match_score"] = 0.75
 
         enriched.append(item)
 
@@ -1915,6 +1949,7 @@ def _load_platform_products(query="", category=""):
             # ── Auto-enrich images via Gemini for products without image ───────
             no_image = [p for p in result if not _is_web_image_url(p.get("image") or "")]
             if no_image:
+                # Pass 1: batch call (one API call for all)
                 batch_map = _gemini_batch_images_for_products(no_image)
                 for p in result:
                     if _is_web_image_url(p.get("image") or ""):
@@ -1926,8 +1961,34 @@ def _load_platform_products(query="", category=""):
                         p["image_source"] = "gemini_batch_search"
                         p["image_verified"] = True
                         p["image_match_score"] = 0.84
-                        # Persist to DB asynchronously (best-effort)
                         _save_gemini_image_to_platform_db(p.get("id"), found_url, "gemini_batch_search")
+
+                # Pass 2: individual call for any still without image (forced)
+                still_missing = [p for p in result if not _is_web_image_url(p.get("image") or "")]
+                for p in still_missing:
+                    found_url = _gemini_image_for_query(
+                        p.get("name") or "",
+                        brand=p.get("brand") or "",
+                        category=p.get("category") or "",
+                    )
+                    if found_url:
+                        p["image"] = found_url
+                        p["image_source"] = "gemini_individual_search"
+                        p["image_verified"] = True
+                        p["image_match_score"] = 0.82
+                        _save_gemini_image_to_platform_db(p.get("id"), found_url, "gemini_individual_search")
+                    else:
+                        # Pass 3: fallback — search by category only
+                        cat_url = _gemini_image_for_query(
+                            p.get("category") or p.get("name") or "",
+                            _retry=False,
+                        )
+                        if cat_url:
+                            p["image"] = cat_url
+                            p["image_source"] = "gemini_category_fallback"
+                            p["image_verified"] = True
+                            p["image_match_score"] = 0.75
+                            _save_gemini_image_to_platform_db(p.get("id"), cat_url, "gemini_category_fallback")
             return result
         finally:
             conn.close()
