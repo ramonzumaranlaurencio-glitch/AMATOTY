@@ -2,6 +2,24 @@
   "date": "2026-05-09",
   "products": [
     {
+      "name": "Proyector Mini Smart 4K HY300 Pro",
+      "brand": "Magcubic",
+      "category": "tecnologia",
+      "short_desc": "Cine en casa en tu mano – 4K, Wi-Fi 5G, Bluetooth 5.2 y Auto Focus",
+      "price": "49.99",
+      "currency": "USD",
+      "rating": 4.2,
+      "badge": "fire",
+      "viral": true,
+      "featured": true,
+      "image": "assets/products/prod_06_proyector_mini_smart_4k.jpeg",
+      "image_verified": true,
+      "search_query": "Magcubic HY300 Pro mini projector 4K wifi bluetooth autofocus",
+      "amazon_url": "https://www.amazon.com/dp/B0F53F8DB3?tag=amatotyshop-20",
+      "walmart_url": "https://goto.walmart.com/c/7284190/568844/9383?u=https%3A%2F%2Fwww.walmart.com%2Fsearch%3Fq%3Dmini+smart+projector+4K+wifi+bluetooth",
+      "image_source": "local"
+    },
+    {
       "name": "Mini licuadora portatil",
       "brand": "BlendJet",
       "category": "cocina",
