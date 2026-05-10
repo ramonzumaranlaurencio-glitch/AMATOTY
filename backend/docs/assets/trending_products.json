@@ -12,12 +12,12 @@
       "badge": "deal",
       "viral": true,
       "featured": true,
-      "image": "https://m.media-amazon.com/images/I/71wlFNSHnQL._AC_SX466_.jpg",
+      "image": "assets/products/prod_07_hp14_celeron_n4020.jpg",
       "image_verified": true,
       "search_query": "HP 14 laptop Intel Celeron N4020 Windows 11 64GB",
       "amazon_url": "https://www.amazon.com/dp/B0947BJ67M?tag=amatotyshop-20",
       "walmart_url": "https://goto.walmart.com/c/7284190/568844/9383?u=https%3A%2F%2Fwww.walmart.com%2Fsearch%3Fq%3DHP+14+laptop+celeron",
-      "image_source": "amazon",
+      "image_source": "local",
       "asin": "B0947BJ67M"
     },
     {
