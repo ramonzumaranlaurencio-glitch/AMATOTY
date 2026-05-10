@@ -2,6 +2,25 @@
   "date": "2026-05-09",
   "products": [
     {
+      "name": "Portátil HP 14 Intel Celeron N4020",
+      "brand": "HP",
+      "category": "tecnologia",
+      "short_desc": "Laptop HP 14\" micro-edge, Windows 11, 4 GB RAM, 64 GB eMMC – ligera y rápida",
+      "price": "199.99",
+      "currency": "USD",
+      "rating": 4.3,
+      "badge": "deal",
+      "viral": true,
+      "featured": true,
+      "image": "https://m.media-amazon.com/images/I/71wlFNSHnQL._AC_SX466_.jpg",
+      "image_verified": true,
+      "search_query": "HP 14 laptop Intel Celeron N4020 Windows 11 64GB",
+      "amazon_url": "https://www.amazon.com/dp/B0947BJ67M?tag=amatotyshop-20",
+      "walmart_url": "https://goto.walmart.com/c/7284190/568844/9383?u=https%3A%2F%2Fwww.walmart.com%2Fsearch%3Fq%3DHP+14+laptop+celeron",
+      "image_source": "amazon",
+      "asin": "B0947BJ67M"
+    },
+    {
       "name": "Proyector Mini Smart 4K HY300 Pro",
       "brand": "Magcubic",
       "category": "tecnologia",
