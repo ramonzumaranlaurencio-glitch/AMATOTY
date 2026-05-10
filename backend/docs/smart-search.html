@@ -1412,6 +1412,8 @@ async function executeSearch(){
     applyFilters();
     document.getElementById("aiModeBadge").textContent=resp.analysis_mode||"IA activa";
     showToast(`✓ ${filtered.length} resultados encontrados`);
+    const grid=document.getElementById("productGrid");
+    if(grid)grid.scrollIntoView({behavior:"smooth",block:"start"});
   }catch(err){
     if(IS_GITHUB_PAGES){
       showToast("⚠️ El servidor IA tardó demasiado. Intenta de nuevo en unos segundos.");
@@ -1419,6 +1421,8 @@ async function executeSearch(){
       showToast("Sin conexión con IA. Mostrando catálogo local.");
     }
     applyFilters();
+    const grid=document.getElementById("productGrid");
+    if(grid)grid.scrollIntoView({behavior:"smooth",block:"start"});
   }finally{
     clearTimeout(wakeTimer);
     [runBtn,sideBtn].forEach(b=>{b.disabled=false;});
