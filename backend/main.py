@@ -131,6 +131,8 @@ def _data_path(*parts):
 
 SITE_DIR = _data_path("docs")
 LOCAL_SITE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "docs"))
+import logging as _log
+_log.getLogger("amatoty").info("SITE_DIR=%s exists=%s", SITE_DIR, os.path.exists(SITE_DIR))
 
 # DATA_DIR permite apuntar a un disco persistente en Render/Railway/etc.
 # Ej: DATA_DIR=/var/data
@@ -331,10 +333,10 @@ def _fallback_oye_bonita_html():
 
 def _fallback_index_html():
     return """<!doctype html>
-<html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AMATOTY</title>
-<style>body{margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#111827}.hero{max-width:900px;margin:42px auto;padding:28px 18px;text-align:center}.btn{display:inline-block;background:#d81b60;color:white;padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700}</style></head>
-<body><main class="hero"><h1>AMATOTY - Oye Bonita</h1><p>Diagnostico facial y productos recomendados.</p><a class="btn" href="/oye-bonita.html">Abrir Oye Bonita</a></main></body></html>"""
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AMATOTY – International Marketplace</title>
+<style>body{margin:0;background:#0b2545;font-family:Arial,sans-serif;color:#fff}.hero{max-width:900px;margin:60px auto;padding:28px 18px;text-align:center}.btn{display:inline-block;background:#ff9900;color:#111;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:1.1em}</style></head>
+<body><main class="hero"><h1 style="font-size:2.4em;margin-bottom:16px">AMATOTY</h1><p style="font-size:1.15em;opacity:.85;margin-bottom:30px">International Marketplace — Smart products for everyday life.</p><a class="btn" href="/oye-bonita.html">Try Oye Bonita</a></main></body></html>"""
 
 
 def _fallback_css():
