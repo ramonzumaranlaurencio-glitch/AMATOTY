@@ -9,3 +9,5 @@ python-dotenv==1.0.1
 stripe==10.5.0
 cloudinary
 pillow
+google-genai
+requests
