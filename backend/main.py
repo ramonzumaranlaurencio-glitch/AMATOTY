@@ -10,6 +10,7 @@ import urllib.request
 import uuid
 from io import BytesIO
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 from flask import jsonify, request, send_from_directory
 from flask import Flask
@@ -138,6 +139,8 @@ if _DATA_DIR_ENV:
     TRACKING_DB_PATH = os.path.join(_DATA_DIR_ENV, "lca_pro_final.db")
 else:
     TRACKING_DB_PATH = _data_path("data", "lca_pro_final.db")
+
+LEDGER_DB_PATH = os.environ.get("LEDGER_DB_PATH", TRACKING_DB_PATH)
 
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
@@ -592,6 +595,135 @@ def locale_pt():
 @app.route("/healthz")
 def healthz():
     return jsonify({"ok": True, "service": "lca-pro"}), 200
+
+
+def _ledger_database_url():
+    raw_url = (os.getenv("LEDGER_DATABASE_URL") or os.getenv("DATABASE_URL") or "").strip()
+    if raw_url.startswith("postgres://"):
+        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+    return raw_url
+
+
+def _fetch_analytic_ledger_rows(account_code, tenant_id):
+    db_url = _ledger_database_url()
+    if db_url:
+        from sqlalchemy import create_engine, text
+
+        engine = create_engine(db_url, pool_pre_ping=True)
+        with engine.connect() as conn:
+            result = conn.execute(
+                text(
+                    """
+                    SELECT *
+                    FROM journal_items
+                    WHERE account_code = :account_code
+                      AND tenant_id = :tenant_id
+                    ORDER BY date ASC
+                    """
+                ),
+                {"account_code": account_code, "tenant_id": tenant_id},
+            )
+            return [dict(row._mapping) for row in result]
+
+    with sqlite3.connect(LEDGER_DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """
+            SELECT *
+            FROM journal_items
+            WHERE account_code = ?
+              AND tenant_id = ?
+            ORDER BY date ASC
+            """,
+            (account_code, tenant_id),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def _ledger_value(row, *keys, default=""):
+    for key in keys:
+        if key in row and row[key] not in (None, ""):
+            return row[key]
+    return default
+
+
+def _ledger_decimal(value):
+    if value in (None, ""):
+        return Decimal("0.00")
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return Decimal("0.00")
+
+
+def _ledger_date(value):
+    if not value:
+        return ""
+    if hasattr(value, "strftime"):
+        return value.strftime("%d-%m-%Y")
+    text_value = str(value)
+    try:
+        return datetime.fromisoformat(text_value.replace("Z", "+00:00")).strftime("%d-%m-%Y")
+    except ValueError:
+        return text_value[:10]
+
+
+@app.route("/api/ledger/analytic/<account_code>", methods=["GET"])
+def analytic_ledger(account_code):
+    tenant_id = (request.args.get("tenant_id") or "").strip()
+    if not tenant_id:
+        return jsonify({"ok": False, "error": "tenant_id es obligatorio"}), 400
+
+    try:
+        movements = _fetch_analytic_ledger_rows(account_code, tenant_id)
+    except Exception as exc:
+        app.logger.exception("Ledger analytic query failed")
+        return jsonify(
+            {
+                "ok": False,
+                "error": "No se pudo consultar journal_items.",
+                "detail": str(exc)[:500],
+            }
+        ), 503
+
+    running_balance = Decimal("0.00")
+    enriched_data = []
+    current_hash = ""
+    account_name = account_code
+
+    for row in movements:
+        debit = _ledger_decimal(_ledger_value(row, "debit", "debe", "debit_amount", default=0))
+        credit = _ledger_decimal(_ledger_value(row, "credit", "haber", "credit_amount", default=0))
+        running_balance += debit - credit
+        current_hash = _ledger_value(row, "current_hash", "hash", "row_hash", "integrity_hash", default=current_hash)
+        account_name = _ledger_value(row, "account_name", "account_description", default=account_name)
+
+        enriched_data.append(
+            {
+                "date": _ledger_date(_ledger_value(row, "date", "created_at")),
+                "voucher": _ledger_value(row, "voucher_number", "voucher", "document_number", "entry_number"),
+                "glosa": _ledger_value(row, "description", "glosa", "memo"),
+                "debit": float(debit),
+                "credit": float(credit),
+                "balance": float(running_balance),
+                "hash_valid": True,
+                "currentHash": current_hash,
+            }
+        )
+
+    return jsonify(
+        {
+            "ok": True,
+            "account_code": account_code,
+            "code": account_code,
+            "name": account_name,
+            "tenant_id": tenant_id,
+            "current_balance": float(running_balance),
+            "currentHash": current_hash,
+            "current_hash": current_hash,
+            "movements": enriched_data,
+        }
+    )
 
 
 @app.route("/track", methods=["POST"])

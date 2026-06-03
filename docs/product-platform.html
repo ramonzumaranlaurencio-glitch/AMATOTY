@@ -384,70 +384,70 @@ tbody tr:hover{background:#eff6ff}
 
                 <!-- Sección 1: Info básica -->
                 <fieldset class="form-section">
-                  <legend>📦 Información básica</legend>
-                  <div class="field"><label for="productName">Nombre del producto</label><input id="productName" required placeholder="Ej: Licuadora portátil 600ml"></div>
-                  <div class="field"><label for="productDescription">Descripción</label><textarea id="productDescription" placeholder="Describe el producto brevemente..."></textarea></div>
-                  <div class="field"><label for="productCategory">Categoría</label><input id="productCategory" placeholder="Ej: Cocina, Electrónica, Automotriz"></div>
-                  <div class="field"><label for="productSku">SKU / Código</label><input id="productSku" placeholder="Ej: A001"></div>
-                  <div class="field"><label for="productUrl">Enlace del producto</label><input id="productUrl" type="url" placeholder="https://..."></div>
+                  <legend>📦 Basic information</legend>
+                  <div class="field"><label for="productName">Product name</label><input id="productName" required placeholder="E.g.: Portable blender 600ml"></div>
+                  <div class="field"><label for="productDescription">Description</label><textarea id="productDescription" placeholder="Briefly describe the product..."></textarea></div>
+                  <div class="field"><label for="productCategory">Category</label><input id="productCategory" placeholder="E.g.: Kitchen, Electronics, Automotive"></div>
+                  <div class="field"><label for="productSku">SKU / Code</label><input id="productSku" placeholder="E.g.: A001"></div>
+                  <div class="field"><label for="productUrl">Product link</label><input id="productUrl" type="url" placeholder="https://..."></div>
                 </fieldset>
 
                 <!-- Sección 2: Precio, stock y estado -->
                 <fieldset class="form-section">
-                  <legend>💰 Precio, stock y estado</legend>
+                  <legend>💰 Price, stock and status</legend>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div class="field"><label for="productPrice">Precio</label><input id="productPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>
-                    <div class="field"><label for="productCurrency">Moneda</label><input id="productCurrency" value="USD" maxlength="6" placeholder="USD"></div>
+                    <div class="field"><label for="productPrice">Price</label><input id="productPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>
+                    <div class="field"><label for="productCurrency">Currency</label><input id="productCurrency" value="USD" maxlength="6" placeholder="USD"></div>
                   </div>
                   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
                     <div class="field"><label for="productStock">Stock</label><input id="productStock" type="number" min="0" value="0"></div>
-                    <div class="field"><label for="productPriority">Prioridad</label><select id="productPriority"><option value="1">🔴 Alta</option><option value="2">🟠 Media alta</option><option value="3" selected>🟡 Media</option><option value="4">🟢 Baja</option><option value="5">⚪ Muy baja</option></select></div>
-                    <div class="field"><label for="productStatus">Estado</label><select id="productStatus"><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
+                    <div class="field"><label for="productPriority">Priority</label><select id="productPriority"><option value="1">🔴 High</option><option value="2">🟠 Med-high</option><option value="3" selected>🟡 Medium</option><option value="4">🟢 Low</option><option value="5">⚪ Very low</option></select></div>
+                    <div class="field"><label for="productStatus">Status</label><select id="productStatus"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
                   </div>
                 </fieldset>
 
                 <!-- Sección 3: Ficha técnica -->
                 <fieldset class="form-section">
-                  <legend>📋 Ficha técnica</legend>
-                  <div class="field"><label for="productSpecs">Especificaciones (una por línea)</label><textarea id="productSpecs" placeholder="Material: acero inoxidable&#10;Medida: 30 cm&#10;Garantía: 12 meses&#10;Voltaje: 110V"></textarea></div>
+                  <legend>📋 Technical specs</legend>
+                  <div class="field"><label for="productSpecs">Specifications (one per line)</label><textarea id="productSpecs" placeholder="Material: stainless steel&#10;Size: 30 cm&#10;Warranty: 12 months&#10;Voltage: 110V"></textarea></div>
                 </fieldset>
 
                 <!-- Sección 4: Imagen -->
                 <fieldset class="form-section">
-                  <legend>🖼️ Imagen pública</legend>
-                  <div class="field"><label for="productImageUrl">URL de la imagen</label><input id="productImageUrl" type="text" placeholder="https://... o Productos/imagen.jpg"></div>
+                  <legend>🖼️ Public image</legend>
+                  <div class="field"><label for="productImageUrl">Image URL</label><input id="productImageUrl" type="text" placeholder="https://... or Productos/image.jpg"></div>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div class="field"><label for="productImageSource">Fuente</label><select id="productImageSource"><option value="">Sin fuente</option><option value="oye_bonita_assets">Oye Bonita</option><option value="amazon_verified">Amazon verificado</option><option value="amazon_candidate">Amazon por verificar</option><option value="official">Oficial</option><option value="local_verified">Local verificado</option></select></div>
-                    <div class="field"><label for="productImageScore">Coincidencia (0–1)</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
+                    <div class="field"><label for="productImageSource">Source</label><select id="productImageSource"><option value="">No source</option><option value="oye_bonita_assets">Oye Bonita</option><option value="amazon_verified">Amazon verified</option><option value="amazon_candidate">Amazon pending</option><option value="official">Official</option><option value="local_verified">Local verified</option></select></div>
+                    <div class="field"><label for="productImageScore">Match score (0–1)</label><input id="productImageScore" type="number" min="0" max="1" step="0.01" placeholder="0.96"></div>
                   </div>
-                  <label class="check-field" for="productImageVerified"><input id="productImageVerified" type="checkbox"> La imagen coincide con el producto</label>
+                  <label class="check-field" for="productImageVerified"><input id="productImageVerified" type="checkbox"> Image matches the product</label>
                 </fieldset>
 
                 <!-- Sección 5: Archivos -->
                 <fieldset class="form-section">
-                  <legend>📁 Archivos multimedia</legend>
-                  <div class="field"><label for="productMedia">Subir imágenes o videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple style="padding:8px"></div>
+                  <legend>📁 Media files</legend>
+                  <div class="field"><label for="productMedia">Upload images or videos</label><input id="productMedia" type="file" accept="image/*,video/*" multiple style="padding:8px"></div>
                 </fieldset>
 
                 <!-- Sección 6: Banner -->
                 <fieldset class="form-section">
-                  <legend>🎯 Banner principal (carrusel)</legend>
-                  <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Mostrar este producto en el carrusel</label>
+                  <legend>🎯 Main banner (carousel)</legend>
+                  <label class="check-field" for="bannerShow"><input id="bannerShow" type="checkbox"> Show this product in the carousel</label>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div class="field"><label for="bannerTitle">Título del banner</label><input id="bannerTitle" placeholder="Usa el nombre si lo dejas vacío"></div>
-                    <div class="field"><label for="bannerCategory">Categoría banner</label><input id="bannerCategory" placeholder="Usa la categoría si lo dejas vacío"></div>
+                    <div class="field"><label for="bannerTitle">Banner title</label><input id="bannerTitle" placeholder="Leave empty to use product name"></div>
+                    <div class="field"><label for="bannerCategory">Banner category</label><input id="bannerCategory" placeholder="Leave empty to use product category"></div>
                   </div>
-                  <div class="field"><label for="bannerDescription">Descripción corta</label><textarea id="bannerDescription" placeholder="Texto breve que aparecerá en el banner..." style="min-height:60px"></textarea></div>
+                  <div class="field"><label for="bannerDescription">Short description</label><textarea id="bannerDescription" placeholder="Brief text to appear in the banner..." style="min-height:60px"></textarea></div>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                    <div class="field"><label for="bannerImage">URL imagen del banner</label><input id="bannerImage" type="text" placeholder="https://... o Productos/imagen.jpg"></div>
-                    <div class="field"><label for="bannerButtonText">Texto del botón</label><input id="bannerButtonText" placeholder="Ver producto"></div>
+                    <div class="field"><label for="bannerImage">Banner image URL</label><input id="bannerImage" type="text" placeholder="https://... or Productos/image.jpg"></div>
+                    <div class="field"><label for="bannerButtonText">Button text</label><input id="bannerButtonText" placeholder="View product"></div>
                   </div>
-                  <div class="field"><label for="bannerLink">Enlace del botón</label><input id="bannerLink" type="url" placeholder="Usa el enlace del producto si lo dejas vacío"></div>
+                  <div class="field"><label for="bannerLink">Button link</label><input id="bannerLink" type="url" placeholder="Leave empty to use product link"></div>
                 </fieldset>
 
                 <div class="split-actions">
-                  <button class="primary-btn" type="submit">💾 Guardar producto</button>
-                  <button id="generateFromFormBtn" class="ghost-btn" type="button">✨ Generar promo</button>
+                  <button class="primary-btn" type="submit">💾 Save product</button>
+                  <button id="generateFromFormBtn" class="ghost-btn" type="button">✨ Generate promo</button>
                 </div>
               </form>
               <div style="height:16px"></div>
@@ -460,32 +460,32 @@ tbody tr:hover{background:#eff6ff}
       <section id="carouselView" class="view hidden">
         <!-- 4 CAROUSEL TABS -->
         <div class="car-tabs">
-          <button class="car-tab active c01" data-car="01" type="button">🔵 CARRUSEL 01 — EMPRESAS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
-          <button class="car-tab c02" data-car="02" type="button">🟡 CARRUSEL 02 — B2B <span class="car-type-pill pill-v">VERTICAL</span></button>
-          <button class="car-tab c03" data-car="03" type="button">🔵 CARRUSEL 03 — PERSONAS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
-          <button class="car-tab c04" data-car="04" type="button">🟡 CARRUSEL 04 — Para ti <span class="car-type-pill pill-v">VERTICAL</span></button>
-          <button class="car-tab c05" data-car="05" type="button">🌸 CARRUSEL 05 — Oye Bonita <span class="car-type-pill pill-v">BELLEZA</span></button>
-          <button class="car-tab c06" data-car="06" type="button">🔍 CARRUSEL 06 — Smart Search <span class="car-type-pill pill-v">BÚSqueda</span></button>
+          <button class="car-tab active c01" data-car="01" type="button">🔵 CAROUSEL 01 — BUSINESS <span class="car-type-pill pill-h">HORIZONTAL</span></button>
+          <button class="car-tab c02" data-car="02" type="button">🟡 CAROUSEL 02 — B2B <span class="car-type-pill pill-v">VERTICAL</span></button>
+          <button class="car-tab c03" data-car="03" type="button">🔵 CAROUSEL 03 — PEOPLE <span class="car-type-pill pill-h">HORIZONTAL</span></button>
+          <button class="car-tab c04" data-car="04" type="button">🟡 CAROUSEL 04 — For you <span class="car-type-pill pill-v">VERTICAL</span></button>
+          <button class="car-tab c05" data-car="05" type="button">🌸 CAROUSEL 05 — Oye Bonita <span class="car-type-pill pill-v">BEAUTY</span></button>
+          <button class="car-tab c06" data-car="06" type="button">🔍 CAROUSEL 06 — Smart Search <span class="car-type-pill pill-v">SEARCH</span></button>
         </div>
         <div style="display:grid;gap:18px;margin-top:14px">
           <!-- Productos en el carrusel activo -->
           <section class="panel">
             <div class="panel-head">
-              <h3 id="carouselActiveTitle">🎠 CARRUSEL 01 — EMPRESAS · Horizontal (izquierda, fila 1)</h3>
-              <button id="refreshCarouselBtn" class="plain-btn" type="button">Actualizar</button>
+              <h3 id="carouselActiveTitle">🎠 CAROUSEL 01 — BUSINESS · Horizontal (left, row 1)</h3>
+              <button id="refreshCarouselBtn" class="plain-btn" type="button">Refresh</button>
             </div>
             <div class="panel-body">
-              <p id="carouselActiveDesc" style="color:var(--ink2);font-size:13px;margin:0 0 14px">Slides horizontales del banner EMPRESAS. Haz clic en <strong>Editar</strong> para personalizar imagen, título y enlace de cada slide.</p>
+              <p id="carouselActiveDesc" style="color:var(--ink2);font-size:13px;margin:0 0 14px">Horizontal slides for the BUSINESS banner. Click <strong>Edit</strong> to customize the image, title and link of each slide.</p>
               <div id="carouselActiveGrid" class="carousel-grid"></div>
             </div>
           </section>
           <!-- Agregar productos al carrusel activo -->
           <section class="panel">
             <div class="panel-head">
-              <h3>📦 Agregar a este carrusel</h3>
+              <h3>📦 Add to this carousel</h3>
             </div>
             <div class="panel-body">
-              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Productos publicados disponibles. Haz clic en <strong>+ Añadir</strong> para incluirlos en el carrusel seleccionado arriba.</p>
+              <p style="color:var(--ink2);font-size:13px;margin:0 0 14px">Published products available. Click <strong>+ Add</strong> to include them in the selected carousel above.</p>
               <div id="carouselAvailableGrid" class="carousel-grid"></div>
             </div>
           </section>
@@ -539,12 +539,12 @@ tbody tr:hover{background:#eff6ff}
         <label class="check-field" for="carouselEditShow" style="margin-bottom:10px">
           <input id="carouselEditShow" type="checkbox"> Mostrar en el carrusel
         </label>
-        <div class="field"><label for="carouselEditTitle">Título del banner</label><input id="carouselEditTitle" placeholder="Usa el nombre del producto si lo dejas vacío"></div>
-        <div class="field"><label for="carouselEditCategory">Categoría</label><input id="carouselEditCategory" placeholder="Usa la categoría del producto"></div>
-        <div class="field"><label for="carouselEditDescription">Descripción corta</label><textarea id="carouselEditDescription" style="min-height:70px" placeholder="Texto breve que aparecerá en el banner..."></textarea></div>
+        <div class="field"><label for="carouselEditTitle">Banner title</label><input id="carouselEditTitle" placeholder="Leave empty to use product name"></div>
+        <div class="field"><label for="carouselEditCategory">Category</label><input id="carouselEditCategory" placeholder="Use the product category"></div>
+        <div class="field"><label for="carouselEditDescription">Short description</label><textarea id="carouselEditDescription" style="min-height:70px" placeholder="Brief text to appear in the banner..."></textarea></div>
         <div class="field"><label for="carouselEditImage">URL de imagen del banner</label><input id="carouselEditImage" type="text" placeholder="https://... o Productos/imagen.jpg"><div id="carouselImagePreview" style="margin-top:8px;min-height:80px;background:var(--panel2);border-radius:6px;overflow:hidden;display:none"><img id="carouselPreviewImg" style="width:100%;max-height:180px;object-fit:cover" alt="Preview"></div></div>
-        <div class="field"><label for="carouselEditButton">Texto del botón</label><input id="carouselEditButton" placeholder="Ver producto"></div>
-        <div class="field"><label for="carouselEditLink">Enlace del botón</label><input id="carouselEditLink" type="url" placeholder="https://..."></div>
+        <div class="field"><label for="carouselEditButton">Button text</label><input id="carouselEditButton" placeholder="View product"></div>
+        <div class="field"><label for="carouselEditLink">Button link</label><input id="carouselEditLink" type="url" placeholder="https://..."></div>
         <div class="split-actions" style="margin-top:6px">
           <button class="primary-btn" type="submit">💾 Guardar</button>
           <button class="plain-btn" id="carouselModalCancelBtn" type="button">Cancelar</button>
@@ -577,12 +577,12 @@ const state = {
 };
 
 const CAR_INFO = {
-  "01": {title:"🎠 CARRUSEL 01 — EMPRESAS · Horizontal (izquierda, fila 1)", desc:"Slides horizontales del banner EMPRESAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_01"},
-  "02": {title:"🎠 CARRUSEL 02 — Productos B2B · Vertical (derecha, fila 1)", desc:"Tarjetas verticales de productos B2B. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_02"},
-  "03": {title:"🎠 CARRUSEL 03 — PERSONAS · Horizontal (izquierda, fila 2)", desc:"Slides horizontales del banner PERSONAS. Haz clic en Editar para personalizar imagen, título y enlace.", key:"carousel_03"},
-  "04": {title:"🎠 CARRUSEL 04 — Productos para ti · Vertical (derecha, fila 2)", desc:"Tarjetas verticales de productos personales. Usa + Añadir para incluir un producto en este carrusel.", key:"carousel_04"},
-  "05": {title:"🌸 CARRUSEL 05 — Oye Bonita · Página de diagnóstico facial", desc:"Productos de belleza que se muestran en la página Oye Bonita. Usa + Añadir para incluir productos de belleza.", key:"carousel_05"},
-  "06": {title:"🔍 CARRUSEL 06 — Smart Search · Panel de búsqueda inteligente", desc:"Productos destacados que aparecen en la página de búsqueda inteligente. Usa + Añadir para seleccionar productos.", key:"carousel_06"}
+  "01": {title:"🎠 CAROUSEL 01 — BUSINESS · Horizontal (left, row 1)", desc:"Horizontal slides for the BUSINESS banner. Click Edit to customize image, title and link.", key:"carousel_01"},
+  "02": {title:"🎠 CAROUSEL 02 — B2B Products · Vertical (right, row 1)", desc:"Vertical B2B product cards. Use + Add to include a product in this carousel.", key:"carousel_02"},
+  "03": {title:"🎠 CAROUSEL 03 — PEOPLE · Horizontal (left, row 2)", desc:"Horizontal slides for the PEOPLE banner. Click Edit to customize image, title and link.", key:"carousel_03"},
+  "04": {title:"🎠 CAROUSEL 04 — Products for you · Vertical (right, row 2)", desc:"Vertical personal product cards. Use + Add to include a product in this carousel.", key:"carousel_04"},
+  "05": {title:"🌸 CAROUSEL 05 — Oye Bonita · Facial diagnosis page", desc:"Beauty products shown on the Oye Bonita page. Use + Add to include beauty products.", key:"carousel_05"},
+  "06": {title:"🔍 CAROUSEL 06 — Smart Search · Smart search panel", desc:"Featured products appearing on the smart search page. Use + Add to select products.", key:"carousel_06"}
 };
 
 const $ = selector => document.querySelector(selector);
@@ -1088,7 +1088,7 @@ function carouselCardHtml(product, inCarousel) {
         <div class="carousel-card-actions">
           ${inCarousel
             ? `<button class="danger-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-remove" data-id="${escapeHtml(product.id)}" type="button">Quitar</button>`
-            : `<button class="ghost-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-add" data-id="${escapeHtml(product.id)}" type="button">+ Añadir</button>`}
+            : `<button class="ghost-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-add" data-id="${escapeHtml(product.id)}" type="button">+ Add</button>`}
           <button class="plain-btn" style="font-size:11px;padding:5px 9px" data-action="carousel-edit" data-id="${escapeHtml(product.id)}" type="button">✏ Editar</button>
         </div>
       </div>
@@ -1104,10 +1104,10 @@ function renderCarousel() {
   const available = state.products.filter(p => !asBool(p.metadata?.[key]) && p.status !== "archived");
   $("#carouselActiveGrid").innerHTML = active.length
     ? active.map(p => carouselCardHtml(p, true)).join("")
-    : `<div class="empty">Ningún producto en este carrusel. Añádelo desde la sección de abajo.</div>`;
+    : `<div class="empty">No products in this carousel. Add them from the section below.</div>`;
   $("#carouselAvailableGrid").innerHTML = available.length
     ? available.map(p => carouselCardHtml(p, false)).join("")
-    : `<div class="empty">Todos los productos publicados ya están en este carrusel.</div>`;
+    : `<div class="empty">All published products are already in this carousel.</div>`;
 }
 
 function openCarouselEdit(productId) {
@@ -1191,7 +1191,7 @@ async function toggleCarouselEntry(productId, addToCarousel) {
     } else {
       await loadProducts();
     }
-    toast(addToCarousel ? `Añadido al carrusel ${state.activeCarousel}.` : `Quitado del carrusel ${state.activeCarousel}.`);
+    toast(addToCarousel ? `Added to carousel ${state.activeCarousel}.` : `Removed from carousel ${state.activeCarousel}.`);
     renderCarousel();
     renderProducts();
   } catch (err) {

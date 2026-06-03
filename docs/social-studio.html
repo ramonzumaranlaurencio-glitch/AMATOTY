@@ -212,25 +212,25 @@ textarea{resize:vertical;line-height:1.5}
 <!-- EDIT MODAL -->
 <div id="edit-modal" class="hidden">
   <div class="edit-box">
-    <div class="edit-title">✏️ Editar producto</div>
-    <div class="form-group"><label class="form-label">Nombre</label><input id="edit-name" type="text"></div>
-    <div class="form-group"><label class="form-label">Precio</label><input id="edit-price" type="text"></div>
-    <div class="form-group"><label class="form-label">Enlace de afiliado</label><input id="edit-link" type="url"></div>
-    <div class="form-group"><label class="form-label">Categoría</label>
+    <div class="edit-title">✏️ Edit product</div>
+    <div class="form-group"><label class="form-label">Name</label><input id="edit-name" type="text"></div>
+    <div class="form-group"><label class="form-label">Price</label><input id="edit-price" type="text"></div>
+    <div class="form-group"><label class="form-label">Affiliate link</label><input id="edit-link" type="url"></div>
+    <div class="form-group"><label class="form-label">Category</label>
       <select id="edit-cat">
         <option value="general">General</option>
         <option value="tech">Tech / Gadgets</option>
-        <option value="home">Hogar</option>
-        <option value="beauty">Belleza</option>
-        <option value="kitchen">Cocina</option>
+        <option value="home">Home</option>
+        <option value="beauty">Beauty</option>
+        <option value="kitchen">Kitchen</option>
         <option value="fitness">Fitness</option>
-        <option value="automotive">Automotriz</option>
-        <option value="tools">Herramientas</option>
+        <option value="automotive">Automotive</option>
+        <option value="tools">Tools</option>
       </select>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px">
-      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Guardar</button>
-      <button class="btn btn-ghost" style="flex:1" onclick="closeEdit()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Save</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeEdit()">Cancel</button>
     </div>
   </div>
 </div>
@@ -240,9 +240,9 @@ textarea{resize:vertical;line-height:1.5}
   <div class="top-inner">
     <span class="brand">AMATOTy<span> Studio</span></span>
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('discover',this)">🔍 Descubrir</div>
-      <div class="tab" onclick="switchTab('studio',this)">✍️ Contenido</div>
-      <div class="tab" onclick="switchTab('products',this)">📦 Mis Productos</div>
+      <div class="tab active" onclick="switchTab('discover',this)">🔍 Discover</div>
+      <div class="tab" onclick="switchTab('studio',this)">✍️ Content</div>
+      <div class="tab" onclick="switchTab('products',this)">📦 My Products</div>
       <div class="tab" onclick="switchTab('admin',this)">⚙️ Admin</div>
     </div>
     <div class="top-links">
@@ -257,29 +257,29 @@ textarea{resize:vertical;line-height:1.5}
   <!-- ══ TAB: DISCOVER ══════════════════════════════════════════════════════ -->
   <div class="tab-panel active" id="panel-discover">
     <div class="section-head">
-      <div class="section-title">🔍 Descubrir Productos Virales</div>
-      <div class="section-sub">Encuentra productos trending de Amazon y Walmart para promover en redes sociales</div>
+      <div class="section-title">🔍 Discover Viral Products</div>
+      <div class="section-sub">Find trending products from Amazon and Walmart to promote on social media</div>
     </div>
     <div class="discover-bar">
       <div class="form-group" style="margin:0">
-        <input type="text" id="disc-query" placeholder="Ej: kitchen gadgets, beauty viral, smart home…" onkeydown="if(event.key==='Enter')discoverProducts()">
+        <input type="text" id="disc-query" placeholder="E.g.: kitchen gadgets, beauty viral, smart home…" onkeydown="if(event.key==='Enter')discoverProducts()">
       </div>
       <select id="disc-cat">
-        <option value="">Todas las categorías</option>
+        <option value="">All categories</option>
         <option value="tech">💡 Tech</option>
-        <option value="home">🏠 Hogar</option>
-        <option value="beauty">💄 Belleza</option>
-        <option value="kitchen">🍳 Cocina</option>
+        <option value="home">🏠 Home</option>
+        <option value="beauty">💄 Beauty</option>
+        <option value="kitchen">🍳 Kitchen</option>
         <option value="fitness">💪 Fitness</option>
         <option value="automotive">🚗 Auto</option>
-        <option value="tools">🔧 Herramientas</option>
+        <option value="tools">🔧 Tools</option>
       </select>
       <select id="disc-plat">
         <option value="both">Amazon + Walmart</option>
         <option value="amazon">Amazon</option>
         <option value="walmart">Walmart</option>
       </select>
-      <button class="btn btn-primary" onclick="discoverProducts()" id="disc-btn">🔍 Buscar</button>
+      <button class="btn btn-primary" onclick="discoverProducts()" id="disc-btn">🔍 Search</button>
     </div>
     <div id="disc-results" class="grid grid-3"></div>
   </div>
@@ -287,58 +287,58 @@ textarea{resize:vertical;line-height:1.5}
   <!-- ══ TAB: STUDIO ═══════════════════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-studio">
     <div class="section-head">
-      <div class="section-title">✍️ Generador de Contenido Viral</div>
-      <div class="section-sub">Genera scripts de TikTok y posts de Facebook con IA (Gemini)</div>
+      <div class="section-title">✍️ Viral Content Generator</div>
+      <div class="section-sub">Generate TikTok scripts and Facebook posts with AI (Gemini)</div>
     </div>
     <div class="studio-layout">
       <!-- CONTROLS -->
       <div class="studio-controls card">
         <div class="form-group">
-          <label class="form-label">Seleccionar producto guardado</label>
+          <label class="form-label">Select saved product</label>
           <select id="sel-saved" onchange="fillFromSaved()">
-            <option value="">— Selecciona o ingresa manualmente —</option>
+            <option value="">— Select or enter manually —</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Nombre del producto *</label>
-          <input type="text" id="st-name" placeholder="Ej: Ice Roller Face Massager">
+          <label class="form-label">Product name *</label>
+          <input type="text" id="st-name" placeholder="E.g.: Ice Roller Face Massager">
         </div>
         <div class="form-group">
-          <label class="form-label">Categoría</label>
+          <label class="form-label">Category</label>
           <select id="st-cat">
             <option value="general">General</option>
             <option value="tech">Tech / Gadgets</option>
-            <option value="home">Hogar</option>
-            <option value="beauty">Belleza</option>
-            <option value="kitchen">Cocina</option>
+            <option value="home">Home</option>
+            <option value="beauty">Beauty</option>
+            <option value="kitchen">Kitchen</option>
             <option value="fitness">Fitness</option>
-            <option value="automotive">Automotriz</option>
-            <option value="tools">Herramientas</option>
+            <option value="automotive">Automotive</option>
+            <option value="tools">Tools</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Precio</label>
-          <input type="text" id="st-price" placeholder="Ej: $24.99">
+          <label class="form-label">Price</label>
+          <input type="text" id="st-price" placeholder="E.g.: $24.99">
         </div>
         <div class="form-group">
-          <label class="form-label">Enlace de afiliado</label>
+          <label class="form-label">Affiliate link</label>
           <input type="url" id="st-link" placeholder="https://www.amazon.com/dp/...">
         </div>
         <div class="form-group">
-          <label class="form-label">País objetivo</label>
+          <label class="form-label">Target country</label>
           <select id="st-country">
-            <option value="US">🇺🇸 Estados Unidos</option>
-            <option value="MX">🇲🇽 México</option>
+            <option value="US">🇺🇸 United States</option>
+            <option value="MX">🇲🇽 Mexico</option>
             <option value="CO">🇨🇴 Colombia</option>
-            <option value="PE">🇵🇪 Perú</option>
+            <option value="PE">🇵🇪 Peru</option>
             <option value="CL">🇨🇱 Chile</option>
             <option value="AR">🇦🇷 Argentina</option>
-            <option value="BR">🇧🇷 Brasil</option>
+            <option value="BR">🇧🇷 Brazil</option>
             <option value="EC">🇪🇨 Ecuador</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Idioma del contenido</label>
+          <label class="form-label">Content language</label>
           <div class="lang-pills">
             <div class="lang-pill active" onclick="setLang('es',this)">🇪🇸 ES</div>
             <div class="lang-pill" onclick="setLang('en',this)">🇺🇸 EN</div>
@@ -346,23 +346,23 @@ textarea{resize:vertical;line-height:1.5}
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Plataforma</label>
+          <label class="form-label">Platform</label>
           <div class="plat-pills">
             <div class="plat-pill plat-tiktok" onclick="setPlat('tiktok',this)">📱 TikTok</div>
             <div class="plat-pill plat-fb" onclick="setPlat('facebook',this)">📘 Facebook</div>
-            <div class="plat-pill plat-both active" onclick="setPlat('both',this)">✨ Ambas</div>
+            <div class="plat-pill plat-both active" onclick="setPlat('both',this)">✨ Both</div>
           </div>
         </div>
         <button class="gen-btn" id="gen-btn" onclick="generateContent()">
-          <span id="gen-btn-text">⚡ Generar Contenido Viral</span>
+          <span id="gen-btn-text">⚡ Generate Viral Content</span>
         </button>
       </div>
       <!-- CONTENT OUTPUT -->
       <div class="content-area" id="content-area">
         <div class="content-placeholder">
           <div class="icon">🚀</div>
-          <p>Completa el formulario y haz clic en<br><strong>Generar Contenido Viral</strong></p>
-          <p style="font-size:12px;margin-top:4px">Usa Gemini AI para crear scripts de TikTok y posts de Facebook optimizados para conversión</p>
+          <p>Complete the form and click<br><strong>Generate Viral Content</strong></p>
+          <p style="font-size:12px;margin-top:4px">Use Gemini AI to create TikTok scripts and Facebook posts optimized for conversion</p>
         </div>
       </div>
     </div>
@@ -372,8 +372,8 @@ textarea{resize:vertical;line-height:1.5}
   <div class="tab-panel" id="panel-products">
     <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
       <div>
-        <div class="section-title">📦 Mis Productos</div>
-        <div class="section-sub">Productos aprobados guardados en este dispositivo</div>
+        <div class="section-title">📦 My Products</div>
+        <div class="section-sub">Approved products saved on this device</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="exportProducts()">⬇️ Exportar JSON</button>
@@ -387,8 +387,8 @@ textarea{resize:vertical;line-height:1.5}
   <!-- ══ TAB: ADMIN ════════════════════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-admin">
     <div class="section-head">
-      <div class="section-title">⚙️ Administración</div>
-      <div class="section-sub">Estadísticas, configuración y herramientas de gestión</div>
+      <div class="section-title">⚙️ Administration</div>
+      <div class="section-sub">Statistics, settings and management tools</div>
     </div>
     <div id="admin-stats" class="admin-grid" style="margin-bottom:24px"></div>
     <div class="card" style="margin-bottom:16px">
@@ -408,11 +408,11 @@ textarea{resize:vertical;line-height:1.5}
       <div id="backend-status" style="margin-top:10px;font-size:12px;color:var(--text3)"></div>
     </div>
     <div class="card">
-      <div style="font-size:15px;font-weight:800;margin-bottom:14px">🛠️ Herramientas</div>
+      <div style="font-size:15px;font-weight:800;margin-bottom:14px">🛠️ Tools</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost" onclick="clearAllProducts()">🗑️ Limpiar todos los productos</button>
-        <button class="btn btn-ghost" onclick="testBackend()">🔌 Probar conexión backend</button>
-        <button class="btn btn-ghost" onclick="resetPin()">🔓 Resetear PIN (usar 2024)</button>
+        <button class="btn btn-ghost" onclick="clearAllProducts()">🗑️ Clear all products</button>
+        <button class="btn btn-ghost" onclick="testBackend()">🔌 Test backend connection</button>
+        <button class="btn btn-ghost" onclick="resetPin()">🔓 Reset PIN (use 2024)</button>
       </div>
     </div>
   </div>
@@ -465,7 +465,7 @@ function checkPin() {
 function changePin() {
   const np = document.getElementById('new-pin').value;
   const cp = document.getElementById('confirm-pin').value;
-  if (!np || np.length < 4) return toast('PIN debe tener al menos 4 dígitos');
+  if (!np || np.length < 4) return toast('PIN must be at least 4 digits');
   if (np !== cp) return toast('Los PINs no coinciden');
   localStorage.setItem(SS_PIN_KEY, np);
   localStorage.setItem(SS_UNLOCKED, '1');
@@ -556,7 +556,7 @@ function renderProductList() {
   const arr = loadProducts();
   const el = document.getElementById('products-list');
   if (!arr.length) {
-    el.innerHTML = `<div class="content-placeholder"><div class="icon">📭</div><p>No tienes productos guardados todavía.<br>Ve a <strong>Descubrir</strong> para agregar productos.</p></div>`;
+    el.innerHTML = `<div class="content-placeholder"><div class="icon">📭</div><p>No saved products yet.<br>Go to <strong>Discover</strong> to add products.</p></div>`;
     return;
   }
   el.innerHTML = arr.map((p, i) => `
@@ -591,7 +591,7 @@ function toggleAndRender(id) {
 }
 
 function deleteProduct(id) {
-  if (!confirm('¿Eliminar este producto?')) return;
+  if (!confirm('Delete this product?')) return;
   removeProduct(id);
   renderProductList();
   refreshSavedSelector();
@@ -699,7 +699,7 @@ function handleImport(e) {
       refreshSavedSelector();
       renderAdminStats();
       toast(`✅ ${added} productos importados`);
-    } catch(_) { toast('❌ Archivo JSON inválido'); }
+    } catch(_) { toast('❌ Invalid JSON file'); }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -721,7 +721,7 @@ function renderAdminStats() {
   `;
 }
 function clearAllProducts() {
-  if (!confirm('¿Eliminar TODOS los productos guardados? Esta acción no se puede deshacer.')) return;
+  if (!confirm('Delete ALL saved products? This action cannot be undone.')) return;
   localStorage.removeItem(SS_KEY);
   renderProductList();
   refreshSavedSelector();
@@ -736,11 +736,11 @@ function saveBackendUrl() {
 }
 async function testBackend() {
   const el = document.getElementById('backend-status');
-  el.textContent = '⏳ Probando conexión…';
+  el.textContent = '⏳ Testing connection...';
   try {
     const r = await fetch(getAPIOrigin() + '/health', { signal: AbortSignal.timeout(8000) });
     const d = await r.json();
-    el.textContent = d.ok ? '✅ Backend conectado correctamente' : '⚠️ Backend respondió pero con error';
+    el.textContent = d.ok ? '✅ Backend connected successfully' : '⚠️ Backend responded with error';
     el.style.color = d.ok ? 'var(--green)' : 'var(--amz)';
   } catch(e) {
     el.textContent = '❌ No se pudo conectar: ' + e.message;
@@ -772,14 +772,14 @@ async function discoverProducts() {
     btn.disabled = false;
     btn.innerHTML = '🔍 Buscar';
     if (!data.ok || !data.products?.length) {
-      res.innerHTML = `<div class="content-placeholder" style="grid-column:1/-1"><div class="icon">😕</div><p>No se encontraron productos. Prueba otra búsqueda.</p></div>`;
+      res.innerHTML = `<div class="content-placeholder" style="grid-column:1/-1"><div class="icon">😕</div><p>No products found. Try a different search.</p></div>`;
       return;
     }
     renderDiscoverResults(data.products);
   } catch(e) {
     btn.disabled = false;
     btn.innerHTML = '🔍 Buscar';
-    res.innerHTML = `<div class="content-placeholder" style="grid-column:1/-1"><div class="icon">🔌</div><p>Error de conexión con el backend.<br><small style="color:var(--text3)">${e.message}</small></p><button class="btn btn-primary" onclick="discoverProducts()">Reintentar</button></div>`;
+    res.innerHTML = `<div class="content-placeholder" style="grid-column:1/-1"><div class="icon">🔌</div><p>Backend connection error.<br><small style="color:var(--text3)">${e.message}</small></p><button class="btn btn-primary" onclick="discoverProducts()">Retry</button></div>`;
   }
 }
 
@@ -799,7 +799,7 @@ function renderDiscoverResults(products) {
           <div class="prod-source ${srcClass}">${p.source}</div>
           <div class="prod-name">${esc(p.name)}</div>
           <div class="prod-price">${esc(p.price || '$–')}</div>
-          <div class="prod-meta">⭐ ${p.rating || '–'} ${p.reviews ? '· ' + numFmt(p.reviews) + ' reseñas' : ''}</div>
+          <div class="prod-meta">⭐ ${p.rating || '–'} ${p.reviews ? '· ' + numFmt(p.reviews) + ' reviews' : ''}</div>
           <div class="prod-actions">
             <button class="btn btn-sm ${p.source==='Amazon'?'btn-amz':'btn-wmt'}" onclick='saveDiscover(${JSON.stringify(p)})'>
               ${saved ? '✅ Guardado' : '+ Guardar'}
@@ -815,7 +815,7 @@ function renderDiscoverResults(products) {
 
 function saveDiscover(p) {
   const existing = loadProducts().find(s => s.name === p.name);
-  if (existing) { toast('Ya está guardado'); return; }
+  if (existing) { toast('Already saved'); return; }
   addProduct({ ...p });
   renderAdminStats();
   refreshSavedSelector();
@@ -870,7 +870,7 @@ async function generateContent() {
   btnText.innerHTML = '<span class="spinner"></span> Generando con Gemini…';
 
   const area = document.getElementById('content-area');
-  area.innerHTML = `<div class="loading-state"><div class="spinner"></div><div>Gemini está creando contenido viral para:<br><strong>${esc(name)}</strong></div><div style="font-size:12px;color:var(--text3)">Esto tarda 5-15 segundos</div></div>`;
+  area.innerHTML = `<div class="loading-state"><div class="spinner"></div><div>Gemini is creating viral content for:<br><strong>${esc(name)}</strong></div><div style="font-size:12px;color:var(--text3)">This takes 5-15 seconds</div></div>`;
 
   try {
     const r = await fetch(getAPIOrigin() + '/api/generate-viral-content', {
@@ -892,12 +892,12 @@ async function generateContent() {
   } catch(e) {
     btn.disabled = false;
     btnText.textContent = '⚡ Generar Contenido Viral';
-    area.innerHTML = errBlock('Error de conexión: ' + e.message);
+    area.innerHTML = errBlock('Connection error: ' + e.message);
   }
 }
 
 function errBlock(msg) {
-  return `<div class="content-placeholder"><div class="icon">⚠️</div><p>${esc(msg)}</p><p style="font-size:12px;color:var(--text3)">Asegúrate de que el backend esté activo y que GEMINI_API_KEY esté configurada.</p><button class="btn btn-primary" onclick="generateContent()">Reintentar</button></div>`;
+  return `<div class="content-placeholder"><div class="icon">⚠️</div><p>${esc(msg)}</p><p style="font-size:12px;color:var(--text3)">Make sure the backend is running and GEMINI_API_KEY is configured.</p><button class="btn btn-primary" onclick="generateContent()">Retry</button></div>`;
 }
 
 function renderContent(d) {
@@ -912,7 +912,7 @@ function renderContent(d) {
       <div class="desc-display">${esc(d.description || '')}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${langEmoji[d.language] ? `<span style="background:var(--glass);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700">${langEmoji[d.language]} ${d.language?.toUpperCase()}</span>` : ''}
-        <button class="copy-btn" onclick="copyText(${JSON.stringify(d.title || '')},'copy-title')">📋 Copiar título</button>
+        <button class="copy-btn" onclick="copyText(${JSON.stringify(d.title || '')},'copy-title')">📋 Copy title</button>
       </div>
     </div>
   `;
@@ -931,7 +931,7 @@ function renderContent(d) {
           ${t.hook ? `<div style="background:rgba(238,29,82,.1);border:1px solid rgba(238,29,82,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px"><div style="font-size:10px;font-weight:800;color:#f87171;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">🪝 HOOK (primeros 3 segundos)</div><div class="content-text" style="color:#fff">${esc(t.hook)}</div></div>` : ''}
           <div class="content-text">${esc(script)}</div>
           ${t.cta ? `<div style="margin-top:12px;padding:10px;background:rgba(238,29,82,.08);border-radius:8px;border:1px solid rgba(238,29,82,.2)"><span style="font-size:11px;font-weight:800;color:#f87171">📌 CTA TikTok: </span><span style="font-size:13px">${esc(t.cta)}</span></div>` : ''}
-          ${t.tips && t.tips.length ? `<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">💡 TIPS DE GRABACIÓN</div>${t.tips.map(tip=>`<div style="font-size:12px;color:var(--text2);padding:4px 0">• ${esc(tip)}</div>`).join('')}</div>` : ''}
+          ${t.tips && t.tips.length ? `<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">💡 RECORDING TIPS</div>${t.tips.map(tip=>`<div style="font-size:12px;color:var(--text2);padding:4px 0">• ${esc(tip)}</div>`).join('')}</div>` : ''}
         </div>
       </div>
     `;
@@ -995,14 +995,14 @@ function renderContent(d) {
   // ── COMPLIANCE CHECKLIST ──────────────────────────────────────────────────
   html += `
     <div style="margin-top:24px;background:rgba(255,165,0,.07);border:1px solid rgba(255,165,0,.3);border-radius:12px;padding:16px 18px">
-      <div style="font-size:13px;font-weight:800;color:#f59e0b;margin-bottom:10px">⚠️ Lista de verificación antes de publicar</div>
+      <div style="font-size:13px;font-weight:800;color:#f59e0b;margin-bottom:10px">⚠️ Pre-publish checklist</div>
       <div style="font-size:12px;color:#fcd34d;line-height:1.8">
-        <div>☑ Activa <strong>Branded Content</strong> en TikTok o <strong>Colaboración pagada</strong> en Facebook antes de publicar.</div>
-        <div>☑ Verifica que el script incluye la divulgación verbal al inicio del video.</div>
-        <div>☑ Confirma que el post de Facebook termina con el pie de divulgación (#ad / #publicidad).</div>
+        <div>☑ Enable <strong>Branded Content</strong> on TikTok or <strong>Paid Partnership</strong> on Facebook before publishing.</div>
+        <div>☑ Verify the script includes verbal disclosure at the beginning of the video.</div>
+        <div>☑ Confirm the Facebook post ends with the disclosure footer (#ad / #sponsored).</div>
         <div>☑ No publiques precios exactos si no los verificaste en tiempo real en Amazon o Walmart.</div>
         <div>☑ El enlace de afiliado incluye tu tag de Amazon Associates (<code style="font-size:11px;background:rgba(0,0,0,.3);padding:1px 4px;border-radius:3px">tag=amatotyshop-20</code>).</div>
-        <div style="margin-top:8px"><a href="https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers" target="_blank" rel="noopener noreferrer" style="color:#60a5fa;font-size:11px">→ FTC Disclosure Guidelines</a> &nbsp;|&nbsp; <a href="affiliate-disclosure.html" target="_blank" style="color:#60a5fa;font-size:11px">→ Nuestra política de afiliados</a></div>
+        <div style="margin-top:8px"><a href="https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers" target="_blank" rel="noopener noreferrer" style="color:#60a5fa;font-size:11px">→ FTC Disclosure Guidelines</a> &nbsp;|&nbsp; <a href="affiliate-disclosure.html" target="_blank" style="color:#60a5fa;font-size:11px">→ Our affiliate policy</a></div>
       </div>
     </div>
   `;

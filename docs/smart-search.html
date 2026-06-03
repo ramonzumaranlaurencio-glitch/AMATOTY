@@ -524,15 +524,15 @@ button{cursor:pointer}
 <div class="location-bar">
   📍 <span data-i18n="market">Market</span>:
   <select id="country" onchange="onCountryChange()">
-    <option value="PE">Perú</option>
+    <option value="PE">Peru</option>
     <option value="US">United States</option>
-    <option value="MX">México</option>
+    <option value="MX">Mexico</option>
     <option value="CO">Colombia</option>
     <option value="CL">Chile</option>
     <option value="AR">Argentina</option>
     <option value="EC">Ecuador</option>
     <option value="BO">Bolivia</option>
-    <option value="BR">Brasil</option>
+    <option value="BR">Brazil</option>
     <option value="UY">Uruguay</option>
   </select>
   &nbsp;|&nbsp; <span data-i18n="currency_label">Currency</span>:
@@ -952,12 +952,12 @@ const countryCurrency = {PE:"PEN",US:"USD",MX:"MXN",CO:"COP",CL:"CLP",AR:"ARS",E
 
 // ── LATAM LOCALIZATION CONFIG ─────────────────────────────────────────────
 const LATAM_CONFIG = {
-  CO:{name:"Colombia",  flag:"🇨🇴",shipping_badge:"🇨🇴 Free Shipping to Colombia",   section_title:"🔥 Trending en Colombia",          currency:"COP",rate:4100, shipping_usd:12,tax_pct:.19,free_ship_above_usd:50,max_recommend_usd:80},
-  PE:{name:"Perú",      flag:"🇵🇪",shipping_badge:"🇵🇪 Ships to Peru",               section_title:"🔥 Viral en Perú",                  currency:"PEN",rate:3.75, shipping_usd:10,tax_pct:.18,free_ship_above_usd:50,max_recommend_usd:80},
+  CO:{name:"Colombia",  flag:"🇨🇴",shipping_badge:"🇨🇴 Free Shipping to Colombia",   section_title:"🔥 Trending in Colombia",           currency:"COP",rate:4100, shipping_usd:12,tax_pct:.19,free_ship_above_usd:50,max_recommend_usd:80},
+  PE:{name:"Peru",       flag:"🇵🇪",shipping_badge:"🇵🇪 Ships to Peru",               section_title:"🔥 Viral Picks in Peru",             currency:"PEN",rate:3.75, shipping_usd:10,tax_pct:.18,free_ship_above_usd:50,max_recommend_usd:80},
   CL:{name:"Chile",     flag:"🇨🇱",shipping_badge:"🇨🇱 AmazonGlobal Chile",          section_title:"🛒 Best Amazon Deals for Chile",    currency:"CLP",rate:950,  shipping_usd:11,tax_pct:.19,free_ship_above_usd:60,max_recommend_usd:80},
-  MX:{name:"México",    flag:"🇲🇽",shipping_badge:"🇲🇽 Envío a México",              section_title:"🔥 Trending en México",             currency:"MXN",rate:17.2, shipping_usd:8, tax_pct:.16,free_ship_above_usd:45,max_recommend_usd:80},
-  AR:{name:"Argentina", flag:"🇦🇷",shipping_badge:"🇦🇷 Envío a Argentina",           section_title:"🔥 Ofertas Virales Argentina",      currency:"ARS",rate:1100, shipping_usd:15,tax_pct:.21,free_ship_above_usd:70,max_recommend_usd:80},
-  EC:{name:"Ecuador",   flag:"🇪🇨",shipping_badge:"🇪🇨 Ships to Ecuador",            section_title:"🔥 Trending en Ecuador",            currency:"USD",rate:1,    shipping_usd:9, tax_pct:.12,free_ship_above_usd:50,max_recommend_usd:80},
+  MX:{name:"Mexico",    flag:"🇲🇽",shipping_badge:"🇲🇽 Ships to Mexico",             section_title:"🔥 Trending in Mexico",             currency:"MXN",rate:17.2, shipping_usd:8, tax_pct:.16,free_ship_above_usd:45,max_recommend_usd:80},
+  AR:{name:"Argentina", flag:"🇦🇷",shipping_badge:"🇦🇷 Ships to Argentina",          section_title:"🔥 Viral Deals in Argentina",       currency:"ARS",rate:1100, shipping_usd:15,tax_pct:.21,free_ship_above_usd:70,max_recommend_usd:80},
+  EC:{name:"Ecuador",   flag:"🇪🇨",shipping_badge:"🇪🇨 Ships to Ecuador",            section_title:"🔥 Trending in Ecuador",            currency:"USD",rate:1,    shipping_usd:9, tax_pct:.12,free_ship_above_usd:50,max_recommend_usd:80},
 };
 let _latamCountry = "";
 let _under80Active = false;
@@ -1269,12 +1269,12 @@ function openDetail(idx){
         <div style="font-size:22px;font-weight:900;color:var(--ink);margin:4px 0">${money(basePrice(p))}</div>
         <div style="font-size:13px;color:var(--ink2)">${esc(p.short_desc||p.reason||p.description||"")}</div>
       </div>
-      <div class="spec-grid">${specsCells||`<div class="spec-cell" style="grid-column:1/-1"><span>Categoría</span><strong>${esc(p.category)}</strong></div>`}</div>
+      <div class="spec-grid">${specsCells||`<div class="spec-cell" style="grid-column:1/-1"><span>Category</span><strong>${esc(p.category)}</strong></div>`}</div>
       <div>
-        <div style="font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;margin-bottom:6px">Consultar en:</div>
+        <div style="font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;margin-bottom:6px">Check on:</div>
         <div class="provider-links">${links}</div>
       </div>
-      <button class="detail-add-btn" onclick="addToCart(${idx});closeDetail()">🛒 Agregar al carrito</button>
+      <button class="detail-add-btn" onclick="addToCart(${idx});closeDetail()">🛒 Add to cart</button>
     </div>`;
   document.getElementById("detailOverlay").classList.add("visible");
   document.body.style.overflow="hidden";
@@ -1312,7 +1312,7 @@ function addToCart(idx){
   if(existing){existing.qty++;}
   else{cart.push({pid,name:p.name,price:basePrice(p),currency:document.getElementById("currency").value||"USD",image:p.image||"",qty:1,sku:p.sku||""});}
   saveCart();updateCartBadge();
-  showToast(`✓ "${p.name}" agregado al carrito`);
+  showToast(`✓ "${p.name}" added to cart`);
 }
 
 function changeQty(pid,delta){
@@ -1327,7 +1327,7 @@ function removeCartItem(pid){cart=cart.filter(i=>i.pid!==pid);saveCart();updateC
 function renderCartDrawer(){
   const container=document.getElementById("cartItems");
   if(!cart.length){
-    container.innerHTML=`<div class="empty-state" style="margin-top:40px"><h3>Tu carrito está vacío</h3><p style="color:var(--ink2);margin-top:8px">Agrega productos para comenzar</p></div>`;
+    container.innerHTML=`<div class="empty-state" style="margin-top:40px"><h3>Your cart is empty</h3><p style="color:var(--ink2);margin-top:8px">Add products to get started</p></div>`;
     document.getElementById("cartSubtotal").textContent=money(0);
     document.getElementById("cartTotal").textContent=money(0);
     return;
@@ -1353,7 +1353,7 @@ function renderCartDrawer(){
 
 // ── CHECKOUT ───────────────────────────────────────────────────────────────
 document.getElementById("checkoutBtn").addEventListener("click",async()=>{
-  if(!cart.length){showToast("El carrito está vacío");return;}
+  if(!cart.length){showToast("Your cart is empty");return;}
   const btn=document.getElementById("checkoutBtn");
   btn.disabled=true;btn.textContent="⏳ Procesando...";
   const currency=document.getElementById("currency").value||"USD";
@@ -1367,7 +1367,7 @@ document.getElementById("checkoutBtn").addEventListener("click",async()=>{
   }catch(err){
     const isDown=err.message.includes("502")||err.message.includes("503")||err.message.includes("Failed to fetch");
     showToast(isDown
-      ? "⏳ El servidor de pago está iniciando. Espera 30 segundos e intenta de nuevo."
+      ? "⏳ The payment server is starting up. Wait 30 seconds and try again."
       : "❌ SafePay no disponible: "+err.message);
     btn.disabled=false;btn.textContent=(window.I18N&&window.I18N.t('btn_checkout'))||"Generar pedido";
   }
@@ -1416,9 +1416,9 @@ async function executeSearch(){
     if(grid)grid.scrollIntoView({behavior:"smooth",block:"start"});
   }catch(err){
     if(IS_GITHUB_PAGES){
-      showToast("⚠️ El servidor IA tardó demasiado. Intenta de nuevo en unos segundos.");
+      showToast("⚠️ The AI server took too long. Please try again in a few seconds.");
     }else{
-      showToast("Sin conexión con IA. Mostrando catálogo local.");
+      showToast("No AI connection. Showing local catalog.");
     }
     applyFilters();
     const grid=document.getElementById("productGrid");
@@ -1513,7 +1513,7 @@ function getLatamCostBreakdown(p){
   const sym=cfg.currency==="USD"?"$":cfg.currency+" ";
   const fmt=(v)=>(v*r).toLocaleString("es",{maximumFractionDigits:0});
   const shipStr=shipUSD===0?'<span style="color:#15803d">Gratis ✓</span>':sym+fmt(shipUSD);
-  return `<div class="latam-cost-breakdown"><div class="breakdown-row"><span>Precio</span><span>${sym}${fmt(priceUSD)}</span></div><div class="breakdown-row"><span>Envío est.</span><span>${shipStr}</span></div><div class="breakdown-row"><span>Impuestos est.</span><span>${sym}${fmt(taxUSD)}</span></div><div class="breakdown-row total"><span>Total aprox.</span><span>${sym}${fmt(totalUSD)}</span></div></div>`;
+  return `<div class="latam-cost-breakdown"><div class="breakdown-row"><span>Price</span><span>${sym}${fmt(priceUSD)}</span></div><div class="breakdown-row"><span>Est. shipping</span><span>${shipStr}</span></div><div class="breakdown-row"><span>Est. taxes</span><span>${sym}${fmt(taxUSD)}</span></div><div class="breakdown-row total"><span>Approx. total</span><span>${sym}${fmt(totalUSD)}</span></div></div>`;
 }
 
 // ── EVENTOS ──────────────────────────────────────────────────────────────
@@ -1578,7 +1578,7 @@ document.getElementById("recordAudioBtn")?.addEventListener("click",async e=>{
     const f=new File([blob],`audio-${Date.now()}.webm`,{type:"audio/webm"});
     const dt=new DataTransfer();dt.items.add(f);
     document.getElementById("imageInput").files=dt.files;
-    document.getElementById("mediaName").textContent="Audio listo. Pulsa Buscar.";
+    document.getElementById("mediaName").textContent="Audio ready. Press Search.";
     const prev=document.getElementById("audioPreview");prev.src=URL.createObjectURL(blob);prev.style.display="block";
   };
   rec.start();btn.dataset.recording="1";btn.textContent="⏹ Detener";

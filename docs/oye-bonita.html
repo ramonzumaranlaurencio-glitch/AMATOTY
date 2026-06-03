@@ -42,33 +42,33 @@
     <div id="oyeBonitaBannerCarousel" data-banner-carousel data-banner-fallback="assets/productos.json" data-banner-max="8"></div>
   </div>
   <div class="ob-card">
-    <div class="ob-title">Oye Bonita: Diagnóstico Facial y Belleza</div>
+    <div class="ob-title">Oye Bonita: Facial Diagnosis &amp; Beauty</div>
     <div class="ob-section">
-      <label for="ob-country">Selecciona tu país:</label><br>
+      <label for="ob-country">Select your country:</label><br>
       <select id="ob-country" required>
-        <option value="">-- País --</option>
-        <option value="PE">Perú</option>
-        <option value="MX">México</option>
+        <option value="">-- Country --</option>
+        <option value="PE">Peru</option>
+        <option value="MX">Mexico</option>
         <option value="CL">Chile</option>
         <option value="CO">Colombia</option>
         <option value="AR">Argentina</option>
-        <option value="US">Estados Unidos</option>
+        <option value="US">United States</option>
         <option value="EC">Ecuador</option>
         <option value="BO">Bolivia</option>
         <option value="PY">Paraguay</option>
         <option value="UY">Uruguay</option>
-        <option value="BR">Brasil</option>
+        <option value="BR">Brazil</option>
         <option value="VE">Venezuela</option>
-        <option value="OTRO">Otro</option>
+        <option value="OTRO">Other</option>
       </select>
-      <br><label for="ob-photo">Sube tu foto (rostro):</label><br>
+      <br><label for="ob-photo">Upload your photo (face):</label><br>
       <input type="file" id="ob-photo" accept="image/*">
       <img id="ob-img-preview" class="ob-img-preview" style="display:none;">
-      <button class="ob-btn" id="ob-analyze-btn" disabled>Analizar rostro y productos</button>
+      <button class="ob-btn" id="ob-analyze-btn" disabled>Analyze face &amp; products</button>
     </div>
     <div id="ob-diagnosis" class="ob-diagnosis" style="display:none;"></div>
     <div id="ob-products-section" class="ob-section" style="display:none;">
-      <h3 id="ob-products-title" style="color:#ff9900;text-align:center;">Productos recomendados para ti</h3>
+      <h3 id="ob-products-title" style="color:#ff9900;text-align:center;">Recommended products for you</h3>
       <div id="ob-products-summary" class="ob-diagnosis" style="display:none;"></div>
       <div id="ob-products" class="ob-products"></div>
     </div>
@@ -121,7 +121,7 @@
       const cartDiv = document.getElementById('ob-cart');
       if (!obCart.length) { cartDiv.style.display = 'none'; return; }
       cartDiv.style.display = 'block';
-      let html = `<div class='ob-cart-title'>🛒 Tu carrito</div><div class='ob-cart-list'>`;
+      let html = `<div class='ob-cart-title'>🛒 Your cart</div><div class='ob-cart-list'>`;
       let total = 0;
       let currency = 'S/';
       obCart.forEach((item, idx) => {
@@ -131,7 +131,7 @@
         html += `<div class='ob-cart-list-item'><span>${item.nombre} <b>x${item.cantidad}</b></span><span>${item.precio}</span><button class='ob-btn' style='background:#ef4444;padding:2px 10px;font-size:0.9em;' onclick='removeFromCart(${idx})'>✕</button></div>`;
       });
       html += `</div><div class='ob-cart-total'>Total: ${currency} ${total.toFixed(2)}</div>`;
-      html += `<div class='ob-cart-btns'><button class='ob-btn' onclick='showCheckout()'>Finalizar compra</button></div>`;
+      html += `<div class='ob-cart-btns'><button class='ob-btn' onclick='showCheckout()'>Checkout</button></div>`;
       cartDiv.innerHTML = html;
     }
     window.removeFromCart = function(idx) {
@@ -139,8 +139,8 @@
     // --- Checkout PRO ---
     function showCheckout() {
       const cartDiv = document.getElementById('ob-cart');
-      let html = `<div class='ob-cart-title'>Finalizar compra</div><form class='ob-checkout-form' onsubmit='return submitCheckout(event)'>`;
-      html += `<label>Nombre completo</label><input required name='nombre'><label>Email</label><input required type='email' name='email'><label>Dirección</label><input required name='direccion'><label>WhatsApp</label><input required name='whatsapp' placeholder='+51...'><button class='ob-btn' type='submit'>Pagar ahora</button></form>`;
+      let html = `<div class='ob-cart-title'>Checkout</div><form class='ob-checkout-form' onsubmit='return submitCheckout(event)'>`;
+      html += `<label>Full name</label><input required name='nombre'><label>Email</label><input required type='email' name='email'><label>Address</label><input required name='direccion'><label>WhatsApp</label><input required name='whatsapp' placeholder='+1...'><button class='ob-btn' type='submit'>Pay now</button></form>`;
       cartDiv.innerHTML = html;
     }
     window.submitCheckout = function(e) {
@@ -154,7 +154,7 @@
         carrito: obCart
       };
       const cartDiv = document.getElementById('ob-cart');
-      cartDiv.innerHTML = `<div class='ob-checkout-success'>Procesando pedido...</div>`;
+      cartDiv.innerHTML = `<div class='ob-checkout-success'>Processing order...</div>`;
       apiFetch('/api/pedido', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
@@ -162,9 +162,9 @@
       })
       .then(r=>r.json())
       .then(resp => {
-        let msg = `<div class='ob-checkout-success'>¡Gracias por tu compra!<br>Te enviaremos la confirmación a tu email.`;
+        let msg = `<div class='ob-checkout-success'>Thank you for your purchase!<br>We will send you a confirmation to your email.`;
         if(resp.wa_url) {
-          msg += `<br><a href='${resp.wa_url}' target='_blank' style='color:#059669;font-weight:bold;'>Enviar pedido por WhatsApp</a>`;
+          msg += `<br><a href='${resp.wa_url}' target='_blank' style='color:#059669;font-weight:bold;'>Send order via WhatsApp</a>`;
         }
         msg += `</div>`;
         cartDiv.innerHTML = msg;
@@ -172,7 +172,7 @@
         setTimeout(()=>{cartDiv.style.display='none';}, 7000);
       })
       .catch(()=>{
-        cartDiv.innerHTML = `<div class='ob-checkout-success' style='background:#fee2e2;color:#b91c1c;'>Error al enviar el pedido. Intenta de nuevo.</div>`;
+        cartDiv.innerHTML = `<div class='ob-checkout-success' style='background:#fee2e2;color:#b91c1c;'>Error sending the order. Please try again.</div>`;
       });
       return false;
     }
@@ -192,7 +192,7 @@
         console.log(pair[0]+ ':', pair[1]);
       }
       document.getElementById('ob-diagnosis').style.display = 'block';
-      document.getElementById('ob-diagnosis').innerHTML = 'Analizando...';
+      document.getElementById('ob-diagnosis').innerHTML = 'Analyzing...';
       const apiUrl = '/api/diagnostico';
       apiFetch(apiUrl, {
         method: 'POST',
@@ -209,48 +209,48 @@
         }
         if (!data) {
           const preview = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
-          throw new Error(`El backend no devolvió JSON. Estado ${r.status}. ${preview || apiUrl}`);
+          throw new Error(`Backend did not return JSON. Status ${r.status}. ${preview || apiUrl}`);
         }
         // Depuración: mostrar respuesta del backend
         console.log('Respuesta backend:', data);
         if (r.ok && data && !data.error) {
           document.getElementById('ob-diagnosis').style.display = 'block';
           const calidad = data.calidad_foto
-            ? `<br><b>Calidad foto:</b> luz ${data.calidad_foto.iluminacion || '-'}, nitidez ${data.calidad_foto.nitidez || '-'}, ángulo ${data.calidad_foto.angulo || '-'}`
+            ? `<br><b>Photo quality:</b> light: ${data.calidad_foto.iluminacion || '-'}, sharpness: ${data.calidad_foto.nitidez || '-'}, angle: ${data.calidad_foto.angulo || '-'}`
             : '';
           const detalles = [
-            data.nivel_grasa ? `<b>Grasa/brillo:</b> ${data.nivel_grasa}` : '',
-            data.nivel_hidratacion ? `<b>Hidratación:</b> ${data.nivel_hidratacion}` : '',
-            data.textura ? `<b>Textura:</b> ${data.textura}` : '',
-            data.ojeras ? `<b>Ojeras:</b> ${data.ojeras}` : '',
-            data.manchas_o_tono ? `<b>Tono/manchas:</b> ${data.manchas_o_tono}` : '',
-            data.labios ? `<b>Labios:</b> ${data.labios}` : ''
+            data.nivel_grasa ? `<b>Oil/shine:</b> ${data.nivel_grasa}` : '',
+            data.nivel_hidratacion ? `<b>Hydration:</b> ${data.nivel_hidratacion}` : '',
+            data.textura ? `<b>Texture:</b> ${data.textura}` : '',
+            data.ojeras ? `<b>Dark circles:</b> ${data.ojeras}` : '',
+            data.manchas_o_tono ? `<b>Tone/spots:</b> ${data.manchas_o_tono}` : '',
+            data.labios ? `<b>Lips:</b> ${data.labios}` : ''
           ].filter(Boolean).join('<br>');
           const rutinaManana = (data.rutina_manana || []).length
-            ? `<br><b>Rutina mañana:</b><ul>${data.rutina_manana.map(x => `<li>${x}</li>`).join('')}</ul>`
+            ? `<br><b>Morning routine:</b><ul>${data.rutina_manana.map(x => `<li>${x}</li>`).join('')}</ul>`
             : '';
           const rutinaNoche = (data.rutina_noche || []).length
-            ? `<b>Rutina noche:</b><ul>${data.rutina_noche.map(x => `<li>${x}</li>`).join('')}</ul>`
+            ? `<b>Night routine:</b><ul>${data.rutina_noche.map(x => `<li>${x}</li>`).join('')}</ul>`
             : '';
           const evitar = (data.evitar || []).length
-            ? `<b>Evitar:</b> ${data.evitar.join(', ')}<br>`
+            ? `<b>Avoid:</b> ${data.evitar.join(', ')}<br>`
             : '';
           document.getElementById('ob-diagnosis').innerHTML =
-            `<b>Modo análisis:</b> ${data.analysis_mode || 'local'} ${data.confianza ? `(confianza ${Math.round(data.confianza * 100)}%)` : ''}<br>` +
-            `<b>Tipo de piel:</b> ${data.tipo_piel}<br>` +
-            `<b>Subtono:</b> ${data.subtono}<br>` +
-            `<b>Recomendación:</b> ${data.recomendacion}<br>` +
+            `<b>Analysis mode:</b> ${data.analysis_mode || 'local'} ${data.confianza ? `(confidence ${Math.round(data.confianza * 100)}%)` : ''}<br>` +
+            `<b>Skin type:</b> ${data.tipo_piel}<br>` +
+            `<b>Undertone:</b> ${data.subtono}<br>` +
+            `<b>Recommendation:</b> ${data.recomendacion}<br>` +
             calidad + (detalles ? `<br>${detalles}` : '') + '<br>' +
             evitar +
-            `<b>Análisis de productos:</b> ${data.analisis_productos || ''}` +
+            `<b>Product analysis:</b> ${data.analisis_productos || ''}` +
             rutinaManana + rutinaNoche;
           document.getElementById('ob-products-section').style.display = 'block';
           document.getElementById('ob-products-title').textContent =
             `Productos disponibles (${data.total_productos || 0})`;
           document.getElementById('ob-products-summary').style.display = 'block';
           document.getElementById('ob-products-summary').innerHTML =
-            `<b>Total en lista:</b> ${data.total_productos || 0}<br>` +
-            `<b>Unidades disponibles:</b> ${data.inventario_total || 0}`;
+            `<b>Total in list:</b> ${data.total_productos || 0}<br>` +
+            `<b>Units available:</b> ${data.inventario_total || 0}`;
           const prodCont = document.getElementById('ob-products');
           prodCont.innerHTML = '';
           (data.productos || []).forEach((p, idx) => {
@@ -258,13 +258,13 @@
             card.className = 'ob-product-card';
             const stock = Number(p.stock || 0);
             const disabled = stock <= 0 ? 'disabled' : '';
-            const btnText = stock <= 0 ? 'Sin stock' : (data.textos && data.textos.btn_agregar || 'Agregar al carrito');
-            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#ff9900;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>Stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
+            const btnText = stock <= 0 ? 'Out of stock' : (data.textos && data.textos.btn_agregar || 'Add to cart');
+            card.innerHTML = `<img src="${p.imagen}" alt="${p.nombre}"><div style='font-weight:bold;'>${p.nombre}</div><div style='color:#ff9900;'>${p.marca}</div><div class='ob-product-meta'>${p.categoria || ''}</div><div style='font-size:0.95em;margin:6px 0;'>${p.desc}</div><div style='font-weight:bold;'>${p.precio}</div><div class='ob-product-stock'>In stock: ${stock}</div><button class='ob-btn' ${disabled} onclick='addToCart(${idx})'>${btnText}</button>`;
             prodCont.appendChild(card);
           });
           window._obLastProducts = data.productos || [];
         } else {
-          let msg = 'Error en el análisis. Intenta de nuevo.';
+          let msg = 'Analysis error. Please try again.';
           // Mostrar siempre el mensaje técnico si existe
           let errorDesc = '';
           if (data && data.productos && data.productos[0] && data.productos[0].desc) {
@@ -283,7 +283,7 @@
         }
       })
       .catch(err => {
-        document.getElementById('ob-diagnosis').innerHTML = 'Error en el análisis. Intenta de nuevo.<br><span style="color:#b91c1c;">' + (err && err.message ? err.message : err) + '</span>';
+        document.getElementById('ob-diagnosis').innerHTML = 'Analysis error. Please try again.<br><span style="color:#b91c1c;">' + (err && err.message ? err.message : err) + '</span>';
         document.getElementById('ob-products-section').style.display = 'none';
         document.getElementById('ob-products').innerHTML = '';
       });

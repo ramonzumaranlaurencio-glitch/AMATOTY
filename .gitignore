@@ -27,6 +27,11 @@ safepay/data/
 .codex_*.log
 logs/
 
+# Node / frontend builds
+node_modules/
+.npm-cache/
+dist/
+
 # Exportaciones y frames temporales
 exports/
 frames/
@@ -39,4 +44,3 @@ Thumbs.db
 .vscode/
 .idea/
 .qodo/
-

@@ -1,4 +1,4 @@
-﻿<!doctype html><html><head><meta charset="utf-8"><title>Blog</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../assets/style.css">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Blog – AMATOTY</title><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="../assets/style.css">
 <style>
 .blog-hero{background:linear-gradient(90deg,#b12704 0%,#ff9900 100%);color:white;padding:36px 24px 28px 24px;border-radius:18px;margin-bottom:32px;box-shadow:0 8px 32px rgba(255,216,20,.18);}
 .blog-hero h1{font-size:2.2em;margin:0 0 10px 0;}
@@ -8,20 +8,20 @@
 .card p{margin-bottom:10px;}
 </style>
 <script src="../assets/product_ai_guard.js"></script>
-</head><body data-product=""><header><h1>Smart Finds Review</h1><nav><a href="../index.html">Inicio</a><a href="../category/index.html">Categorías</a><a href="../smart-search.html">Busca inteligente</a><a href="index.html">Blog</a><a href="../about.html">Sobre</a><a href="../affiliate-disclosure.html">Divulgación</a><a href="../contact.html">Contacto</a><a href="../editorial-policy.html">Editorial</a></nav></header><main>
+</head><body data-product=""><header><h1>AMATOTY</h1><nav><a href="../index.html">Home</a><a href="../category/index.html">Categories</a><a href="../smart-search.html">Smart Search</a><a href="index.html">Blog</a><a href="../about.html">About</a><a href="../affiliate-disclosure.html">Disclosure</a><a href="../contact.html">Contact</a><a href="../editorial-policy.html">Editorial</a></nav></header><main>
 <div class="blog-hero">
-  <h1>Últimos análisis y reviews</h1>
-  <p>Descubre los productos más útiles y nuestras comparativas honestas. Solo lo que realmente funciona.</p>
+  <h1>Latest reviews &amp; analysis</h1>
+  <p>Discover the most useful products and our honest comparisons. Only what actually works.</p>
 </div>
 <div class='grid'>
-  <div class="card"><span class="badge">Recomendado</span><h2>Portable Mini Blender</h2><p>Ideal para quienes buscan salud y rapidez.</p><a class="btn" href="portable-mini-blender-review.html">Leer review</a></div>
-  <div class="card"><span class="badge">Más vendido</span><h2>Car Seat Gap Organizer</h2><p>Evita perder objetos en el auto.</p><a class="btn" href="car-seat-gap-organizer-review.html">Leer review</a></div>
-  <div class="card"><span class="badge">Ahorro</span><h2>Kitchen Food Saver Gadget</h2><p>Reduce el desperdicio de comida.</p><a class="btn" href="kitchen-food-saver-gadget-review.html">Leer review</a></div>
-  <div class="card"><span class="badge">Organización</span><h2>Home Cable Organizer</h2><p>Tu escritorio siempre limpio y ordenado.</p><a class="btn" href="home-cable-organizer-review.html">Leer review</a></div>
-  <div class="card"><span class="badge">Práctico</span><h2>Mini Vacuum Cleaner</h2><p>Elimina polvo y migas en segundos.</p><a class="btn" href="mini-vacuum-cleaner-review.html">Leer review</a></div>
+  <div class="card"><span class="badge">Recommended</span><h2>Portable Mini Blender</h2><p>Ideal for those seeking health and speed.</p><a class="btn" href="portable-mini-blender-review.html">Read review</a></div>
+  <div class="card"><span class="badge">Best seller</span><h2>Car Seat Gap Organizer</h2><p>Stop losing items in your car.</p><a class="btn" href="car-seat-gap-organizer-review.html">Read review</a></div>
+  <div class="card"><span class="badge">Savings</span><h2>Kitchen Food Saver Gadget</h2><p>Reduce food waste every week.</p><a class="btn" href="kitchen-food-saver-gadget-review.html">Read review</a></div>
+  <div class="card"><span class="badge">Organization</span><h2>Home Cable Organizer</h2><p>Keep your desk clean and tidy.</p><a class="btn" href="home-cable-organizer-review.html">Read review</a></div>
+  <div class="card"><span class="badge">Practical</span><h2>Mini Vacuum Cleaner</h2><p>Remove dust and crumbs in seconds.</p><a class="btn" href="mini-vacuum-cleaner-review.html">Read review</a></div>
 </div>
 <section id="trending-blog" class="card" style="background:#f3f3f3;margin-top:32px;">
-  <h2 style="color:#b12704;">Productos tendencia destacados</h2>
+  <h2 style="color:#b12704;">Featured trending products</h2>
   <div id="trending-blog-list" class="grid"></div>
 </section>
 <script>
@@ -30,12 +30,12 @@ fetch('../assets/trending_products.json')
   .then(data => {
     const cont = document.getElementById('trending-blog-list');
     if (!data.products || !data.products.length) {
-      cont.innerHTML = '<p>No hay productos tendencia hoy.</p>';
+      cont.innerHTML = '<p>No trending products today.</p>';
       return;
     }
     ProductAIGuard.renderProductGrid('trending-blog-list', data.products, {prefix: '../'});
   });
 </script>
-<div style="margin-top:32px;text-align:center;font-size:1.1em;">¿Buscas algo específico? <a href="../contact.html">Contáctanos</a> y lo analizamos por ti.</div>
+<div style="margin-top:32px;text-align:center;font-size:1.1em;">Looking for something specific? <a href="../contact.html">Contact us</a> and we will analyze it for you.</div>
 </main><footer><p>As an Amazon Associate, I earn from qualifying purchases.</p><p>Author: Edwin Sumaran</p></footer><script src="../assets/lca_tracker.js"></script><script src="assets/ai_chat.js" defer></script>
 </body></html>

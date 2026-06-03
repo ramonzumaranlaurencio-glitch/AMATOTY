@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Error de Pago · SafePay PRO{% endblock %}
+{% block title %}Payment Error · SafePay PRO{% endblock %}
 
 {% block content %}
 <div class="result-page result-cancel">
   <div class="result-icon">⚠️</div>
-  <h1>Error al Procesar el Pago</h1>
-  <p class="result-sub">No se pudo conectar con el proveedor de pagos.</p>
+  <h1>Error Processing Payment</h1>
+  <p class="result-sub">Could not connect to the payment provider.</p>
 
   {% if error %}
   <div class="result-card">
@@ -17,13 +17,13 @@
 
   <div class="result-actions">
     {% if pay_id %}
-    <a href="/payment/{{ pay_id }}" class="btn btn-outline">← Volver al pago</a>
+    <a href="/payment/{{ pay_id }}" class="btn btn-outline">← Back to payment</a>
     {% endif %}
     <a href="/dashboard" class="btn btn-outline">Dashboard</a>
   </div>
 
   <p class="result-note">
-    Si el problema persiste, contacta al administrador del sistema.
+    If the problem persists, please contact the system administrator.
   </p>
 </div>
 {% endblock %}

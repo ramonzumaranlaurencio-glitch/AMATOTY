@@ -1,0 +1,27 @@
+{
+  "name": "conta-pro-audit-module",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:audit": "vite --host 127.0.0.1",
+    "build:audit": "tsc -p tsconfig.json && vite build",
+    "preview:audit": "vite preview --host 127.0.0.1",
+    "api:audit": "uvicorn src.api.main:app --host 127.0.0.1 --port 8001 --reload"
+  },
+  "dependencies": {
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "autoprefixer": "latest",
+    "postcss": "latest",
+    "tailwindcss": "3.4.17",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

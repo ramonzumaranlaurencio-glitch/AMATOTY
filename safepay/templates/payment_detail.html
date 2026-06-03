@@ -4,30 +4,30 @@
 {% block content %}
 <div class="page-header">
   <a href="/dashboard" class="back-link">← Dashboard</a>
-  <h1>Pago <code>{{ payment.id }}</code></h1>
+  <h1>Payment <code>{{ payment.id }}</code></h1>
 </div>
 
-<!-- Botón "Pagar ahora" — visible solo si el pago está pendiente/procesando -->
+<!-- "Pay now" button — visible only if payment is pending/processing -->
 {% if payment.status in ['pendiente', 'procesando'] %}
 <div class="pay-now-bar">
   {% if payment.checkout_url %}
-    <!-- Ya existe un link de pago generado -->
+    <!-- Payment link already generated -->
     <a href="{{ payment.checkout_url }}" target="_blank" class="btn btn-pay">
-      💳 Pagar ahora ({{ payment.provider | upper }})
+      💳 Pay now ({{ payment.provider | upper }})
     </a>
-    <span class="pay-note">El cliente puede pagar en este enlace</span>
+    <span class="pay-note">The customer can pay via this link</span>
   {% elif payment_provider == 'stripe' %}
-    <!-- Generar checkout session de Stripe -->
+    <!-- Generate Stripe checkout session -->
     <form method="POST" action="/payment/{{ payment.id }}/checkout" style="display:inline">
-      <button type="submit" class="btn btn-pay">💳 Generar enlace de pago (Stripe)</button>
+      <button type="submit" class="btn btn-pay">💳 Generate payment link (Stripe)</button>
     </form>
-    <span class="pay-note">Crea la sesión de pago en Stripe y redirige al cliente</span>
+    <span class="pay-note">Creates a Stripe checkout session and redirects the customer</span>
   {% else %}
-    <!-- Proveedor manual: mostrar instrucciones -->
+    <!-- Manual provider: show instructions -->
     <div class="manual-pay-info">
-      <strong>🏦 Instrucciones de pago manual:</strong>
-      Confirma el pago por {{ payment.method }} y actualiza el estado a
-      <em>pagado</em> en el panel de abajo.
+      <strong>🏦 Manual payment instructions:</strong>
+      Confirm the payment via {{ payment.method }} and update the status to
+      <em>paid</em> in the panel below.
     </div>
   {% endif %}
 </div>
@@ -35,35 +35,35 @@
 
 {% if payment.status == 'pagado' %}
 <div class="alert-paid">
-  ✅ Este pago fue <strong>confirmado y cobrado</strong> exitosamente.
+  ✅ This payment was <strong>confirmed and collected</strong> successfully.
 </div>
 {% endif %}
 
 <div class="detail-grid">
-  <!-- Detalle principal -->
+  <!-- Main detail -->
   <div class="card">
-    <h2>Información del Pago</h2>
+    <h2>Payment Information</h2>
     <table class="detail-table">
-      <tr><th>ID Operación</th><td><code>{{ payment.id }}</code></td></tr>
-      <tr><th>Cliente</th><td>{{ payment.customer or "—" }}</td></tr>
+      <tr><th>Operation ID</th><td><code>{{ payment.id }}</code></td></tr>
+      <tr><th>Customer</th><td>{{ payment.customer or "—" }}</td></tr>
       {% if payment.customer_email %}
       <tr><th>Email</th><td>{{ payment.customer_email }}</td></tr>
       {% endif %}
-      <tr><th>Monto</th>
+      <tr><th>Amount</th>
           <td class="amount">{{ payment.currency }} {{ "%.2f"|format(payment.amount) }}</td></tr>
-      <tr><th>Método</th><td>{{ payment.method }}</td></tr>
-      <tr><th>Estado</th>
+      <tr><th>Method</th><td>{{ payment.method }}</td></tr>
+      <tr><th>Status</th>
           <td><span class="pill pill-{{ payment.status }}">{{ payment.status }}</span></td></tr>
-      <tr><th>Proveedor</th><td>{{ (payment.provider or 'manual') | upper }}</td></tr>
-      <tr><th>Descripción</th><td>{{ payment.description or "—" }}</td></tr>
-      <tr><th>Creado</th><td>{{ payment.created_at }}</td></tr>
-      <tr><th>Actualizado</th><td>{{ payment.updated_at }}</td></tr>
+      <tr><th>Provider</th><td>{{ (payment.provider or 'manual') | upper }}</td></tr>
+      <tr><th>Description</th><td>{{ payment.description or "—" }}</td></tr>
+      <tr><th>Created</th><td>{{ payment.created_at }}</td></tr>
+      <tr><th>Updated</th><td>{{ payment.updated_at }}</td></tr>
     </table>
 
     {% if payment.payment_id or payment.transaction_id %}
     <hr style="margin:14px 0;border-color:#f1f5f9">
     <h3 style="font-size:13px;color:#64748b;font-weight:800;text-transform:uppercase;margin-bottom:10px">
-      Referencia del Proveedor
+      Provider Reference
     </h3>
     <table class="detail-table">
       {% if payment.payment_id %}
@@ -75,18 +75,18 @@
       {% if payment.checkout_url %}
       <tr><th>Checkout URL</th>
           <td><a href="{{ payment.checkout_url }}" target="_blank" style="color:#2563eb">
-            Ver enlace →</a></td></tr>
+            View link →</a></td></tr>
       {% endif %}
     </table>
     {% endif %}
   </div>
 
-  <!-- Actualizar estado -->
+  <!-- Update status -->
   <div class="card">
-    <h2>Actualizar Estado</h2>
+    <h2>Update Status</h2>
     <form method="POST" action="/payment/{{ payment.id }}/update">
       <div class="form-group">
-        <label>Nuevo Estado</label>
+        <label>New Status</label>
         <select name="status" class="form-input">
           {% for s in statuses %}
           <option value="{{ s }}" {% if s == payment.status %}selected{% endif %}>{{ s }}</option>
@@ -94,22 +94,22 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Notas</label>
+        <label>Notes</label>
         <textarea name="notes" rows="2" class="form-input"
-                  placeholder="Motivo del cambio..."></textarea>
+                  placeholder="Reason for change..."></textarea>
       </div>
-      <button type="submit" class="btn btn-primary btn-block">Actualizar</button>
+      <button type="submit" class="btn btn-primary btn-block">Update</button>
     </form>
   </div>
 </div>
 
-<!-- Historial -->
+<!-- History -->
 <div class="card">
-  <h2>Historial de Transacciones</h2>
+  <h2>Transaction History</h2>
   {% if history %}
   <table class="sp-table">
     <thead>
-      <tr><th>Acción</th><th>Notas</th><th>Fecha</th></tr>
+      <tr><th>Action</th><th>Notes</th><th>Date</th></tr>
     </thead>
     <tbody>
       {% for h in history %}
@@ -122,8 +122,7 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty-note">Sin historial.</p>
+  <p class="empty-note">No history yet.</p>
   {% endif %}
 </div>
 {% endblock %}
-

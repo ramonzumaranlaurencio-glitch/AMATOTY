@@ -1,40 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Pago Confirmado · SafePay PRO{% endblock %}
+{% block title %}Payment Confirmed · SafePay PRO{% endblock %}
 
 {% block content %}
 <div class="result-page result-success">
   <div class="result-icon">✅</div>
-  <h1>¡Pago Confirmado!</h1>
-  <p class="result-sub">Tu pago fue procesado exitosamente.</p>
+  <h1>Payment Confirmed!</h1>
+  <p class="result-sub">Your payment was processed successfully.</p>
 
   {% if payment %}
   <div class="result-card">
     <table class="detail-table">
-      <tr><th>ID de Operación</th><td><code>{{ payment.id }}</code></td></tr>
-      <tr><th>Monto</th>
+      <tr><th>Operation ID</th><td><code>{{ payment.id }}</code></td></tr>
+      <tr><th>Amount</th>
           <td class="amount">{{ payment.currency }} {{ "%.2f"|format(payment.amount) }}</td></tr>
-      <tr><th>Método</th><td>{{ payment.method }}</td></tr>
-      <tr><th>Estado</th>
-          <td><span class="pill pill-pagado">pagado</span></td></tr>
+      <tr><th>Method</th><td>{{ payment.method }}</td></tr>
+      <tr><th>Status</th>
+          <td><span class="pill pill-pagado">paid</span></td></tr>
       {% if payment.transaction_id %}
       <tr><th>Transaction ID</th><td><code>{{ payment.transaction_id }}</code></td></tr>
       {% endif %}
       {% if payment.provider and payment.provider != 'manual' %}
-      <tr><th>Proveedor</th><td>{{ payment.provider | upper }}</td></tr>
+      <tr><th>Provider</th><td>{{ payment.provider | upper }}</td></tr>
       {% endif %}
     </table>
   </div>
   {% endif %}
 
   <div class="result-actions">
-    <a href="/dashboard" class="btn btn-outline">← Volver al Dashboard</a>
+    <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
     {% if payment.id %}
-    <a href="/payment/{{ payment.id }}" class="btn btn-primary">Ver Detalle</a>
+    <a href="/payment/{{ payment.id }}" class="btn btn-primary">View Details</a>
     {% endif %}
   </div>
 
   <p class="result-note">
-    Recibirás la confirmación por correo electrónico si proporcionaste tu email.
+    You will receive a confirmation email if you provided your email address.
   </p>
 </div>
 {% endblock %}
